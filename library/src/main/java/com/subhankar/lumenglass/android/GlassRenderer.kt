@@ -102,6 +102,15 @@ internal const val TIER_BALANCED: Float = 1f
 internal const val AGSL_MIN_API: Int = Build.VERSION_CODES.TIRAMISU
 
 /**
+ * The minimum API level for [android.graphics.RenderNode] — the capture primitive.
+ *
+ * Lower than [AGSL_MIN_API], but declared separately because they are genuinely different gates:
+ * a device can have `RenderNode` without AGSL. The library uses the *higher* of the two to decide
+ * whether the shader path can run at all.
+ */
+internal const val RENDER_NODE_MIN_API: Int = Build.VERSION_CODES.Q
+
+/**
  * Whether this device can run the AGSL shader at all.
  *
  * `false` on API < 33. Callers use this to choose the FALLBACK tier rather than attempting a
