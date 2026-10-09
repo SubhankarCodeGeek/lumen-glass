@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.core
+package com.subhankar.lumenglass.core
 
 /**
  * Performance tier for the glass effect.

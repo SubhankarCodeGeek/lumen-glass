@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.core
+package com.subhankar.lumenglass.core
 
 import kotlin.math.max
 import kotlin.math.min

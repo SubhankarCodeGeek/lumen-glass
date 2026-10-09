@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.core
+package com.subhankar.lumenglass.core
 
 import java.io.File
 import org.junit.Assert.assertTrue
@@ -48,9 +48,9 @@ class CorePurityTest {
     private fun findCoreSourceDir(): File? {
         var dir: File? = File(".").absoluteFile
         repeat(6) {
-            val candidate = File(dir, "src/main/java/com/securnyx360/lumenglass/core")
+            val candidate = File(dir, "src/main/java/com/subhankar/lumenglass/core")
             if (candidate.isDirectory) return candidate
-            val alt = File(dir, "library/src/main/java/com/securnyx360/lumenglass/core")
+            val alt = File(dir, "library/src/main/java/com/subhankar/lumenglass/core")
             if (alt.isDirectory) return alt
             dir = dir?.parentFile
         }

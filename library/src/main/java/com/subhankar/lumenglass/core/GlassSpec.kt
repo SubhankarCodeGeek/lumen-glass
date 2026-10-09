@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.core
+package com.subhankar.lumenglass.core
 
 /**
  * The optical configuration of a glass surface — the v1 effect set.

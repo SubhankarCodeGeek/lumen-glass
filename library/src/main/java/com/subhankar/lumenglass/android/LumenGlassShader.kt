@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.android
+package com.subhankar.lumenglass.android
 
 /**
  * # The Lumen Glass AGSL shader (CLEAN-ROOM)

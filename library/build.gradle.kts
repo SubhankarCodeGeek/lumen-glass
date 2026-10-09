@@ -15,7 +15,7 @@ plugins {
 }
 
 android {
-    namespace = "com.securnyx360.lumenglass"
+    namespace = "com.subhankar.lumenglass"
     compileSdk = 36
 
     defaultConfig {

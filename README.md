@@ -44,7 +44,7 @@ We credit `backdrop` and `liquid` as **inspiration**; we do not depend on them.
 ```
 LumenGlass/
 ├── library/                  # the library (single module for P1)
-│   └── src/main/java/com/securnyx360/lumenglass/
+│   └── src/main/java/com/subhankar/lumenglass/
 │       ├── core/             # platform-agnostic model + maths (NO android/androidx)
 │       ├── android/          # RuntimeShader, capture, RenderEffect  (substrate = P2)
 │       └── compose/          # public API: Modifier.lumenGlass(...)   (P4)

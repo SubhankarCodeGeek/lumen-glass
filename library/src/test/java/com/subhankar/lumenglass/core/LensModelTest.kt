@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.core
+package com.subhankar.lumenglass.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

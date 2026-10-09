@@ -1,4 +1,4 @@
-package com.securnyx360.lumenglass.android
+package com.subhankar.lumenglass.android
 
 import org.junit.Assert.assertTrue
 import org.junit.Test
