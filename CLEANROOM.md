@@ -130,11 +130,12 @@ behind `dispersion > 0` *and* the HIGH tier.
 > `FletchMcKee/liquid`, `io.github.kyant0:backdrop`, the 360 Community `LIQUID_AGSL`, or any other
 > third-party glass shader."
 >
-> — *author / date:* `______________`
+> — *author / date:* `Subhankar Bag / Oct 9, 2026`
 
-> [!IMPORTANT]
-> **Signature intentionally left blank.** This attestation is a legal statement about provenance.
-> The project owner must sign it; it is not for an automated tool to assert on their behalf.
+> [!NOTE]
+> **Signed.** The attestation above is complete and the project owner has signed it, so the
+> clean-room condition gating publication is satisfied. If the shader is materially re-derived in
+> future (a new algorithm, not a tuning change), re-sign rather than assume this remains accurate.
 
 ---
 

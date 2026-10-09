@@ -222,9 +222,9 @@ Box {
 | Phase | Deliverable | Exit criteria |
 |---|---|---|
 | **P0 — Decision** | Answer Q1–Q3 (§4); confirm licence approach | ✅ Done (this doc) |
-| **P1 — Clean-room shader** | Re-derive the AGSL from the maths; parity with the current effect | ✅ Done — device-verified; `CLEANROOM.md` complete; parity recorded in `PARITY.md`. **Owner must still sign the `CLEANROOM.md` attestation.** |
-| **P2 — Own substrate** | `GlassSource`/`GlassEffect` (capture + RenderEffect) without `backdrop` | Banner works with zero `backdrop` imports |
-| **P3 — Dual lens model** | `LensModel` blend (centre/rim) + dispersion | Both modes demo-able in the sample |
+| **P1 — Clean-room shader** | Re-derive the AGSL from the maths; parity with the current effect | ✅ Done — device-verified; `CLEANROOM.md` complete **and signed**; parity recorded in `PARITY.md`; shader↔`GlassMath` agreement enforced by `ShaderMathParityTest` (Q-F). |
+| **P2 — Own substrate** | `GlassSource`/`GlassEffect` (capture + RenderEffect) without `backdrop` | ✅ Done — zero `backdrop`/`kyant` references in `library/` or `app/`. |
+| **P3 — Dual lens model** | `LensModel` blend (centre/rim) + dispersion | ✅ Done — three-pane comparison in `LensComparisonActivity`; dispersion toggle on device. |
 | **P3.5 — Performance tiers** | Reduced-res capture, separable blur, adaptive tiers (§5.2) | **≥ 60fps on a low-end reference device** with the glass animating; tier auto-selection verified. **Also closes the two P1 gaps recorded in `PARITY.md` (blur, bezel).** |
 | **P4 — Public API + module** | standalone module, `Modifier.lumenGlass`, KDoc | Compiles standalone; sample app runs |
 | **P5 — Packaging** | Maven publishing (JitPack or Sonatype/`mavenCentral`), versioning, licences | A throwaway consumer project resolves + renders |
@@ -233,10 +233,10 @@ Box {
 Each phase is independently valuable; P1–P3.5 justify the work **even if we never publish**.
 
 > [!IMPORTANT]
-> **P1 is marked done but is not yet publishable.** `PARITY.md` §4.4 and §4.6 record two known gaps
-> versus the prototype — in-shader blur and the bezel are not rendered by Lumen Glass yet. They are
-> scheduled work for P3.5, not oversights, and the clean-room attestation still needs the owner's
-> signature before anything ships.
+> **P1's exit criteria are met**, including the signed attestation. P1–P3 are done; **P3.5 is the
+> next phase.** Note that `PARITY.md` §4.4 and §4.6 record two capabilities the prototype has and
+> Lumen Glass does not yet — in-shader blur and the bezel. They are scheduled for P3.5, not
+> oversights.
 
 ### 6.1 Performance budget (acceptance)
 
