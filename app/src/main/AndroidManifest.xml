@@ -35,6 +35,17 @@
             </intent-filter>
         </activity>
 
+        <!-- P3: three-pane lens comparison (Centre / Rim / Blend) + dispersion toggle. -->
+        <activity
+            android:name=".LensComparisonActivity"
+            android:exported="true"
+            android:label="@string/harness_lens">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

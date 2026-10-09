@@ -118,6 +118,18 @@ const val AGSL_MIN_API: Int = Build.VERSION_CODES.TIRAMISU
 const val RENDER_NODE_MIN_API: Int = Build.VERSION_CODES.Q
 
 /**
+ * The minimum API level for attaching a `RenderEffect` to a `RenderNode`.
+ *
+ * **Higher than [RENDER_NODE_MIN_API]**: the node itself is API 29, but
+ * `RenderNode.setRenderEffect` is API 31. The distinction matters — a device can have `RenderNode`
+ * without being able to apply an effect to it, so the two gates are genuinely different.
+ *
+ * Still below [AGSL_MIN_API] (33), so in practice AGSL is the binding constraint for the glass
+ * path; this constant exists so the layering is explicit rather than accidentally correct.
+ */
+const val RENDER_EFFECT_MIN_API: Int = Build.VERSION_CODES.S
+
+/**
  * Whether this device can run the AGSL shader at all.
  *
  * `false` on API < 33. Callers use this to choose the FALLBACK tier rather than attempting a

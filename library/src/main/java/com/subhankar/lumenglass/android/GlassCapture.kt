@@ -104,6 +104,17 @@ class GlassCapture {
     /** The region recorded by the last [record] call, or an empty rect if none. */
     fun recordedRegion(): RectF = RectF(recorded)
 
+    /**
+     * Applies the glass material to this capture's node.
+     *
+     * The P2 substrate in one call: record (above), then render through the lens (here).
+     *
+     * @return `true` if the effect was applied; `false` when AGSL is unavailable (API < 33) or the
+     *   capture has been released, in which case the caller draws the FROST fallback.
+     */
+    @RequiresApi(RENDER_EFFECT_MIN_API)
+    fun applyGlass(uniforms: GlassUniforms): Boolean = applyGlassEffect(this, uniforms)
+
     /** The recorded region as an integer [Rect], for `setPosition` / `RenderNode` interop. */
     fun recordedRegionInt(): Rect = Rect(
         recorded.left.toInt(),

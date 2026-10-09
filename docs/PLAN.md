@@ -222,15 +222,21 @@ Box {
 | Phase | Deliverable | Exit criteria |
 |---|---|---|
 | **P0 — Decision** | Answer Q1–Q3 (§4); confirm licence approach | ✅ Done (this doc) |
-| **P1 — Clean-room shader** | Re-derive the AGSL from the maths; parity with the current effect | Harness shows equal-or-better result; `CLEANROOM.md` written |
+| **P1 — Clean-room shader** | Re-derive the AGSL from the maths; parity with the current effect | ✅ Done — device-verified; `CLEANROOM.md` complete; parity recorded in `PARITY.md`. **Owner must still sign the `CLEANROOM.md` attestation.** |
 | **P2 — Own substrate** | `GlassSource`/`GlassEffect` (capture + RenderEffect) without `backdrop` | Banner works with zero `backdrop` imports |
 | **P3 — Dual lens model** | `LensModel` blend (centre/rim) + dispersion | Both modes demo-able in the sample |
-| **P3.5 — Performance tiers** | Reduced-res capture, separable blur, adaptive tiers (§5.2) | **≥ 60fps on a low-end reference device** with the glass animating; tier auto-selection verified |
+| **P3.5 — Performance tiers** | Reduced-res capture, separable blur, adaptive tiers (§5.2) | **≥ 60fps on a low-end reference device** with the glass animating; tier auto-selection verified. **Also closes the two P1 gaps recorded in `PARITY.md` (blur, bezel).** |
 | **P4 — Public API + module** | standalone module, `Modifier.lumenGlass`, KDoc | Compiles standalone; sample app runs |
 | **P5 — Packaging** | Maven publishing (JitPack or Sonatype/`mavenCentral`), versioning, licences | A throwaway consumer project resolves + renders |
 | **P6 — Polish & docs** | README, API docs, runbook, perf notes, goldens | Ready to announce |
 
 Each phase is independently valuable; P1–P3.5 justify the work **even if we never publish**.
+
+> [!IMPORTANT]
+> **P1 is marked done but is not yet publishable.** `PARITY.md` §4.4 and §4.6 record two known gaps
+> versus the prototype — in-shader blur and the bezel are not rendered by Lumen Glass yet. They are
+> scheduled work for P3.5, not oversights, and the clean-room attestation still needs the owner's
+> signature before anything ships.
 
 ### 6.1 Performance budget (acceptance)
 

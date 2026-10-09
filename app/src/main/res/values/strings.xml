@@ -4,6 +4,7 @@
     <!-- Distinct launcher labels so the two surfaces are told apart in the app drawer (Q-B). -->
     <string name="harness_compose">LG Harness (Compose)</string>
     <string name="harness_raw">LG Harness (Raw RenderNode)</string>
+    <string name="harness_lens">LG Harness (Lens Compare)</string>
 
     <string name="overlap_banner">OVERLAP GUARD: surface does not cover the capture — expect near-black</string>
     <string name="overlap_ok">Overlap OK</string>
