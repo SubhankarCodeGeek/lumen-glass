@@ -1,7 +1,5 @@
 package com.subhankar.lumenglass.sample
 
-import android.graphics.Paint
-import android.graphics.RuntimeShader
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,47 +19,40 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.subhankar.lumenglass.android.GlassUniforms
 import com.subhankar.lumenglass.android.LumenGlassDebug
-import com.subhankar.lumenglass.android.OverlapRect
-import com.subhankar.lumenglass.android.TIER_BALANCED
-import com.subhankar.lumenglass.android.TIER_HIGH
-import com.subhankar.lumenglass.android.buildGlassShader
-import com.subhankar.lumenglass.android.checkOverlap
-import com.subhankar.lumenglass.android.logOverlapVerdict
+import com.subhankar.lumenglass.compose.LumenSource
+import com.subhankar.lumenglass.compose.lumenGlass
+import com.subhankar.lumenglass.compose.rememberLumenGlassState
+import com.subhankar.lumenglass.core.LensModel
 
 /**
- * P1.7 harness — **Compose** surface.
+ * P4 harness — **the public API, used by a real consumer**.
  *
- * Proves the clean-room shader compiles, renders, and binds its uniforms through a Compose layer,
- * and that the ARCHITECTURE §4 overlap guard is surfaced to the user.
+ * ## Why this screen was rewritten
  *
- * The shader is applied via `Paint.setShader(...)` on the Compose native canvas — the documented
- * `RuntimeShader` path (it *is* a `Shader`, not only a `RenderEffect` input). This exercises the
- * exact same `GlassUniforms` / `buildGlassShader` code the library ships.
+ * Through P1–P3 this harness reached into the library's `android/` layer (`GlassCapture`,
+ * `applyGlassEffect`, `GlassBuilder` internals) to drive the shader. Those types were made public
+ * for the harness's convenience, not because they were designed as API.
  *
- * Deliberately **not** using a `Modifier.lumenGlass(...)` public API — that is P4. The wiring here
- * is local to the harness so P1.7 does not freeze the API shape.
+ * P4 closes that: the harness now uses **only** `rememberLumenGlassState`, [LumenSource] and
+ * [lumenGlass]. That is deliberate — if the public API cannot express what the harness needs, the
+ * API is wrong, and this screen is where that shows up rather than in a consumer's app.
+ *
+ * Note the shape: [LumenSource] wraps the content in a lambda. That is required because recording
+ * Compose content into a capture layer means re-emitting a draw pass, which only exists inside a
+ * draw scope. See the KDoc on [LumenSource].
  */
 class ComposeHarnessActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Opt in to the library's debug instrumentation (guard logging, banner surfacing).
+        // Opt in to the library's debug instrumentation (overlap-guard logging).
         LumenGlassDebug.enabled = true
         setContent { ComposeHarness() }
     }
@@ -69,30 +60,55 @@ class ComposeHarnessActivity : ComponentActivity() {
 
 @Composable
 private fun ComposeHarness() {
-    var refraction by remember { mutableFloatStateOf(1.0f) }
+    var refraction by remember { mutableFloatStateOf(1.2f) }
     var dispersion by remember { mutableFloatStateOf(0.0f) }
     var centreWeight by remember { mutableFloatStateOf(0.6f) }
     var rimWeight by remember { mutableFloatStateOf(0.4f) }
-    var tintAlpha by remember { mutableFloatStateOf(0.25f) }
+    var tintAlpha by remember { mutableFloatStateOf(0.15f) }
 
-    // Pushes the glass surface off the captured region to prove the guard fires. 0 = aligned.
+    // Shifts the glass surface off the captured region to exercise the overlap guard. 0 = aligned.
     var breakOverlapPx by remember { mutableFloatStateOf(0f) }
+
+    // The ONLY library entry point this screen needs for state.
+    val glass = rememberLumenGlassState()
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         Column(Modifier.fillMaxSize()) {
-            HighContrastScrollingContent(Modifier.weight(1f))
+            // Everything behind the glass is wrapped in LumenSource so it is recorded into the
+            // capture. The glass surface below refracts this.
+            LumenSource(glass, Modifier.weight(1f)) {
+                HighContrastScrollingContent(Modifier.fillMaxSize())
+            }
 
-            GlassSurface(
-                modifier = Modifier
+            Box(
+                Modifier
                     .fillMaxWidth()
                     .height(220.dp)
-                    .padding(horizontal = 12.dp),
-                refraction = refraction,
-                dispersion = dispersion,
-                centreWeight = centreWeight,
-                rimWeight = rimWeight,
-                tintAlpha = tintAlpha,
-                breakOverlapPx = breakOverlapPx,
+                    .padding(horizontal = 12.dp)
+                    .padding(start = with(androidx.compose.ui.platform.LocalDensity.current) {
+                        breakOverlapPx.toDp()
+                    })
+                    // The public modifier: no knowledge of shaders, captures or uniforms.
+                    .lumenGlass(glass) {
+                        lens = LensModel.Blend(centre = centreWeight, rim = rimWeight)
+                        this.refraction = refraction
+                        this.dispersion = dispersion
+                        tint = Color(0xFFFF3B30).copy(alpha = tintAlpha)
+                        frost = 6.dp
+                        edgeLight = 0.1f
+                    },
+            )
+
+            // Report what the library ACTUALLY chose, not what we hoped — the detectability
+            // contract from P3.5, now a public property.
+            Text(
+                text = "tier ${glass.tier.name} · shader=${glass.canRunShader} · " +
+                    "blur=${glass.resolvedFeatures.useBlur} " +
+                    "dispersion=${glass.resolvedFeatures.useDispersion} " +
+                    "capture=${glass.resolvedFeatures.captureScale}",
+                color = Color(0xFF9E9E9E),
+                fontSize = 11.sp,
+                modifier = Modifier.padding(horizontal = 12.dp),
             )
 
             SliderRow("refraction", refraction, 0f..3f) { refraction = it }
@@ -100,115 +116,17 @@ private fun ComposeHarness() {
             SliderRow("centreWeight", centreWeight, 0f..1f) { centreWeight = it }
             SliderRow("rimWeight", rimWeight, 0f..1f) { rimWeight = it }
             SliderRow("tintAlpha", tintAlpha, 0f..1f) { tintAlpha = it }
-            // Range must exceed the surface width (~1100px) so the slider can drive the overlap
-            // all the way to zero. A 0..600 range could only ever reach ~45% overlap.
+            // Range exceeds the surface width so the slider can drive overlap to zero and prove the
+            // guard fires.
             SliderRow("breakOverlap", breakOverlapPx, 0f..2000f) { breakOverlapPx = it }
         }
-    }
-}
-
-/**
- * The real render path: build a bound [RuntimeShader] and draw with it.
- *
- * A production path would reuse the shader and re-bind uniforms only; rebuilding on change is fine
- * for a harness and keeps P1.7 focused (shader reuse / caching is P3.5).
- */
-@Composable
-private fun GlassSurface(
-    modifier: Modifier,
-    refraction: Float,
-    dispersion: Float,
-    centreWeight: Float,
-    rimWeight: Float,
-    tintAlpha: Float,
-    breakOverlapPx: Float,
-) {
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    val density = LocalDensity.current
-
-    val shader: RuntimeShader? = remember(
-        size, refraction, dispersion, centreWeight, rimWeight, tintAlpha,
-    ) {
-        if (size.width == 0 || size.height == 0) return@remember null
-        buildGlassShader(
-            GlassUniforms(
-                widthPx = size.width.toFloat(),
-                heightPx = size.height.toFloat(),
-                cornerRadiusPx = with(density) { 24.dp.toPx() },
-                centreWeight = centreWeight,
-                rimWeight = rimWeight,
-                refraction = refraction,
-                dispersion = dispersion,
-                tintArgb = Color(0xFFFF3B30).copy(alpha = tintAlpha).toArgb(),
-                saturation = 1f,
-                contrast = 1f,
-                edgeLight = 0.1f,
-                tier = if (dispersion > 0f) TIER_HIGH else TIER_BALANCED,
-            ),
-        )
-    }
-
-    val paint = remember { Paint().apply { isAntiAlias = true } }
-
-    val widthPx = size.width.toFloat().coerceAtLeast(1f)
-    val heightPx = size.height.toFloat().coerceAtLeast(1f)
-
-    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-        Box(
-            modifier
-                .onSizeChanged { size = it }
-                .drawBehind {
-                    val activeShader = shader ?: return@drawBehind
-                    paint.shader = activeShader
-                    drawIntoCanvas { canvas ->
-                        canvas.nativeCanvas.drawRect(0f, 0f, widthPx, heightPx, paint)
-                    }
-                },
-        )
-
-        // Guard: the shader is told the surface is at x = breakOverlapPx. Once that no longer
-        // overlaps the captured region the render is near-black, so show the verdict.
-        val verdict = remember(breakOverlapPx, widthPx, heightPx) {
-            checkOverlap(
-                surface = OverlapRect(
-                    left = breakOverlapPx,
-                    top = 0f,
-                    right = breakOverlapPx + widthPx,
-                    bottom = heightPx,
-                ),
-                capture = OverlapRect(left = 0f, top = 0f, right = widthPx, bottom = heightPx),
-            )
-        }
-        logOverlapVerdict(verdict)
-
-        OverlapBanner(overlapping = verdict.overlapping)
-    }
-}
-
-/**
- * On-screen half of the overlap guard (Q-A). The library logs; the harness shows. This is what
- * makes the failure mode *provable*, which the P1.7 exit bar requires.
- */
-@Composable
-private fun OverlapBanner(overlapping: Boolean) {
-    val bg = if (overlapping) Color(0xFF1B5E20) else Color(0xFFB71C1C)
-    Box(Modifier.fillMaxWidth().background(bg).padding(8.dp)) {
-        Text(
-            text = if (overlapping) {
-                "OVERLAP OK — shader should render"
-            } else {
-                "OVERLAP GUARD FIRED — expect near-black"
-            },
-            color = Color.White,
-            fontSize = 12.sp,
-        )
     }
 }
 
 /** High-contrast scrolling content — the worst case for a glass shader. */
 @Composable
 private fun HighContrastScrollingContent(modifier: Modifier) {
-    val items = remember { (1..60).map { "Item $it — LUMEN GLASS P1.7" } }
+    val items = remember { (1..60).map { "Item $it — LUMEN GLASS P4" } }
     LazyColumn(modifier) {
         items(items) { label ->
             Row(
