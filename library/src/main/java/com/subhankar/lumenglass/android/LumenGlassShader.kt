@@ -57,6 +57,9 @@ uniform float  saturation;
 uniform float  contrast;
 uniform float  edgeLight;
 uniform float  tier;
+// Bezel (inner shadow). Gated on the HIGH tier; disabled by passing bezelAlpha = 0.
+uniform float  bezelAlpha;
+uniform float  bezelRadiusPx;
 
 // Signed distance to a rounded rectangle (<= 0 inside). Mirrors GlassMath.roundedRectSdf.
 float roundedRectSdf(float2 p, float2 halfSize, float radius) {
@@ -152,6 +155,18 @@ half4 main(float2 fragCoord) {
     float edgeBand = smoothstep(-max(edgeLight, 1e-4) * 24.0, 0.0, sdf);
     color.rgb += half3(edgeBand * edgeLight);
 
+    // Bezel — a soft dark inner edge that gives the glass depth. Derived from the SAME `sdf` the
+    // mask uses, so it costs almost nothing: dark where the pixel is just inside the border,
+    // fading to nothing toward the middle. Gated on the HIGH tier, and a no-op when bezelAlpha
+    // is 0 (which is what the cheaper tiers pass).
+    if (tier >= 2.0 && bezelAlpha > 0.0) {
+        // `sdf` is <= 0 inside. A band of width bezelRadiusPx inside the border:
+        //   sdf = 0 at the edge  ->  strongest shadow
+        //   sdf = -bezelRadiusPx ->  no shadow
+        float bezel = 1.0 - smoothstep(-max(bezelRadiusPx, 1e-4), 0.0, sdf);
+        color.rgb *= half(1.0 - bezel * bezelAlpha);
+    }
+
     return color * coverage;
 }
 """.trimIndent()
@@ -182,4 +197,6 @@ val LUMEN_GLASS_UNIFORMS: List<String> = listOf(
     "contrast",
     "edgeLight",
     "tier",
+    "bezelAlpha",
+    "bezelRadiusPx",
 )

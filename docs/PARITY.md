@@ -129,16 +129,21 @@ Lumen Glass performs tint **and** saturation/contrast grading inside the shader
 
 ### 4.6 Bezel
 
+> [!NOTE]
+> **Updated at P3.5 — this gap is closed.** The text below is the P1-era finding, kept for the
+> record.
+
 The prototype applies an `InnerShadow` bezel as a separate `backdrop` effect in the chain.
 
 Lumen Glass declares `Bezel` in `GlassSpec` but **does not render it yet** — the shader has no bezel
 path, and `QualityTier.resolveFeatures()` gates `useBezel` to the HIGH tier only.
 
-> [!NOTE]
-> **Stated honestly:** this is a **gap**, not a difference. The prototype renders a bezel; Lumen
-> Glass does not yet. Recorded here so it cannot be quietly forgotten.
+**Resolved at P3.5:** the bezel is now rendered **inside the shader**, as a dark band derived from
+ the signed distance the mask already computes. That costs almost nothing (no second pass, no extra
+tap) and keeps the "own the substrate" decision intact — the prototype needed a separate
+`InnerShadow` effect from a third-party library to do the same thing.
 
-**Verdict: prototype more complete today — Lumen Glass gap, deferred.**
+**Verdict: prototype had it first; Lumen Glass now does it with less machinery.**
 
 ---
 
@@ -151,11 +156,12 @@ path, and `QualityTier.resolveFeatures()` gates `useBezel` to the HIGH tier only
 | `edge`/edge light | Dead uniform | Applied | **Lumen** |
 | Tint + grading | Tint only (vibrancy is external) | Tint + saturation/contrast in-shader | Equivalent |
 | Licence | ❌ Unlicensed port | ✅ Clean-room | **Lumen** |
-| Blur | 9×9 in-shader (works, 81 taps) | Architectural seam only | Prototype (P3.5) |
-| Bezel | Renders it | Declared, not rendered | Prototype (deferred) |
+| Blur | 9×9 in-shader (81 taps) | Platform `createBlurEffect` (separable, hardware) | **Lumen** (P3.5) |
+| Bezel | Separate library effect | In-shader, near-free | **Lumen** (P3.5) |
 
-**P1 exit criterion: met** — equal-or-better visually, with two honestly-recorded gaps that are
-scheduled work (P3.5 blur, bezel), not omissions.
+**P1 exit criterion: met** — equal-or-better visually. **Both P1-era gaps (blur, bezel) are now
+closed at P3.5**, and the blur row inverted: what looked like the prototype being ahead turned out
+to be the prototype doing expensive work the platform already does better.
 
 ---
 

@@ -60,17 +60,29 @@ class GlassCapture {
     var isReleased: Boolean = false
         private set
 
+    /** The geometry used by the last [record] call. Defaults to a 1×1 full-scale placeholder. */
+    private var geometry: CaptureGeometry = CaptureGeometry(1f, 1, 1)
+
     /**
-     * Records [draw] into the capture node at the given region.
+     * Records [draw] into the capture node at the given region, at an optional reduced scale.
      *
-     * The node is sized to the region (in whole pixels, with a minimum of 1×1 — `beginRecording`
-     * rejects a zero dimension). Content is then recorded at full resolution; the reduced-scale path
-     * is P3.5.
+     * ## Two sizes, and why they must not be confused
      *
-     * @param left left edge of the recorded region, in node coordinates.
-     * @param top top edge of the recorded region, in node coordinates.
-     * @param right right edge of the recorded region, in node coordinates.
-     * @param bottom bottom edge of the recorded region, in node coordinates.
+     * - The **recorded region** (`left`/`top`/`right`/`bottom`) is in **surface coordinates**. It is
+     *   what [checkSurfaceOverlap] compares, and it is stored **unscaled**.
+     * - The **buffer size** is `scale` × the region, so the GPU rasterises fewer fragments.
+     *
+     * Scaling the recorded region as well would silently corrupt the overlap guard, because the
+     * guard would then be comparing a shrunken rect against a real one. The split is the whole point
+     * of [geometryFor].
+     *
+     * @param left left edge of the recorded region, in surface coordinates.
+     * @param top top edge of the recorded region, in surface coordinates.
+     * @param right right edge of the recorded region, in surface coordinates.
+     * @param bottom bottom edge of the recorded region, in surface coordinates.
+     * @param scale linear capture scale from `GlassFeatures.captureScale`; `1f` = full resolution.
+     *   Clamped to `[MIN_CAPTURE_SCALE, 1]`, and the buffer is always at least 1×1 because
+     *   `beginRecording` rejects a zero dimension.
      * @param draw the content to record. Runs against the node's recording canvas.
      */
     fun record(
@@ -78,15 +90,22 @@ class GlassCapture {
         top: Float,
         right: Float,
         bottom: Float,
+        scale: Float = 1f,
         draw: (android.graphics.Canvas) -> Unit,
     ) {
         check(!isReleased) { "GlassCapture has been released" }
 
-        val widthPx = (right - left).toInt().coerceAtLeast(1)
-        val heightPx = (bottom - top).toInt().coerceAtLeast(1)
+        val widthPx = (right - left).coerceAtLeast(1f)
+        val heightPx = (bottom - top).coerceAtLeast(1f)
+        val geometry = geometryFor(widthPx, heightPx, scale)
+        this.geometry = geometry
 
-        val canvas = node.beginRecording(widthPx, heightPx)
+        // Size the BUFFER by the scale, but record the REGION unscaled (see the note above).
+        val canvas = node.beginRecording(geometry.bufferWidthPx, geometry.bufferHeightPx)
         try {
+            // The caller's draw code works in surface coordinates, so scale the canvas down to fit
+            // the smaller buffer. This keeps the content geometrically identical, just coarser.
+            canvas.scale(geometry.scale, geometry.scale)
             draw(canvas)
         } finally {
             // Must always end the recording, even if `draw` threw — otherwise the node stays in a
@@ -100,6 +119,9 @@ class GlassCapture {
         // Position the node so its content lands at the recorded region's origin.
         node.setPosition(left.toInt(), top.toInt(), right.toInt(), bottom.toInt())
     }
+
+    /** The geometry used by the last [record] call (scale + buffer size). */
+    internal fun captureGeometry(): CaptureGeometry = geometry
 
     /** The region recorded by the last [record] call, or an empty rect if none. */
     fun recordedRegion(): RectF = RectF(recorded)

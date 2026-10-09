@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.graphics.RuntimeShader
+import android.graphics.Shader
 import androidx.annotation.RequiresApi
 
 /**
@@ -36,6 +37,43 @@ fun buildGlassRenderEffect(uniforms: GlassUniforms): RenderEffect =
     )
 
 /**
+ * Builds the glass effect with an optional **frost** (blur) pass in front of the lens.
+ *
+ * ## Why the platform blur, not a hand-written one
+ *
+ * `PLAN.md` §5.2 originally planned a hand-written two-pass AGSL blur ("81 → 18 taps"). The API
+ * makes that unnecessary: `RenderEffect.createBlurEffect(radiusX, radiusY, input, tileMode)` takes
+ * **independent X and Y radii**, so the framework's blur is *already* separable and
+ * hardware-accelerated. A shader loop of our own would cost more, add an untested path, and
+ * re-implement something the platform does better.
+ *
+ * Blur is therefore chained **in front of** the lens: content is blurred first, then refracted.
+ * That ordering matters — blurring the *refracted* result would smear the lens's edge definition.
+ *
+ * @param frostRadiusPx blur radius in px; `<= 0` skips the blur entirely so the cheaper tiers pay
+ *   nothing for it. Applied isotropically (the spec exposes one radius); the API supports
+ *   anisotropic blur, but `GlassSpec` does not surface it yet.
+ * @return the effect chain: `blur -> lens`, or just `lens` when frost is off.
+ */
+@RequiresApi(AGSL_MIN_API)
+fun buildGlassRenderEffect(
+    uniforms: GlassUniforms,
+    frostRadiusPx: Float,
+): RenderEffect {
+    val lens = buildGlassRenderEffect(uniforms)
+    if (frostRadiusPx <= 0f) return lens
+
+    // TileMode.CLAMP, not DECAL: DECAL would bleed transparent edges inward and darken the rim,
+    // fighting the shader's own edge-light term.
+    return RenderEffect.createBlurEffect(
+        frostRadiusPx,
+        frostRadiusPx,
+        lens,
+        Shader.TileMode.CLAMP,
+    )
+}
+
+/**
  * Builds the glass effect, or `null` below API 33 where AGSL does not exist.
  *
  * Callers **must** handle `null` by drawing the FROST fallback rather than skipping the surface —
@@ -44,8 +82,8 @@ fun buildGlassRenderEffect(uniforms: GlassUniforms): RenderEffect =
  *
  * @return the effect, or `null` on API < 33.
  */
-fun buildGlassRenderEffectOrNull(uniforms: GlassUniforms): RenderEffect? =
-    if (isAgsSupported()) buildGlassRenderEffect(uniforms) else null
+fun buildGlassRenderEffectOrNull(uniforms: GlassUniforms, frostRadiusPx: Float = 0f): RenderEffect? =
+    if (isAgsSupported()) buildGlassRenderEffect(uniforms, frostRadiusPx) else null
 
 /**
  * The name of the shader input the effect binds.
@@ -68,9 +106,13 @@ const val CONTENT_SAMPLER_NAME: String = "content"
  * @return `true` if the effect was applied, `false` if it could not be.
  */
 @RequiresApi(RENDER_EFFECT_MIN_API)
-fun applyGlassEffect(capture: GlassCapture, uniforms: GlassUniforms): Boolean {
+fun applyGlassEffect(
+    capture: GlassCapture,
+    uniforms: GlassUniforms,
+    frostRadiusPx: Float = 0f,
+): Boolean {
     if (capture.isReleased) return false
-    val effect = buildGlassRenderEffectOrNull(uniforms) ?: return false
+    val effect = buildGlassRenderEffectOrNull(uniforms, frostRadiusPx) ?: return false
     capture.node.setRenderEffect(effect)
     return true
 }

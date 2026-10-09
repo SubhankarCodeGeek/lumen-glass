@@ -36,6 +36,9 @@ import com.subhankar.lumenglass.core.resolveWeights
  * @property contrast colour contrast multiplier (`1f` = unchanged).
  * @property edgeLight specular edge-band strength.
  * @property tier selector: `2f` = HIGH (dispersion path), `1f` = BALANCED/LOW.
+ * @property bezelAlpha strength of the inner-shadow bezel, `0f`..`1f` (`0f` disables it, which is
+ *   what the cheaper tiers pass). Gated on the HIGH tier in the shader.
+ * @property bezelRadiusPx width of the bezel band, inward from the border, in px.
  */
 data class GlassUniforms(
     val widthPx: Float,
@@ -51,6 +54,8 @@ data class GlassUniforms(
     val contrast: Float,
     val edgeLight: Float,
     val tier: Float,
+    val bezelAlpha: Float = 0f,
+    val bezelRadiusPx: Float = 0f,
 ) {
     companion object {
         /** Superellipse exponent matching the reference squircle field. */
@@ -74,6 +79,8 @@ data class GlassUniforms(
             dispersion: Float = spec.dispersion,
             refraction: Float = spec.refraction,
             tier: Float = TIER_BALANCED,
+            /** Bezel band width in px, converted by the caller (the spec stores dp). */
+            bezelRadiusPx: Float = 0f,
         ): GlassUniforms {
             val weights = spec.lens.resolveWeights()
             return GlassUniforms(
@@ -89,6 +96,10 @@ data class GlassUniforms(
                 contrast = spec.contrast,
                 edgeLight = spec.edgeLight,
                 tier = tier,
+                // The bezel is only rendered on the HIGH tier; passing 0 elsewhere is what makes it
+                // a no-op rather than an untested branch.
+                bezelAlpha = if (tier >= TIER_HIGH) spec.bezel?.alpha ?: 0f else 0f,
+                bezelRadiusPx = if (tier >= TIER_HIGH) bezelRadiusPx else 0f,
             )
         }
     }
@@ -168,6 +179,8 @@ fun buildGlassShader(uniforms: GlassUniforms): RuntimeShader {
     shader.setFloatUniform("contrast", uniforms.contrast)
     shader.setFloatUniform("edgeLight", uniforms.edgeLight)
     shader.setFloatUniform("tier", uniforms.tier)
+    shader.setFloatUniform("bezelAlpha", uniforms.bezelAlpha)
+    shader.setFloatUniform("bezelRadiusPx", uniforms.bezelRadiusPx)
 
     // `tint` is declared `layout(color) uniform half4`, so it must be bound as a colour — a
     // setFloatUniform here would throw. This is exactly the kind of per-uniform detail that is easy

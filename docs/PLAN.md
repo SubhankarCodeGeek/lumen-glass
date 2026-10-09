@@ -167,7 +167,7 @@ lighting. That is why we saw GPU shader-compile fallbacks on a mid-range Adreno.
 | Technique | Saving | Notes |
 |---|---|---|
 | **Reduced-resolution capture** | ~4× fragment work at 0.5× | Glass is blurry by definition — the capture can render at 0.25×–0.5× linear scale with no visible loss |
-| **Separable two-pass blur** (H + V) | 81 → 18 taps | Standard; mathematically equivalent for a box/Gaussian |
+| **Platform blur** (not ours) | n/a | **Corrected at P3.5.** This row previously said *"Separable two-pass blur (H + V), 81 → 18 taps"* as work **we** would do. That was wrong: `RenderEffect.createBlurEffect(radiusX, radiusY, input, edgeTreatment)` takes independent X and Y radii, so the framework's blur is **already separable and hardware-accelerated**. We use it and spend the savings on `captureScale` instead. A hand-written AGSL tap loop would have been slower *and* a re-implementation of something the platform does better. |
 | **Render-once / cache** | ~0 when idle | A static surface only needs re-sampling when content behind it changes |
 | **Optional dispersion** | −(N−1) taps | The single most expensive effect; off in low tiers |
 | **Single-tap lens in low tier** | – | Skip the multi-sample lens path |
@@ -178,8 +178,8 @@ lighting. That is why we saw GPU shader-compile fallbacks on a mid-range Adreno.
 | Tier | Selects | Target |
 |---|---|---|
 | **HIGH** | full taps + dispersion + bezel | flagship GPUs |
-| **BALANCED** | separable blur, dispersion optional, no bezel | mainstream |
-| **LOW** | reduced-res capture + single-pass small blur + tint only | low-end / old GPUs |
+| **BALANCED** | platform blur, dispersion optional, no bezel | mainstream |
+| **LOW** | reduced-res capture + no blur + tint only | low-end / old GPUs |
 | **FALLBACK** | no shader (API < 33 or non-AGSL) → plain frosted panel | everything else |
 
 **Selection policy:** default from a capability probe (API level + a light GPU heuristic),
