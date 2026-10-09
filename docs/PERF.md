@@ -96,8 +96,31 @@
 
 - A device without the frame-rate override (or with it disabled) — needs a root/managed device.
 - A genuine low-end reference device, per PQ2.
-- `Surface.setFrameRate(FrameRateCategory.HIGH)` from the app: the app can *request* a rate, and while
-  a system governor may still override it, it is worth trying before writing off the hardware.
+
+#### App-side frame-rate requests — TRIED, INEFFECTIVE
+
+> [!WARNING]
+> **Do not repeat this experiment.** The app-side levers were tested on 2026-10-09 and do not work
+> here.
+>
+> `TierComparisonActivity` calls the only window-level frame-rate levers the platform offers a plain
+> `View` hierarchy:
+> ```kotlin
+> window.setFrameRateBoostOnTouchEnabled(true)
+> window.setFrameRatePowerSavingsBalanced(false)
+> ```
+> (`Surface.setFrameRate` is not usable here — it needs a `Surface`, and only a `SurfaceView` owns
+> one, so it is not reachable from a `View`-based screen.)
+>
+> Result: the governor **re-applied 45Hz regardless**, and did so even to a freshly-installed UID:
+> ```
+> before launch:  frameRateOverride {uid=10429 frameRateHz=45.0}
+> after launch:   frameRateOverride {uid=10463 frameRateHz=45.0}
+> in-app HUD:     fps ~45.5  avg 22.0ms
+> ```
+> The calls are left in place (harmless, and they *would* help on a device without a governor) but
+> they are **not** a workaround on this hardware. A root/managed device or a different device is
+> required.
 
 ---
 

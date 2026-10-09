@@ -99,10 +99,44 @@ class TierComparisonActivity : ComponentActivity() {
 
         setContentView(root)
 
+        // Ask the platform for a high frame rate.
+        //
+        // Why this is here: this device pins the app's UID to 45Hz via a system governor
+        // (`frameRateOverride {uid=... frameRateHz=45.0}`), which made every tier measure the same
+        // and rendered the in-app frame-timing HUD useless for P3.5. `setFrameRate` is the
+        // documented way for an app to *request* a rate. It is a request, not a guarantee — a
+        // system governor can still override it — and checking whether it yields is the whole point
+        // of this code being here. See docs/PERF.md.
+        requestHighFrameRate()
+
         // Populate the tier label and hand the surface its starting tier. Without this the screen
         // renders the default tier but the label stays blank, so the user cannot tell what they are
         // looking at — which defeats the point of a comparison screen.
         applyTier()
+    }
+
+    /**
+     * Windows-level requests to favour frame rate over power saving.
+     *
+     * ## Tested and ineffective on this device (kept deliberately)
+     *
+     * This device pins the app's UID to 45Hz via a system power governor
+     * (`frameRateOverride {uid=... frameRateHz=45.0}`), which makes every tier measure identically
+     * and rendered the in-app frame-timing HUD useless for P3.5.
+     *
+     * These two calls are the only window-level frame-rate levers the platform exposes to a plain
+     * `View` hierarchy (`Surface.setFrameRate` needs a `Surface`, which only a `SurfaceView` owns).
+     * They were tried as an experiment: the governor **re-applied 45Hz anyway**, including to a
+     * freshly-installed UID. See `docs/PERF.md`.
+     *
+     * The calls are kept rather than deleted so the negative result is reproducible and so nobody
+     * re-runs the same experiment assuming it was never tried. They are harmless where no governor
+     * is present — indeed that is exactly where they would help.
+     */
+    private fun requestHighFrameRate() {
+        val w = window ?: return
+        w.setFrameRateBoostOnTouchEnabled(true)
+        w.setFrameRatePowerSavingsBalanced(false)
     }
 
     override fun onResume() {
