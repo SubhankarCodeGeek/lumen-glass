@@ -23,6 +23,11 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "P1.7-harness"
+
+        // REQUIRED for the instrumented shader compile smoke test to be discovered.
+        // Without it, AGP uses a default runner that silently reports "tests: 0" instead of
+        // running the AndroidX JUnit4 tests — a false green.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -56,4 +61,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.material3)
+
+    // Instrumented tests (src/androidTest): the shader compile smoke test. RuntimeShader compiles
+    // on the GPU, so this cannot be a JVM unit test. It lives in :app because :app is already
+    // minSdk 33 while :library is deliberately minSdk 21.
+    //   ./gradlew :app:connectedDebugAndroidTest
+    androidTestImplementation(libs.androidx.test.junit.ext)
+    androidTestImplementation(libs.androidx.test.runner)
 }

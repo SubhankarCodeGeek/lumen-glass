@@ -106,7 +106,7 @@ behaviour rather than being an untested blob.
 > Q2: Lumen Glass owns its capture + effect pipeline. **No `backdrop` dependency.**
 
 ```
-source content ──Modifier.lumenSource(state)──▶ GraphicsLayer (captured)
+source content ──Modifier.lumenSource(state)──▶ RenderNode (captured)
                                                      │
 glass surface ──Modifier.lumenGlass(state){…}────────┤
                                                      ▼
@@ -115,6 +115,13 @@ glass surface ──Modifier.lumenGlass(state){…}────────┤
                                                      ▼
                                                   draw
 ```
+
+> [!IMPORTANT]
+> **The capture primitive is `android.graphics.RenderNode`, not `GraphicsLayer`.**
+> `android.graphics.GraphicsLayer` is a **hidden framework API** — it is *not* present in
+> `android.jar`, so a library compiling against the public SDK cannot use it (verified against the
+> API 36 platform jar). `RenderNode` is the public equivalent and provides everything the substrate
+> needs: `beginRecording`/`endRecording`, `setPosition`, and `setRenderEffect`.
 
 **The pitfall (learned the hard way):** the glass surface **must overlap the region recorded into
 the capture layer**, or the shader samples empty space and renders **near-black**. The API must make

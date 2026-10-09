@@ -11,13 +11,13 @@ import androidx.annotation.RequiresApi
  * This is the **substrate** decision from Q2: Lumen Glass owns its own capture rather than
  * depending on `backdrop`.
  *
- * ## Why `RenderNode` and not `GraphicsLayer`
+ * ## Why `RenderNode`
  *
- * The design docs (`ARCHITECTURE.md` §4/§5.1, `PLAN.md` §5.1) name `android.graphics.GraphicsLayer`
- * as the capture primitive. **That class is a hidden framework API** — it is *not* present in
- * `android.jar`, so a library that compiles against the public SDK cannot use it. Verified against
- * the API 36 platform jar. The public equivalent is [RenderNode], which provides everything the
- * substrate needs (`beginRecording` / `endRecording`, `setPosition`, `setRenderEffect`).
+ * The capture primitive is [RenderNode], **not** `android.graphics.GraphicsLayer`: the latter is a
+ * **hidden framework API** — it is *not* present in `android.jar`, so a library that compiles
+ * against the public SDK cannot use it (verified against the API 36 platform jar). `RenderNode` is
+ * the public equivalent and provides everything the substrate needs (`beginRecording` /
+ * `endRecording`, `setPosition`, `setRenderEffect`).
  *
  * ## Scope
  *

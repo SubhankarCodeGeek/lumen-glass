@@ -97,7 +97,8 @@ From the app's `EMERG-REFRACT-*` work we have working knowledge of:
 
 > [!NOTE]
 > **Q2 — Substrate ownership: DECIDED = OWN IT.** The library owns its own capture + `RenderEffect`
-> pipeline (Android `GraphicsLayer`/`RenderNode`); it does **not** depend on `backdrop`. This is
+> pipeline (Android `RenderNode` — **not** `GraphicsLayer`, which is a hidden API; see §5.1); it
+> does **not** depend on `backdrop`. This is
 > what makes it a *library* rather than a wrapper. We will still credit `backdrop`/`liquid` as
 > **inspiration** in the README, and document them as alternatives. See §5.1.
 
@@ -150,8 +151,9 @@ From the app's `EMERG-REFRACT-*` work we have working knowledge of:
 
 Owning the capture + `RenderEffect` pipeline is what makes this a *library* rather than a wrapper:
 
-- **Capture:** render the source content into a `GraphicsLayer` (Android `GraphicsLayer` /
-  `RenderNode`), off the main draw of the effect surface.
+- **Capture:** render the source content into a `RenderNode` (the public capture primitive —
+  `android.graphics.GraphicsLayer` is a hidden framework API and is **not** usable from a library
+  built against the public SDK), off the main draw of the effect surface.
 - **Effect:** apply `RenderEffect.createRuntimeShaderEffect(shader, "content")`, chaining blur + lens
   + (optional) dispersion, then draw.
 - **The pitfall we learned:** the surface **must overlap the recorded region** or it renders black.

@@ -133,8 +133,13 @@ half4 main(float2 fragCoord) {
  * `setFloatUniform`/`setColorUniform` for an undeclared name throws
  * `IllegalArgumentException: unknown identifier` at runtime — a crash class the Kotlin compiler and
  * Robolectric cannot catch. This list closes it at test time.
+ *
+ * ## API status: PROVISIONAL (pre-P4)
+ *
+ * Public so the instrumented compile/bind smoke test can assert against it. Not the designed public
+ * API — that is P4.
  */
-internal val LUMEN_GLASS_UNIFORMS: List<String> = listOf(
+val LUMEN_GLASS_UNIFORMS: List<String> = listOf(
     "size",
     "cornerRadius",
     "centreWeight",

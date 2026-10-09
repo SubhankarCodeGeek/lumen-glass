@@ -8,6 +8,8 @@ kotlin = "2.2.20"
 composeBom = "2026.06.01"
 androidxCoreKtx = "1.17.0"
 androidxActivityCompose = "1.11.0"
+androidxTestExtJunit = "1.3.0"
+androidxTestRunner = "1.7.0"
 junit = "4.13.2"
 
 [libraries]
@@ -20,6 +22,11 @@ androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
+# NOTE: named `androidx-test-junit-ext`, not `androidx-test-ext-junit`: the latter generates the
+# accessor `libs.androidx.test.ext.junit`, and `.ext` collides with the Kotlin DSL's own extension
+# accessor inside a dependencies {} block.
+androidx-test-junit-ext = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]
