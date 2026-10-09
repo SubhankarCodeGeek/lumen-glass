@@ -1,0 +1,26 @@
+# Lumen Glass — version catalog.
+# Pinned to the toolchain used by the 360 Community project so the library can be developed and
+# tested against it. (Android-first; KMP / Kotlin 2.4 / AGP 9 is deliberately deferred — see
+# docs/lumen-glass/PLAN.md §4 Q1 and the Risks table.)
+[versions]
+agp = "8.13.2"
+kotlin = "2.2.20"
+composeBom = "2026.06.01"
+androidxCoreKtx = "1.17.0"
+junit = "4.13.2"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-ui = { module = "androidx.compose.ui:ui" }
+androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-material3 = { module = "androidx.compose.material3:material3" }
+junit = { module = "junit:junit", version.ref = "junit" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
