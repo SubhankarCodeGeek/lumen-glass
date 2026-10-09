@@ -5,7 +5,10 @@ package com.subhankar.lumenglass.android
  *
  * This shader is **re-derived from the mathematics** in `core/GlassMath.kt` — the rounded-rect SDF,
  * the aspect-agnostic squircle field, the centre/rim lens displacement, and the per-channel
- * dispersion offsets. It is **not** a copy of any third-party glass shader. See `CLEANROOM.md`.
+ * dispersion scales. It is **not** a copy of any third-party glass shader. See `CLEANROOM.md`.
+ *
+ * `core/GlassMath` is the **specification** for the maths; this shader implements it, and
+ * `ShaderMathParityTest` (instrumented, in `:app`) enforces the agreement numerically on device.
  *
  * It runs as a `RenderEffect.createRuntimeShaderEffect(shader, "content")` over a captured backdrop
  * layer — a `uniform shader content` that can be sampled at arbitrary coordinates.
@@ -34,8 +37,13 @@ package com.subhankar.lumenglass.android
  * | `contrast` | colour contrast multiplier |
  * | `edgeLight` | specular edge-band strength |
  * | `tier` | quality tier selector |
+ *
+ * ## API status: PROVISIONAL (pre-P4)
+ *
+ * Public so the instrumented parity test (in `:app`) can assert the shared-expression wiring.
+ * Not a designed API.
  */
-internal val LUMEN_GLASS_AGSL: String = """
+val LUMEN_GLASS_AGSL: String = """
 uniform shader content;
 uniform float2 size;
 uniform float  cornerRadius;
@@ -60,8 +68,11 @@ float roundedRectSdf(float2 p, float2 halfSize, float radius) {
 }
 
 // Aspect-agnostic squircle distance: 0 at centre, ~1 at the border. Mirrors GlassMath.squircle.
+//
+// The body is interpolated from ProbeShaderText.SQUIRCLE_EXPR, so this shader and the diagnostic
+// probe are generated from ONE copy of the expression and cannot drift apart (see Q-F).
 float squircle(float2 n, float e) {
-    return pow(abs(n.x), e) + pow(abs(n.y), e);
+    return ${ProbeShaderText.SQUIRCLE_EXPR};
 }
 
 // Colour grading: saturation then contrast. Keeps the material from reading as flat.
@@ -93,22 +104,41 @@ half4 main(float2 fragCoord) {
     }
 
     // Aspect-agnostic normalized coords (-1..1 per axis) + squircle field.
+    //
+    // CONTRACT: the terms below are specified by `core/GlassMath` and enforced numerically on
+    // device by `ShaderMathParityTest` (in :app), which renders a probe and compares the readback
+    // against `GlassMath.lensOffset` / `GlassMath.dispersionScales`. If you change the maths here,
+    // change it there first — Q-F exists precisely because these two silently drifted apart.
     float2 n = p / halfSize;
     float sq = clamp(squircle(n, squircleExp), 0.0, 1.0);
 
     // Lens displacement: centre term peaks in the middle, rim term peaks at the edge.
-    float weight = ((1.0 - sq) * centreWeight + sq * rimWeight) * refraction;
-    float2 offset = -n * weight * min(halfSize.x, halfSize.y);
+    //
+    // The weight and scale terms are interpolated from ProbeShaderText, so this shader and the
+    // diagnostic probe are generated from ONE copy of each expression (see Q-F). Scale is
+    // min(halfSize.x, halfSize.y) — the same `min` GlassMath.lensOffset performs internally (Q-I).
+    float weight = ${ProbeShaderText.LENS_WEIGHT_EXPR};
+    float scale = ${ProbeShaderText.LENS_SCALE_EXPR};
+    float2 offset = -n * weight * scale;
     float2 sampleCoord = fragCoord + offset;
 
     // Sample, with optional chromatic dispersion (3 taps) on the HIGH tier.
+    //
+    // Dispersion is a RADIAL SCALE about the surface centre, per GlassMath.dispersionScales:
+    //   redScale = 1 + dispersion, greenScale = 1, blueScale = 1 - dispersion
+    // Each channel samples the (lens-displaced) coordinate scaled about `centre` by its own
+    // factor. This is zero at the optical centre and grows toward the rim.
+    //
+    // NOTE: this replaced an earlier linear-offset formulation that disagreed with GlassMath — the
+    // drift Q-F uncovered. Do not reintroduce an offset-based variant.
     half4 color;
     if (tier >= 2.0 && dispersion > 0.0) {
-        float2 fromCentre = n;
-        float2 aberration = dispersion * fromCentre * 0.05 * min(halfSize.x, halfSize.y);
-        half4 cR = content.eval(sampleCoord - aberration);
+        float redScale = 1.0 + dispersion;
+        float blueScale = 1.0 - dispersion;
+        float2 rel = sampleCoord - centre;
+        half4 cR = content.eval(centre + rel * redScale);
         half4 cG = content.eval(sampleCoord);
-        half4 cB = content.eval(sampleCoord + aberration);
+        half4 cB = content.eval(centre + rel * blueScale);
         color = half4(cR.r, cG.g, cB.b, cG.a);
     } else {
         color = content.eval(sampleCoord);

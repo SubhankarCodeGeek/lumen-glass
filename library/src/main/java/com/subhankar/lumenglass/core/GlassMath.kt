@@ -8,21 +8,33 @@ import kotlin.math.sqrt
 /**
  * Pure mathematics behind the glass shader.
  *
- * These are the formulas the AGSL shader mirrors. Keeping them here means the algorithm is
- * **unit-tested on the JVM** (the shader itself can only be compiled/rendered on a device) and the
- * shader is a transliteration of *tested* behaviour rather than an untested blob.
+ * This object is the **specification** for the glass algorithm. The AGSL shader is corrected to
+ * match it, and `ShaderMathParityTest` (instrumented, in `:app`) enforces the agreement numerically
+ * by rendering a diagnostic probe and comparing its readback against these functions.
+ *
+ * Keeping the maths here means it is **unit-tested on the JVM**, whereas the shader itself can only
+ * be compiled and rendered on a device. The shader is therefore a transliteration of *tested*
+ * behaviour rather than an untested blob — and, since Q-F, that claim is **enforced by a test**
+ * rather than merely asserted.
+ *
+ * > **History (Q-F):** before that test existed, the shader and this object had silently drifted
+ * > apart — they used different lens scale terms and *fundamentally different* dispersion
+ * > formulations. The KDoc previously claimed they mirrored each other; nothing verified it, and it
+ * > was not true. The drift is fixed and the claim is now backed by a device test.
  *
  * ## Clean-room note
  *
  * These formulas are derived from **generic, public computer-graphics references** (2D signed
- * distance functions; separable blur; per-channel sample offsets) and from our own analysis. No
+ * distance functions; separable blur; per-channel radial scaling) and from our own analysis. No
  * source text was copied from any third-party glass shader — see `CLEANROOM.md`.
  *
  * ## Coordinate convention
  *
- * Everywhere here, positions and sizes are in **the same space** the caller uses (pixels or
- * normalized units) as long as they are consistent. The shader normalizes to a `-1..1` per-axis
- * space so the maths is independent of the surface's aspect ratio.
+ * - Positions and sizes here are in **the same space** the caller uses (pixels or normalized units)
+ *   as long as they are consistent.
+ * - `nx`/`ny` are **normalized to `-1..1` per axis** (i.e. `p / halfSize`), which is what makes the
+ *   maths independent of the surface's aspect ratio.
+ * - Half-extents are in **the same units as the positions** — in the shader, pixels.
  */
 object GlassMath {
 
@@ -81,6 +93,20 @@ object GlassMath {
      * So `centreWeight = 1, rimWeight = 0` warps the whole face; `centre = 0, rim = 1` bends only
      * the edge (the incumbent behaviour); any blend is in between — the differentiator.
      *
+     * ## The scale term (Q-I)
+     *
+     * The displacement is scaled by **`min(halfWidth, halfHeight)`**, not by either half-extent
+     * alone. This takes the same half-extents as [roundedRectSdf] and derives the scale internally,
+     * so there is **no undocumented caller convention** and the shader and this function are
+     * literally the same formula. (Previously this took a bare `halfExtent` scalar, which callers
+     * had to know to pass the minimum for — trivially easy to get wrong, and exactly the kind of
+     * silent drift Q-F found.)
+     *
+     * @param nx normalized X in `-1..1`.
+     * @param ny normalized Y in `-1..1`.
+     * @param squircleValue the squircle field at this point (`0` centre … `~1` rim).
+     * @param halfWidth half the surface width, in the same units as the result.
+     * @param halfHeight half the surface height, in the same units as the result.
      * @return the sample offset `(dx, dy)` to add to the pixel position, in the same units.
      */
     fun lensOffset(
@@ -90,22 +116,41 @@ object GlassMath {
         centreWeight: Float,
         rimWeight: Float,
         refraction: Float,
-        halfExtent: Float,
+        halfWidth: Float,
+        halfHeight: Float,
     ): FloatArray {
         val sq = squircleValue.coerceIn(0f, 1f)
         val centreTerm = (1f - sq) * centreWeight.coerceIn(0f, 1f)
         val rimTerm = sq * rimWeight.coerceIn(0f, 1f)
         val weight = (centreTerm + rimTerm) * refraction
-        return floatArrayOf(-nx * weight * halfExtent, -ny * weight * halfExtent)
+        val scale = min(halfWidth, halfHeight)
+        return floatArrayOf(-nx * weight * scale, -ny * weight * scale)
     }
 
     /**
-     * Per-channel dispersion offsets (chromatic aberration).
+     * Per-channel dispersion scales (chromatic aberration).
      *
-     * Red and blue are sampled at slightly different radial scales than green, which is what
-     * produces the colour fringe of thick glass. Returns `(redScale, greenScale, blueScale)`.
+     * Thick glass refracts different wavelengths by slightly different amounts, producing a colour
+     * fringe. We model this as a **radial scale about the centre**, which is the physically correct
+     * model: the effect is *zero at the optical centre* and grows toward the rim.
      *
-     * @param dispersion strength; `0f` returns all-equal scales (no fringe).
+     * Returns `(redScale, greenScale, blueScale)`. To apply it, scale the centre-relative
+     * coordinate by each channel's factor, sample, and recombine `(R from the red tap, G from the
+     * green tap, B from the blue tap)`.
+     *
+     * ## This is the authoritative formulation (Q-H)
+     *
+     * The shader previously used a **different** formulation — a linear offset rather than a radial
+     * scale — and nothing tied the two together. That drift is exactly what Q-F uncovered; the
+     * shader now implements *this* function, and `ShaderMathParityTest` enforces the agreement on
+     * device. Do not reintroduce an offset-based variant.
+     *
+     * At `dispersion = 0` all three scales are identical (`1`), so the shader collapses to a single
+     * sample — which is why it gates the multi-tap path behind both a non-zero dispersion and the
+     * HIGH tier.
+     *
+     * @param dispersion strength; `0f` returns all-equal scales (no fringe). Values `>= 1` would
+     *   invert a channel and are clamped by the caller's `GlassSpec` contract, not here.
      */
     fun dispersionScales(dispersion: Float): FloatArray {
         val d = dispersion.coerceAtLeast(0f)

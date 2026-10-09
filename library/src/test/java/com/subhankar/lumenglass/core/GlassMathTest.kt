@@ -62,7 +62,7 @@ class GlassMathTest {
             nx = 0f, ny = 0f,
             squircleValue = 0f,
             centreWeight = 1f, rimWeight = 1f,
-            refraction = 1f, halfExtent = 100f,
+            refraction = 1f, halfWidth = 100f, halfHeight = 100f,
         )
         assertEquals(0f, o[0], 1e-5f)
         assertEquals(0f, o[1], 1e-5f)
@@ -75,7 +75,7 @@ class GlassMathTest {
             nx = 0.5f, ny = 0f,
             squircleValue = GlassMath.squircle(0.5f, 0f, 8f),
             centreWeight = 1f, rimWeight = 0f,
-            refraction = 1f, halfExtent = 100f,
+            refraction = 1f, halfWidth = 100f, halfHeight = 100f,
         )
         assertTrue("centre-weighted lens should displace mid-surface pixels", o[0] != 0f)
     }
@@ -87,7 +87,7 @@ class GlassMathTest {
             nx = 0f, ny = 0f,
             squircleValue = 0f,
             centreWeight = 0f, rimWeight = 1f,
-            refraction = 1f, halfExtent = 100f,
+            refraction = 1f, halfWidth = 100f, halfHeight = 100f,
         )
         assertEquals(0f, o[0], 1e-5f)
         assertEquals(0f, o[1], 1e-5f)
@@ -95,7 +95,10 @@ class GlassMathTest {
 
     @Test
     fun lensOffset_isZeroWhenRefractionIsZero() {
-        val o = GlassMath.lensOffset(0.7f, 0.7f, 0.5f, 1f, 1f, refraction = 0f, halfExtent = 100f)
+        val o = GlassMath.lensOffset(
+            0.7f, 0.7f, 0.5f, 1f, 1f,
+            refraction = 0f, halfWidth = 100f, halfHeight = 100f,
+        )
         assertEquals(0f, o[0], 1e-5f)
         assertEquals(0f, o[1], 1e-5f)
     }
@@ -103,8 +106,43 @@ class GlassMathTest {
     @Test
     fun lensOffset_pointsTowardCentre() {
         // Displacement is negative of the outward direction => samples toward the centre.
-        val o = GlassMath.lensOffset(1f, 0f, 1f, 1f, 1f, refraction = 1f, halfExtent = 100f)
+        val o = GlassMath.lensOffset(
+            1f, 0f, 1f, 1f, 1f,
+            refraction = 1f, halfWidth = 100f, halfHeight = 100f,
+        )
         assertTrue("x offset should be negative (toward centre)", o[0] < 0f)
+    }
+
+    // ---- lensOffset scale term (Q-I) ----------------------------------------
+
+    @Test
+    fun lensOffset_scalesByTheSmallerHalfExtent_onNonSquareSurfaces() {
+        // The scale term is min(halfWidth, halfHeight). On a wide surface the height is the
+        // smaller extent, so that is what bounds the displacement.
+        val wide = GlassMath.lensOffset(
+            1f, 0f, 1f, 1f, 1f,
+            refraction = 1f, halfWidth = 500f, halfHeight = 100f,
+        )
+        // weight = ((1 - 1) * 1 + 1 * 1) * 1 = 1, scale = min(500, 100) = 100
+        assertEquals(-100f, wide[0], 1e-3f)
+
+        val tall = GlassMath.lensOffset(
+            1f, 0f, 1f, 1f, 1f,
+            refraction = 1f, halfWidth = 100f, halfHeight = 500f,
+        )
+        assertEquals(
+            "A tall surface must scale by its width (the smaller extent)",
+            -100f, tall[0], 1e-3f,
+        )
+    }
+
+    @Test
+    fun lensOffset_isAspectIndependentForTheScaleTerm() {
+        // Transposing the surface halves must transpose the bound displacement: this is the
+        // property the shader's min() and this function must agree on.
+        val a = GlassMath.lensOffset(1f, 0f, 1f, 1f, 1f, 1f, halfWidth = 400f, halfHeight = 120f)
+        val b = GlassMath.lensOffset(1f, 0f, 1f, 1f, 1f, 1f, halfWidth = 120f, halfHeight = 400f)
+        assertEquals(a[0], b[0], 1e-3f)
     }
 
     // ---- dispersionScales ---------------------------------------------------
