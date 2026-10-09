@@ -26,3 +26,6 @@ include(":library")
 // P1.7 harness app — proves the shader compiles/renders/binds on a device and that the
 // ARCHITECTURE §4 overlap guard fires. Not a product, not the public API (P4).
 include(":app")
+
+// P3.5 Macrobenchmark module — frame timing for PLAN §6.1. Test-only; nothing depends on it.
+include(":benchmark")

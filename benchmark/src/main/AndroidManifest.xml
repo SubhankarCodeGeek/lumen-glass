@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Minimal manifest for the Macrobenchmark test module.
+
+  `<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />` is deliberately
+  omitted — Macrobenchmark writes its results through the instrumentation framework, and requesting
+  storage permission here would only add a permission prompt to an automated run.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

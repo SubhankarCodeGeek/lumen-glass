@@ -7,6 +7,9 @@ plugins {
     // seeing AGP "already on the classpath with an unknown version".
     alias(libs.plugins.android.app) apply false
     alias(libs.plugins.android.library) apply false
+    // com.android.test — the P3.5 Macrobenchmark module. Declared here for the same reason as
+    // above: it would otherwise hit "already on the classpath with an unknown version".
+    alias(libs.plugins.android.benchmark) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.compose.compiler) apply false
 }

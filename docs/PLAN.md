@@ -251,6 +251,15 @@ Each phase is independently valuable; P1–P3.5 justify the work **even if we ne
 >
 > Measure with Macrobenchmark + GPU frame timing in the sample app.
 
+> [!CAUTION]
+> **Status: measured, but NOT discharged.** The Macrobenchmark harness now exists
+> (`:benchmark`, `./gradlew :benchmark:connectedBenchmarkAndroidTest`) and has produced real CPU
+> frame-cost data — see [`PERF.md`](PERF.md). It **cannot** yet return a frame-rate verdict, for two
+> independent reasons: the test device is the *mid-range* Edge 70 rather than a low-end reference,
+> and that device pins this app's UID to **45Hz**, which Macrobenchmark does not defeat.
+>
+> Treat the criterion as open until it can be run on suitable hardware.
+
 ---
 
 ## 7. Risks

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Manifest overlay for the `benchmark` build type only.
+
+  `<profileable android:shell="true" />` is REQUIRED for Macrobenchmark to read platform frame
+  timing on API 29+. It is placed here rather than in the main manifest on purpose: a *shipping*
+  app should not be profileable, and putting it in `src/main` would ship that property to users.
+
+  Sourcesets merge by build type, so this applies to `benchmark` and nothing else. If the
+  benchmark ever starts reporting `Debugging` / `profileable` errors, check that the build type
+  under test is actually `benchmark` — running it against `release` will fail here.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <profileable android:shell="true" />
+    </application>
+
+</manifest>

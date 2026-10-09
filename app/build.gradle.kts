@@ -34,6 +34,29 @@ android {
         release {
             isMinifyEnabled = false
         }
+
+        /**
+         * Build type for Macrobenchmark (P3.5).
+         *
+         * Macrobenchmark must measure a build that is NOT debuggable — debug builds carry extra
+         * checks and are JIT-dominated, so they measure the wrong thing — but it also must be
+         * **profileable** so the benchmark library can read platform frame data.
+         *
+         * `isMinifyEnabled = false` is deliberate and load-bearing: a minified build is not
+         * reliably profileable, and the failure is not an error — the benchmark simply starts
+         * producing useless numbers. If R8 is ever turned on here, re-verify against PERF.md.
+         *
+         * Signed with the debug key so it installs on a physical device without a release keystore.
+         */
+        create("benchmark") {
+            isDebuggable = false
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            // Distinguishes the benchmark build in the launcher so it is not confused with the
+            // debug harness while measuring.
+            versionNameSuffix = "-benchmark"
+        }
     }
 
     compileOptions {
