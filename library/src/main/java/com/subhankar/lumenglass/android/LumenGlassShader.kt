@@ -43,7 +43,7 @@ package com.subhankar.lumenglass.android
  * Public so the instrumented parity test (in `:app`) can assert the shared-expression wiring.
  * Not a designed API.
  */
-val LUMEN_GLASS_AGSL: String = """
+internal val LUMEN_GLASS_AGSL: String = """
 uniform shader content;
 uniform float2 size;
 uniform float  cornerRadius;
@@ -184,7 +184,7 @@ half4 main(float2 fragCoord) {
  * Public so the instrumented compile/bind smoke test can assert against it. Not the designed public
  * API — that is P4.
  */
-val LUMEN_GLASS_UNIFORMS: List<String> = listOf(
+internal val LUMEN_GLASS_UNIFORMS: List<String> = listOf(
     "size",
     "cornerRadius",
     "centreWeight",

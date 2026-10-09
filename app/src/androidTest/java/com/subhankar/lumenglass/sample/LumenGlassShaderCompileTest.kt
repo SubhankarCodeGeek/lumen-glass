@@ -3,14 +3,8 @@ package com.subhankar.lumenglass.sample
 import android.graphics.RuntimeShader
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.subhankar.lumenglass.android.AGSL_MIN_API
 import com.subhankar.lumenglass.android.GlassUniforms
-import com.subhankar.lumenglass.android.LUMEN_GLASS_UNIFORMS
-import com.subhankar.lumenglass.android.TIER_BALANCED
-import com.subhankar.lumenglass.android.TIER_HIGH
-import com.subhankar.lumenglass.android.buildGlassShader
-import com.subhankar.lumenglass.android.buildGlassShaderOrNull
-import com.subhankar.lumenglass.android.isAgsSupported
+import com.subhankar.lumenglass.android.LumenGlassTestApi
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -54,7 +48,7 @@ import org.junit.runner.RunWith
  *
  * ## Higher-tier coverage matters
  *
- * The tests deliberately build at [TIER_HIGH]. The `dispersion` branch inside the shader's `main`
+ * The tests deliberately build at `TIER_HIGH`. The `dispersion` branch inside the shader's `main`
  * is a **separate code path**, and the P1.7 harness ran BALANCED by default — so a syntax error in
  * the dispersion path would have sailed past a BALANCED-only test.
  */
@@ -79,7 +73,7 @@ class LumenGlassShaderCompileTest {
         saturation = 1f,
         contrast = 1f,
         edgeLight = 0.1f,
-        tier = TIER_HIGH,
+        tier = LumenGlassTestApi.tierHigh,
     )
 
     /** The BALANCED path — the one the P1.7 harness actually ran. */
@@ -95,7 +89,7 @@ class LumenGlassShaderCompileTest {
         saturation = 1f,
         contrast = 1f,
         edgeLight = 0.1f,
-        tier = TIER_BALANCED,
+        tier = LumenGlassTestApi.tierBalanced,
     )
 
     /**
@@ -106,17 +100,17 @@ class LumenGlassShaderCompileTest {
      */
     @Test
     fun shaderCompilesAtHighTier() {
-        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= AGSL_MIN_API)
+        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= LumenGlassTestApi.agslMinApi)
 
-        val shader: RuntimeShader = buildGlassShader(uniformsHighTier())
+        val shader: RuntimeShader = LumenGlassTestApi.buildShader(uniformsHighTier())
         assertNotNull("Shader should build", shader)
     }
 
     @Test
     fun shaderCompilesAtBalancedTier() {
-        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= AGSL_MIN_API)
+        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= LumenGlassTestApi.agslMinApi)
 
-        val shader: RuntimeShader = buildGlassShader(uniformsBalanced())
+        val shader: RuntimeShader = LumenGlassTestApi.buildShader(uniformsBalanced())
         assertNotNull("Shader should build", shader)
     }
 
@@ -127,34 +121,34 @@ class LumenGlassShaderCompileTest {
      * against a real `RuntimeShader`. A `setFloatUniform`/`setColorUniform` for a name the shader
      * does not declare throws `IllegalArgumentException: unknown identifier`.
      *
-     * [buildGlassShader] binds every name in [LUMEN_GLASS_UNIFORMS]; reaching this line means all of
+     * The production builder binds every name in the uniform list; reaching this line means all of
      * them succeeded. The explicit check documents the intent and fails loudly if the list and the
      * binder ever drift apart.
      */
     @Test
     fun allDeclaredUniformsBindWithoutError() {
-        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= AGSL_MIN_API)
+        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= LumenGlassTestApi.agslMinApi)
 
         // Throws IllegalArgumentException if any bound name is undeclared.
-        val shader = buildGlassShader(uniformsHighTier())
+        val shader = LumenGlassTestApi.buildShader(uniformsHighTier())
         assertNotNull(shader)
 
         assertTrue(
             "Expected the canonical uniform list to be non-empty",
-            LUMEN_GLASS_UNIFORMS.isNotEmpty(),
+            LumenGlassTestApi.uniformNames.isNotEmpty(),
         )
     }
 
     /**
      * The API gate degrades gracefully rather than throwing.
      *
-     * Below API 33, [buildGlassShaderOrNull] must return `null` so the caller draws the FROST
+     * Below API 33, `buildShaderOrNull` must return `null` so the caller draws the FROST
      * fallback. On an AGSL device this simply confirms the positive branch returns a shader.
      */
     @Test
     fun buildOrNullRespectsTheApiGate() {
-        val shader = buildGlassShaderOrNull(uniformsBalanced())
-        if (isAgsSupported()) {
+        val shader = LumenGlassTestApi.buildShaderOrNull(uniformsBalanced())
+        if (LumenGlassTestApi.isAgsSupported()) {
             assertNotNull("On AGSL devices the shader must be built", shader)
         } else {
             assertNull("Below API 33 the shader must be null (frost fallback)", shader)

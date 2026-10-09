@@ -14,9 +14,8 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.subhankar.lumenglass.android.GlassCapture
 import com.subhankar.lumenglass.android.GlassUniforms
-import com.subhankar.lumenglass.android.TIER_BALANCED
-import com.subhankar.lumenglass.android.TIER_HIGH
-import com.subhankar.lumenglass.android.applyGlassEffect
+import com.subhankar.lumenglass.android.LumenGlassDebug
+import com.subhankar.lumenglass.android.LumenGlassTestApi
 import com.subhankar.lumenglass.core.Bezel
 import com.subhankar.lumenglass.core.GlassSpec
 import com.subhankar.lumenglass.core.LensModel
@@ -310,7 +309,7 @@ class TierComparisonActivity : ComponentActivity() {
             }
 
             val frostPx = if (features.useBlur) dpToPx(spec.frostDp) else 0f
-            val applied = applyGlassEffect(active, uniforms, frostPx)
+            val applied = LumenGlassTestApi.applyGlass(active, uniforms, frostPx)
             if (!applied) {
                 paint.shader = null
                 paint.color = 0xB0FFFFFF.toInt()
@@ -328,12 +327,12 @@ class TierComparisonActivity : ComponentActivity() {
         }
 
         private fun QualityTier.uniformValue(): Float = when (this) {
-            QualityTier.HIGH -> TIER_HIGH
+            QualityTier.HIGH -> LumenGlassTestApi.tierHigh
             // LOW and BALANCED share the cheap single-sample shader path; LOW differs by running no
             // blur and a smaller capture, both applied above rather than in the shader.
-            QualityTier.BALANCED -> TIER_BALANCED
-            QualityTier.LOW -> TIER_BALANCED
-            QualityTier.FALLBACK -> TIER_BALANCED
+            QualityTier.BALANCED -> LumenGlassTestApi.tierBalanced
+            QualityTier.LOW -> LumenGlassTestApi.tierBalanced
+            QualityTier.FALLBACK -> LumenGlassTestApi.tierBalanced
         }
 
         private fun dpToPx(dp: Float): Float = dp * resources.displayMetrics.density

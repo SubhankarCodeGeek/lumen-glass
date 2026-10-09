@@ -10,13 +10,9 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import com.subhankar.lumenglass.android.AGSL_MIN_API
-import com.subhankar.lumenglass.android.GlassCapture
 import com.subhankar.lumenglass.android.GlassUniforms
 import com.subhankar.lumenglass.android.LumenGlassDebug
-import com.subhankar.lumenglass.android.TIER_BALANCED
-import com.subhankar.lumenglass.android.TIER_HIGH
-import com.subhankar.lumenglass.android.buildGlassShaderOrNull
+import com.subhankar.lumenglass.android.LumenGlassTestApi
 import com.subhankar.lumenglass.core.LensModel
 import com.subhankar.lumenglass.core.resolveWeights
 import android.os.Build
@@ -174,10 +170,14 @@ private class LensPaneView(
             saturation = 1f,
             contrast = 1f,
             edgeLight = 0.1f,
-            tier = if (dispersionOn) TIER_HIGH else TIER_BALANCED,
+            tier = if (dispersionOn) {
+                LumenGlassTestApi.tierHigh
+            } else {
+                LumenGlassTestApi.tierBalanced
+            },
         )
 
-        val canRunShader = Build.VERSION.SDK_INT >= AGSL_MIN_API
+        val canRunShader = Build.VERSION.SDK_INT >= LumenGlassTestApi.agslMinApi
 
         if (!canRunShader) {
             // FROST fallback — must look intentional, per PLAN §5.2.
@@ -187,7 +187,7 @@ private class LensPaneView(
             return
         }
 
-        val shader = buildGlassShaderOrNull(uniforms)
+        val shader = LumenGlassTestApi.buildShaderOrNull(uniforms)
         if (shader == null) {
             paint.shader = null
             paint.color = 0x60FFFFFF

@@ -135,41 +135,67 @@ requirement, not a footnote.)
 `PLAN.md` §5.2 has the full table. The architecture implications:
 
 - **`DownscaleCapture`** — capture renders at 0.25×–0.5× linear scale (glass is blurry anyway), then
-  the effect samples the small layer. ~4× fragment work saved.
-- **Separable blur** — horizontal + vertical passes (18 taps vs 81), not a single 9×9.
+  the effect samples the small layer. ~4× fragment work saved. **Implemented (P3.5).**
+- **Platform blur, not ours** — `RenderEffect.createBlurEffect(radiusX, radiusY, …)` takes separate
+  X and Y radii, so the framework's blur is *already* separable and hardware-accelerated. We use it
+  rather than writing an 18-tap loop. **Corrected at P3.5** — see `PLAN.md` §5.2.
 - **Render-once** — the capture layer is only re-recorded when content behind the surface changes.
 - **Tier-gated effects** — dispersion (the most expensive) and bezel only run in HIGH.
 - **FALLBACK** — no shader at all (API < 33 / non-AGSL): a clean frosted panel that looks intentional.
 
 ---
 
-## 6. Public API (`compose/`)
+## 6. Public API (`compose/`) — **implemented (P4)**
 
 ```kotlin
-val state = rememberLumenGlassState()      // creates/owns the capture
+val glass = rememberLumenGlassState()          // creates/owns the capture
 
 Box {
-    ScrollingContent(Modifier.lumenSource(state))     // marks the captured source
+    // The content the glass refracts. NOTE: this takes a content lambda, not a bare Modifier.
+    LumenSource(glass, Modifier.fillMaxSize()) {
+        ScrollingContent()
+    }
+
     Card(
-        Modifier.lumenGlass(state) {
+        Modifier.lumenGlass(glass) {
             lens       = LensModel.Blend(centre = 0.6f, rim = 0.4f)
             refraction = 1.0f
             dispersion = 0.35f
             frost      = 6.dp
             tint       = Color(0xFFFF3B30).copy(alpha = 0.40f)
             edgeLight  = 0.1f
-            bezel      = Bezel.soft(radius = 12.dp, alpha = 0.12f)
+            bezel { radius = 12.dp; alpha = 0.12f }
         }
     )
 }
 ```
 
+> [!IMPORTANT]
+> **Two deliberate departures from this document's original sketch**, both discovered during
+> implementation and agreed before landing:
+>
+> 1. **`LumenSource` is a composable taking a content lambda**, not a bare `Modifier.lumenSource`.
+>    Recording Compose content into a capture layer requires re-emitting a draw pass, and a draw
+>    pass only exists inside a `DrawScope`. A bare `Modifier` cannot obtain one.
+> 2. **The capture is Lumen Glass's own `RenderNode`, wired via `CanvasDrawScope`.** Compose's
+>    `rememberGraphicsLayer()` is not usable here: `GraphicsLayer` exposes no `RenderNode` and no
+>    `renderEffect` setter, and the only route to its native node is an *internal* Compose API.
+>    Depending on that would break silently on Compose upgrades, so the library owns its capture
+>    instead — consistent with the Q2 substrate decision.
+>
+> The DSL also builds through a `GlassSpecBuilder` rather than assigning to properties directly, so
+> that `GlassSpec` can stay an immutable `data class`.
+
 **Principles**
-- **Overlap-safe** (see §4).
-- **Token-driven** — typed values, never magic numbers.
-- **Graceful** — documented FALLBACK below API 33.
+- **Overlap-safe** (see §4) — enforced, not just documented: the guard runs inside the modifier and
+  logs both rectangles in debug when they do not meet.
+- **Token-driven** — typed values, never magic numbers. `Dp` and `Color` are converted to the
+  platform-agnostic `core/` representation at the Compose boundary.
+- **Graceful** — documented FALLBACK below API 33: a frost panel that looks deliberate, never blank.
+- **Detectable** — `LumenGlassState.resolvedFeatures` is public, so an app can ask what tier and
+  effect set it actually got rather than inferring it (`PLAN.md` §5.2).
 - **Guarded** — a structural test asserts every bound uniform is declared (the `unknown identifier`
-  crash class).
+  crash class), and an on-device test compiles the shader for real.
 
 ---
 

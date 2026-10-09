@@ -23,6 +23,12 @@ import com.subhankar.lumenglass.core.resolveWeights
  * P4 (`Modifier.lumenGlass(...)` / `rememberLumenGlassState()`). Expect these names and shapes to
  * change. See `ARCHITECTURE.md` §6.
  *
+ * ## API status: PROVISIONAL
+ *
+ * Public because the instrumented tests in `:app` build fixtures with it (see
+ * [LumenGlassTestApi]). It is not part of the consumer-facing API — that is the `compose/`
+ * package. Treat this type as unstable.
+ *
  * @property widthPx surface width in px.
  * @property heightPx surface height in px.
  * @property cornerRadiusPx rounded-corner radius in px.
@@ -106,10 +112,10 @@ data class GlassUniforms(
 }
 
 /** Tier uniform value meaning "HIGH — the dispersion code path is available". */
-const val TIER_HIGH: Float = 2f
+internal const val TIER_HIGH: Float = 2f
 
 /** Tier uniform value meaning "BALANCED / LOW — single content sample, no dispersion". */
-const val TIER_BALANCED: Float = 1f
+internal const val TIER_BALANCED: Float = 1f
 
 /**
  * The minimum API level at which AGSL (`RuntimeShader`) exists.
@@ -117,7 +123,7 @@ const val TIER_BALANCED: Float = 1f
  * Below this the library degrades to the FALLBACK tier (a frosted panel, no shader) — see
  * `QualityTier.FALLBACK`. Declared here so there is one constant rather than scattered `33`s.
  */
-const val AGSL_MIN_API: Int = Build.VERSION_CODES.TIRAMISU
+internal const val AGSL_MIN_API: Int = Build.VERSION_CODES.TIRAMISU
 
 /**
  * The minimum API level for [android.graphics.RenderNode] — the capture primitive.
@@ -126,7 +132,7 @@ const val AGSL_MIN_API: Int = Build.VERSION_CODES.TIRAMISU
  * a device can have `RenderNode` without AGSL. The library uses the *higher* of the two to decide
  * whether the shader path can run at all.
  */
-const val RENDER_NODE_MIN_API: Int = Build.VERSION_CODES.Q
+internal const val RENDER_NODE_MIN_API: Int = Build.VERSION_CODES.Q
 
 /**
  * The minimum API level for attaching a `RenderEffect` to a `RenderNode`.
@@ -138,7 +144,7 @@ const val RENDER_NODE_MIN_API: Int = Build.VERSION_CODES.Q
  * Still below [AGSL_MIN_API] (33), so in practice AGSL is the binding constraint for the glass
  * path; this constant exists so the layering is explicit rather than accidentally correct.
  */
-const val RENDER_EFFECT_MIN_API: Int = Build.VERSION_CODES.S
+internal const val RENDER_EFFECT_MIN_API: Int = Build.VERSION_CODES.S
 
 /**
  * Whether this device can run the AGSL shader at all.
@@ -147,7 +153,7 @@ const val RENDER_EFFECT_MIN_API: Int = Build.VERSION_CODES.S
  * shader build that would fail.
  */
 @ChecksSdkIntAtLeast(api = AGSL_MIN_API)
-fun isAgsSupported(): Boolean = Build.VERSION.SDK_INT >= AGSL_MIN_API
+internal fun isAgsSupported(): Boolean = Build.VERSION.SDK_INT >= AGSL_MIN_API
 
 /**
  * Builds a fully-bound [RuntimeShader] for the Lumen Glass material.
@@ -164,7 +170,7 @@ fun isAgsSupported(): Boolean = Build.VERSION.SDK_INT >= AGSL_MIN_API
  * @return a bound shader.
  */
 @RequiresApi(AGSL_MIN_API)
-fun buildGlassShader(uniforms: GlassUniforms): RuntimeShader {
+internal fun buildGlassShader(uniforms: GlassUniforms): RuntimeShader {
     val shader = RuntimeShader(LUMEN_GLASS_AGSL)
 
     // Float uniforms. Kept in the same order as LUMEN_GLASS_UNIFORMS for easy auditing.
@@ -198,5 +204,5 @@ fun buildGlassShader(uniforms: GlassUniforms): RuntimeShader {
  *
  * @return a bound shader, or `null` on API < 33.
  */
-fun buildGlassShaderOrNull(uniforms: GlassUniforms): RuntimeShader? =
+internal fun buildGlassShaderOrNull(uniforms: GlassUniforms): RuntimeShader? =
     if (isAgsSupported()) buildGlassShader(uniforms) else null

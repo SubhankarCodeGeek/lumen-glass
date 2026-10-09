@@ -8,12 +8,7 @@ import android.graphics.RuntimeShader
 import android.media.ImageReader
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.subhankar.lumenglass.android.AGSL_MIN_API
-import com.subhankar.lumenglass.android.LUMEN_GLASS_AGSL
-import com.subhankar.lumenglass.android.PROBE_ENCODE_RANGE
-import com.subhankar.lumenglass.android.ProbeShaderText
-import com.subhankar.lumenglass.android.buildProbeShader
-import com.subhankar.lumenglass.android.decodeProbeValue
+import com.subhankar.lumenglass.android.LumenGlassTestApi
 import com.subhankar.lumenglass.core.GlassMath
 import com.subhankar.lumenglass.core.LensModel
 import com.subhankar.lumenglass.core.resolveWeights
@@ -47,7 +42,7 @@ import kotlin.math.abs
  * ## Why this is not just "two copies of the maths agreeing"
  *
  * The probe and the production shader are generated from the **same expression text**
- * ([ProbeShaderText]), so there is one copy of each term. A change flows into both, and a
+ * (`LumenGlassTestApi.ProbeExpressions`), so there is one copy of each term. A change flows into both, and a
  * disagreement with `GlassMath` fails here. The shared wiring is itself asserted (see
  * `probeAndProductionShaderShareTheLensExpression`) so nobody can "fix" a failure by editing the
  * probe alone.
@@ -75,7 +70,7 @@ class ShaderMathParityTest {
     /**
      * Tolerance in pixels.
      *
-     * The probe encodes through an 8-bit channel: one step is `2 * PROBE_ENCODE_RANGE / 255` ≈
+     * The probe encodes through an 8-bit channel: one step is `2 * encodeRange / 255` ≈
      * 2.0 px, so half a step is the best achievable discrimination. The tolerance allows a little
      * more for `half4` rounding. It is **derived from the encoding**, not picked to make the test
      * green — a tolerance chosen loosely enough to always pass would make this decorative.
@@ -83,7 +78,7 @@ class ShaderMathParityTest {
     private val tolerancePx = 3.0f
 
     private fun assumeAgs() =
-        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= AGSL_MIN_API)
+        assumeTrue("AGSL requires API 33+", Build.VERSION.SDK_INT >= LumenGlassTestApi.agslMinApi)
 
     /**
      * Renders the probe on the GPU and reads back the displacement at one pixel.
@@ -97,7 +92,7 @@ class ShaderMathParityTest {
         py: Int,
     ): FloatArray {
         val weights = model.resolveWeights()
-        val shader = RuntimeShader(buildProbeShader(PROBE_ENCODE_RANGE)).apply {
+        val shader = RuntimeShader(LumenGlassTestApi.probeShaderSource(LumenGlassTestApi.probeEncodeRange)).apply {
             setFloatUniform("size", widthPx.toFloat(), heightPx.toFloat())
             setFloatUniform("cornerRadius", 8f)
             setFloatUniform("centreWeight", weights.centre)
@@ -152,7 +147,10 @@ class ShaderMathParityTest {
                 // RGBA_8888: R at +0, G at +1.
                 val r = (buffer.get(offset).toInt() and 0xFF) / 255f
                 val g = (buffer.get(offset + 1).toInt() and 0xFF) / 255f
-                return floatArrayOf(decodeProbeValue(r), decodeProbeValue(g))
+                return floatArrayOf(
+                    LumenGlassTestApi.decodeProbeValue(r),
+                    LumenGlassTestApi.decodeProbeValue(g),
+                )
             } finally {
                 image.close()
             }
@@ -306,15 +304,15 @@ class ShaderMathParityTest {
         assertTrue(
             "LUMEN_GLASS_AGSL must interpolate the shared lens-weight expression; if it " +
                 "hard-codes its own, the parity test proves nothing",
-            LUMEN_GLASS_AGSL.contains(ProbeShaderText.LENS_WEIGHT_EXPR),
+            LumenGlassTestApi.shaderSource.contains(LumenGlassTestApi.ProbeExpressions.lensWeight),
         )
         assertTrue(
             "LUMEN_GLASS_AGSL must interpolate the shared lens-scale expression",
-            LUMEN_GLASS_AGSL.contains(ProbeShaderText.LENS_SCALE_EXPR),
+            LumenGlassTestApi.shaderSource.contains(LumenGlassTestApi.ProbeExpressions.lensScale),
         )
         assertTrue(
             "LUMEN_GLASS_AGSL must interpolate the shared squircle expression",
-            LUMEN_GLASS_AGSL.contains(ProbeShaderText.SQUIRCLE_EXPR),
+            LumenGlassTestApi.shaderSource.contains(LumenGlassTestApi.ProbeExpressions.squircle),
         )
     }
 
@@ -328,16 +326,16 @@ class ShaderMathParityTest {
     fun dispersionScalesAreImplementedByTheProductionShader() {
         assertTrue(
             "production shader must scale red by (1 + dispersion) — the GlassMath formulation (Q-H)",
-            LUMEN_GLASS_AGSL.contains("1.0 + dispersion"),
+            LumenGlassTestApi.shaderSource.contains("1.0 + dispersion"),
         )
         assertTrue(
             "production shader must scale blue by (1 - dispersion) — the GlassMath formulation (Q-H)",
-            LUMEN_GLASS_AGSL.contains("1.0 - dispersion"),
+            LumenGlassTestApi.shaderSource.contains("1.0 - dispersion"),
         )
         assertTrue(
             "the old linear-offset dispersion (constant 0.05) must not reappear; it disagreed " +
                 "with GlassMath and was removed in Q-H",
-            !LUMEN_GLASS_AGSL.contains("0.05"),
+            !LumenGlassTestApi.shaderSource.contains("0.05"),
         )
     }
 }

@@ -9,7 +9,7 @@ import android.util.Log
  * Deliberately **not** `android.graphics.RectF`, so the overlap decision can be unit-tested on the
  * JVM without Robolectric or a device. The Android entry points convert at the boundary.
  */
-data class OverlapRect(
+internal data class OverlapRect(
     val left: Float,
     val top: Float,
     val right: Float,
@@ -30,7 +30,7 @@ data class OverlapRect(
 }
 
 /** Converts an Android [RectF] to the framework-free [OverlapRect]. */
-fun RectF.toOverlapRect(): OverlapRect =
+internal fun RectF.toOverlapRect(): OverlapRect =
     OverlapRect(left = left, top = top, right = right, bottom = bottom)
 
 /**
@@ -40,6 +40,12 @@ fun RectF.toOverlapRect(): OverlapRect =
  * it on screen. The library never draws anything itself — see ARCHITECTURE §4.
  *
  * @property overlapping `true` when the glass surface overlaps the captured region.
+ *
+ * ## API status: PROVISIONAL
+ *
+ * Public only because [GlassCapture.checkSurfaceOverlap] returns it. Consumers see the concept via
+ * [LumenGlassTestApi.Verdict]; the consumer-facing API is the `compose/` package.
+ *
  * @property intersectionFraction the intersect area as a fraction of the glass surface area,
  *   `0f`..`1f`. A tiny non-zero value means the surface only clips the capture — visually broken
  *   even though it technically "overlaps".
@@ -58,7 +64,7 @@ data class OverlapVerdict(
  * smear across most of its face, so "any intersection at all" is too weak a test. Below this
  * fraction of the glass area we report failure.
  */
-const val MIN_OVERLAP_FRACTION: Float = 0.01f
+internal const val MIN_OVERLAP_FRACTION: Float = 0.01f
 
 /**
  * Decides whether a glass surface overlaps the region recorded into the capture layer.
@@ -74,7 +80,7 @@ const val MIN_OVERLAP_FRACTION: Float = 0.01f
  * @param capture the recorded region, in the same space.
  * @return the [OverlapVerdict]; `overlapping = false` means the render will be broken.
  */
-fun checkOverlap(surface: OverlapRect, capture: OverlapRect): OverlapVerdict {
+internal fun checkOverlap(surface: OverlapRect, capture: OverlapRect): OverlapVerdict {
     if (surface.isEmpty) {
         return OverlapVerdict(
             overlapping = false,
@@ -127,7 +133,7 @@ fun checkOverlap(surface: OverlapRect, capture: OverlapRect): OverlapVerdict {
  *
  * Logging is confined to debug builds so a shipped app does not spam logcat.
  */
-fun logOverlapVerdict(verdict: OverlapVerdict, tag: String = TAG) {
+internal fun logOverlapVerdict(verdict: OverlapVerdict, tag: String = TAG) {
     if (!LumenGlassDebug.enabled) return
     if (verdict.overlapping) {
         Log.d(tag, verdict.message)
@@ -137,7 +143,7 @@ fun logOverlapVerdict(verdict: OverlapVerdict, tag: String = TAG) {
 }
 
 /** The logcat tag used by the glass render path. */
-const val TAG: String = "LumenGlass"
+internal const val TAG: String = "LumenGlass"
 
 /**
  * Whether debug-only instrumentation (logging, on-screen banners) is active.
@@ -145,7 +151,7 @@ const val TAG: String = "LumenGlass"
  * The library cannot read the consumer's `BuildConfig`, so the harness/app opts in. Defaults to
  * `false` so a release consumer gets no log spam unless they ask for it.
  */
-object LumenGlassDebug {
+public object LumenGlassDebug {
     /** Set to `true` by a debug harness to enable logging + banner surfacing. */
     @Volatile
     var enabled: Boolean = false

@@ -30,7 +30,7 @@ package com.subhankar.lumenglass.android
  *
  * Public so the instrumented parity test (in `:app`) can reach it. Not a designed API.
  */
-object ProbeShaderText {
+internal object ProbeShaderText {
 
     /**
      * The squircle field expression, shared with the production shader.
@@ -71,7 +71,7 @@ object ProbeShaderText {
  * A `uniform float2 probeScale` is **not** used; the encode range is baked in so the readback
  * decoder and the shader cannot disagree about it.
  */
-fun buildProbeShader(encodeRange: Float): String = """
+internal fun buildProbeShader(encodeRange: Float): String = """
 uniform float2 size;
 uniform float  cornerRadius;
 uniform float  centreWeight;
@@ -110,12 +110,12 @@ half4 main(float2 fragCoord) {
  * never clips (clipping would make a *large* error look like a *small* one — the worst possible
  * failure mode for a parity test).
  */
-const val PROBE_ENCODE_RANGE: Float = 256f
+internal const val PROBE_ENCODE_RANGE: Float = 256f
 
 /**
  * Decodes a probe pixel back into a displacement in pixels.
  *
  * The exact inverse of the shader's `encodeSigned`, so the two cannot drift.
  */
-fun decodeProbeValue(channel: Float): Float =
+internal fun decodeProbeValue(channel: Float): Float =
     (channel - 0.5f) * (2f * PROBE_ENCODE_RANGE)

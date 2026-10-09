@@ -38,9 +38,11 @@ import androidx.annotation.RequiresApi
  * [release]. This is the one obvious place a capture can leak, which is why lifetime is centralised
  * here rather than spread across call sites.
  *
- * ## API status: PROVISIONAL (pre-P4)
+ * ## API status: PROVISIONAL
  *
- * Public so the P1.7 harness module can drive it. Not the designed API — that is P4.
+ * Public because [LumenGlassTestApi] exposes it to the harness, which renders several tiers side by
+ * side — something the consumer API deliberately does not express. Not part of the consumer-facing
+ * API; that is the `compose/` package.
  */
 @RequiresApi(RENDER_NODE_MIN_API)
 class GlassCapture {

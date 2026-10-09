@@ -98,7 +98,7 @@ class RawRenderNodeActivity : ComponentActivity() {
                 saturation = 1f,
                 contrast = 1f,
                 edgeLight = 0.1f,
-                tier = com.subhankar.lumenglass.android.TIER_BALANCED,
+                tier = com.subhankar.lumenglass.android.LumenGlassTestApi.tierBalanced,
             ),
         )
         root.addView(
@@ -115,21 +115,21 @@ class RawRenderNodeActivity : ComponentActivity() {
         //    (0..widthPx, 0..contentHeight). Because the surface is deliberately placed *inside*
         //    the content's vertical span, this should report OK — proving the guard both fires and
         //    does not false-positive.
-        val verdict = com.subhankar.lumenglass.android.checkOverlap(
-            surface = com.subhankar.lumenglass.android.OverlapRect(
-                left = surfaceLeft.toFloat(),
-                top = surfaceTop.toFloat(),
-                right = (surfaceLeft + surfaceWidth).toFloat(),
-                bottom = (surfaceTop + surfaceHeight).toFloat(),
-            ),
-            capture = com.subhankar.lumenglass.android.OverlapRect(
-                left = 0f,
-                top = 0f,
-                right = widthPx.toFloat(),
-                bottom = contentHeight.toFloat(),
-            ),
+        //
+        //    This screen deliberately works BELOW the public Compose API (it exists to isolate the
+        //    shader from Compose), so it uses the library's documented test entry point rather than
+        //    the `compose/` modifiers.
+        val verdict = com.subhankar.lumenglass.android.LumenGlassTestApi.checkOverlap(
+            surfaceLeft = surfaceLeft.toFloat(),
+            surfaceTop = surfaceTop.toFloat(),
+            surfaceRight = (surfaceLeft + surfaceWidth).toFloat(),
+            surfaceBottom = (surfaceTop + surfaceHeight).toFloat(),
+            captureLeft = 0f,
+            captureTop = 0f,
+            captureRight = widthPx.toFloat(),
+            captureBottom = contentHeight.toFloat(),
         )
-        com.subhankar.lumenglass.android.logOverlapVerdict(verdict)
+        com.subhankar.lumenglass.android.LumenGlassTestApi.logOverlapVerdict(verdict)
 
         banner = TextView(this).apply {
             text = if (verdict.overlapping) {
@@ -164,7 +164,8 @@ private class GlassSurfaceView(
     uniforms: com.subhankar.lumenglass.android.GlassUniforms,
 ) : View(context) {
 
-    private val shader: RuntimeShader? = com.subhankar.lumenglass.android.buildGlassShaderOrNull(uniforms)
+    private val shader: RuntimeShader? = com.subhankar.lumenglass.android.LumenGlassTestApi
+        .buildShaderOrNull(uniforms)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     init {

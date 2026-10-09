@@ -30,7 +30,7 @@ import androidx.annotation.RequiresApi
  * Public so the harness can drive it. Not the designed API — that is P4.
  */
 @RequiresApi(AGSL_MIN_API)
-fun buildGlassRenderEffect(uniforms: GlassUniforms): RenderEffect =
+internal fun buildGlassRenderEffect(uniforms: GlassUniforms): RenderEffect =
     RenderEffect.createRuntimeShaderEffect(
         buildGlassShader(uniforms),
         CONTENT_SAMPLER_NAME,
@@ -56,7 +56,7 @@ fun buildGlassRenderEffect(uniforms: GlassUniforms): RenderEffect =
  * @return the effect chain: `blur -> lens`, or just `lens` when frost is off.
  */
 @RequiresApi(AGSL_MIN_API)
-fun buildGlassRenderEffect(
+internal fun buildGlassRenderEffect(
     uniforms: GlassUniforms,
     frostRadiusPx: Float,
 ): RenderEffect {
@@ -82,7 +82,7 @@ fun buildGlassRenderEffect(
  *
  * @return the effect, or `null` on API < 33.
  */
-fun buildGlassRenderEffectOrNull(uniforms: GlassUniforms, frostRadiusPx: Float = 0f): RenderEffect? =
+internal fun buildGlassRenderEffectOrNull(uniforms: GlassUniforms, frostRadiusPx: Float = 0f): RenderEffect? =
     if (isAgsSupported()) buildGlassRenderEffect(uniforms, frostRadiusPx) else null
 
 /**
@@ -92,7 +92,7 @@ fun buildGlassRenderEffectOrNull(uniforms: GlassUniforms, frostRadiusPx: Float =
  * arrives on. Our shader declares `uniform shader content;` (asserted by
  * `LumenGlassShaderStructureTest`), so the name is `content`. Declared once, here.
  */
-const val CONTENT_SAMPLER_NAME: String = "content"
+internal const val CONTENT_SAMPLER_NAME: String = "content"
 
 /**
  * Applies the glass material to a [GlassCapture]'s node.
@@ -106,7 +106,7 @@ const val CONTENT_SAMPLER_NAME: String = "content"
  * @return `true` if the effect was applied, `false` if it could not be.
  */
 @RequiresApi(RENDER_EFFECT_MIN_API)
-fun applyGlassEffect(
+internal fun applyGlassEffect(
     capture: GlassCapture,
     uniforms: GlassUniforms,
     frostRadiusPx: Float = 0f,
@@ -130,7 +130,7 @@ fun applyGlassEffect(
  * @return `true` if drawn, `false` for a degenerate size (caller should draw the FROST fallback).
  */
 @RequiresApi(AGSL_MIN_API)
-fun drawGlassWithShader(
+internal fun drawGlassWithShader(
     canvas: Canvas,
     shader: RuntimeShader,
     widthPx: Float,
