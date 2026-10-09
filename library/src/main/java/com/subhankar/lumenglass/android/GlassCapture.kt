@@ -37,9 +37,13 @@ import androidx.annotation.RequiresApi
  * A [RenderNode] is a native object. It is owned by exactly one [GlassCapture] and freed by
  * [release]. This is the one obvious place a capture can leak, which is why lifetime is centralised
  * here rather than spread across call sites.
+ *
+ * ## API status: PROVISIONAL (pre-P4)
+ *
+ * Public so the P1.7 harness module can drive it. Not the designed API — that is P4.
  */
 @RequiresApi(RENDER_NODE_MIN_API)
-internal class GlassCapture {
+class GlassCapture {
 
     /**
      * The node the source content is recorded into.

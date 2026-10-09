@@ -65,10 +65,14 @@ float squircle(float2 n, float e) {
 }
 
 // Colour grading: saturation then contrast. Keeps the material from reading as flat.
+//
+// NOTE: AGSL does NOT accept GLSL half-suffix literals (`0.5h`) — the device compiler rejects
+// them. Use the `half(...)` constructor instead. This was caught only by compiling on a real
+// device; the structural guard test checks uniform *declarations*, not syntax.
 half3 gradeColor(half3 c) {
     float luma = dot(c, half3(0.2126, 0.7152, 0.0722));
     half3 saturated = mix(half3(luma), c, half(saturation));
-    return saturate((saturated - 0.5h) * half(contrast) + 0.5h);
+    return saturate((saturated - half(0.5)) * half(contrast) + half(0.5));
 }
 
 half4 main(float2 fragCoord) {
@@ -77,8 +81,12 @@ half4 main(float2 fragCoord) {
     float2 p = fragCoord - centre;
 
     // Rounded-rect mask (anti-aliased via a small SDF feather).
+    //
+    // NOTE: AGSL has NO `fwidth()` / derivative builtins (device compiler: "no match for
+    // fwidth(float)"). We feather with a fixed ~1px band instead. This is the correct
+    // trade-off for AGSL: screen-space derivatives are simply unavailable here.
     float sdf = roundedRectSdf(p, halfSize, cornerRadius);
-    float aa = fwidth(sdf) + 1e-4;
+    float aa = 1.0;
     float coverage = 1.0 - smoothstep(-aa, aa, sdf);
     if (coverage <= 0.0) {
         return half4(0.0);

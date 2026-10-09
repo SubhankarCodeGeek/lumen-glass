@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      A deliberately minimal theme. The harness draws its own content, so this only needs to be a
+      sane, dark, no-action-bar base. Defined here rather than pulling in Material Components
+      XML themes — the app is Compose-first and nothing else needs them.
+    -->
+    <style name="Theme.LumenGlassHarness" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

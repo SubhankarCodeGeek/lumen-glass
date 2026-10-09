@@ -1,0 +1,59 @@
+// Lumen Glass — P1.7 harness app.
+//
+// This module exists ONLY to prove the clean-room shader compiles, renders, binds its uniforms, and
+// that the ARCHITECTURE §4 overlap guard fires. It is not a product, not a sample of the public
+// API (there isn't one yet — that is P4), and nothing depends on it.
+//
+// minSdk = 33 (not 21 like :library): RuntimeShader/RenderEffect require API 33, and forcing the
+// render path to be unconditional makes the P1.7 result unambiguous. The library itself keeps
+// minSdk 21 and gates at runtime.
+plugins {
+    alias(libs.plugins.android.app)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+}
+
+android {
+    namespace = "com.subhankar.lumenglass.sample"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.subhankar.lumenglass.sample"
+        minSdk = 33
+        targetSdk = 36
+        versionCode = 1
+        versionName = "P1.7-harness"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    kotlin {
+        jvmToolchain(21)
+    }
+
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    implementation(project(":library"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+
+    implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.material3)
+}

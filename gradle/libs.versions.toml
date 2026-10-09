@@ -7,10 +7,12 @@ agp = "8.13.2"
 kotlin = "2.2.20"
 composeBom = "2026.06.01"
 androidxCoreKtx = "1.17.0"
+androidxActivityCompose = "1.11.0"
 junit = "4.13.2"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivityCompose" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
@@ -21,6 +23,10 @@ androidx-material3 = { module = "androidx.compose.material3:material3" }
 junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]
+# NOTE: deliberately named `android-app`, not `android-application`: the latter generates the
+# accessor `libs.plugins.android.application`, which collides with the built-in `application`
+# accessor on PluginDependenciesSpec inside a `plugins {}` block.
+android-app = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.LumenGlassHarness">
+
+        <!--
+          Two launcher entries, one per render surface (per the approved plan, Q-B).
+
+          Both are deliberately LAUNCHER so they can be opened independently from the app drawer
+          with no shared state, which makes A/B comparison trivial on the device.
+
+          android:exported="true" is mandatory for activities with intent filters on API 31+.
+        -->
+        <activity
+            android:name=".ComposeHarnessActivity"
+            android:exported="true"
+            android:label="@string/harness_compose">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".RawRenderNodeActivity"
+            android:exported="true"
+            android:label="@string/harness_raw">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
