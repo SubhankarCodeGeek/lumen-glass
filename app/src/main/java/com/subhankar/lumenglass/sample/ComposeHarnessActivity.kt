@@ -101,6 +101,7 @@ private fun ComposeHarness() {
     var centreWeight by remember { mutableFloatStateOf(0.05f) }
     var rimWeight by remember { mutableFloatStateOf(0.55f) }
     var frostDp by remember { mutableFloatStateOf(6f) }
+    var edgeLight by remember { mutableFloatStateOf(0.38f) }
     var precisionMode by remember { mutableStateOf(true) }
     var selectedRimProfile by remember { mutableStateOf(com.subhankar.lumenglass.core.RimProfile.TORIC) }
 
@@ -240,7 +241,7 @@ private fun ComposeHarness() {
                                 this.dispersion = dispersion
                                 this.tint = selectedTint.color
                                 this.frost = frostDp.dp
-                                this.edgeLight = if (precisionMode) 0.35f else 0.2f
+                                this.edgeLight = edgeLight
                                 this.precisionMode = precisionMode
                                 this.rimProfile = selectedRimProfile
                                 if (precisionMode) {
@@ -305,7 +306,7 @@ private fun ComposeHarness() {
                                 this.dispersion = dispersion
                                 this.tint = selectedTint.color
                                 this.frost = frostDp.dp
-                                this.edgeLight = if (precisionMode) 0.38f else 0.25f
+                                this.edgeLight = edgeLight
                                 this.precisionMode = precisionMode
                                 this.rimProfile = selectedRimProfile
                                 if (precisionMode) {
@@ -340,7 +341,7 @@ private fun ComposeHarness() {
                                 this.dispersion = dispersion
                                 this.tint = selectedTint.color
                                 this.frost = frostDp.dp
-                                this.edgeLight = if (precisionMode) 0.30f else 0.15f
+                                this.edgeLight = edgeLight
                                 this.precisionMode = precisionMode
                                 this.rimProfile = selectedRimProfile
                                 if (precisionMode) {
@@ -387,6 +388,7 @@ private fun ComposeHarness() {
                             dispersion = 0.05f
                             centreWeight = 0.05f
                             rimWeight = 0.50f
+                            edgeLight = 0.35f
                             precisionMode = true
                         } else if (preset.name == "Apple Dark") {
                             frostDp = 8f
@@ -394,6 +396,7 @@ private fun ComposeHarness() {
                             dispersion = 0.08f
                             centreWeight = 0.05f
                             rimWeight = 0.55f
+                            edgeLight = 0.42f
                             precisionMode = true
                         }
                     },
@@ -419,6 +422,7 @@ private fun ComposeHarness() {
             SliderRow("Refraction", refraction, 0f..2.5f) { refraction = it }
             SliderRow("Dispersion", dispersion, 0f..0.5f) { dispersion = it }
             SliderRow("Frost (Blur)", frostDp, 0f..24f) { frostDp = it }
+            SliderRow("Highlight Stroke", edgeLight, 0f..1f) { edgeLight = it }
             SliderRow("Centre Weight", centreWeight, 0f..1f) { centreWeight = it }
             SliderRow("Rim Weight", rimWeight, 0f..1f) { rimWeight = it }
         }

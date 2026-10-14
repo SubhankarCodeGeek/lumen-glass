@@ -203,23 +203,27 @@ half4 main(float2 fragCoord) {
 
     if (precisionMode > 0.5) {
         // Apple precision mode:
-        // 1. Asymmetric overhead lighting (5% ambient floor, 95% directional power)
-        float lightFactor = 0.05 + 0.95 * pow(directional, 1.3);
+        // Ambient floor of 28% ensures the entire perimeter stroke is visible,
+        // while the directional term boosts top/top-left edges to full specular brilliance:
+        float strokeFactor = 0.28 + 0.72 * pow(directional, 1.2);
 
-        // 2. Dual-lobe highlight:
-        // Lobe A: Hairline 1.2px specular stroke right on the boundary
-        float strokeWidth = 1.2;
-        float hairline = smoothstep(-strokeWidth - 0.5, -strokeWidth, sdf) * (1.0 - smoothstep(-0.5, 0.0, sdf));
-        // Lobe B: Soft 4.5px subsurface Fresnel sheen
-        float fresnel = (1.0 - smoothstep(-4.5, 0.0, sdf)) * 0.25;
+        // 1. Hairline perimeter border stroke (1.6px - 2.2px anti-aliased border):
+        // Spans right along the inner boundary of the card with smooth sub-pixel feathering.
+        float strokeWidthPx = clamp(cornerRadius * 0.035, 1.6, 2.2);
+        float stroke = smoothstep(-strokeWidthPx - 0.75, -strokeWidthPx + 0.1, sdf) * (1.0 - smoothstep(0.0, 0.8, sdf));
 
-        float edgeHighlight = (hairline * 0.85 + fresnel) * edgeLight * lightFactor;
+        // 2. Soft subsurface Fresnel sheen on light-facing edges (extends ~5.5px inside):
+        float fresnel = (1.0 - smoothstep(-5.5, 0.0, sdf)) * 0.22 * pow(directional, 1.5);
+
+        // Combined edge highlight: the crisp stroke provides full perimeter definition,
+        // while the top-facing edges catch intense specular gleam.
+        float edgeHighlight = (stroke * strokeFactor + fresnel) * edgeLight;
         color.rgb += half3(edgeHighlight);
 
         // 3. Bezel: Inner shadow on edges facing AWAY from light
         if (tier >= 2.0 && bezelAlpha > 0.0) {
             float bezel = 1.0 - smoothstep(-max(bezelRadiusPx, 1e-4), 0.0, sdf);
-            float shadowDirectional = 0.2 + 0.8 * clamp(dot(normal, -vecToLight), 0.0, 1.0);
+            float shadowDirectional = 0.25 + 0.75 * clamp(dot(normal, -vecToLight), 0.0, 1.0);
             color.rgb *= half(1.0 - bezel * bezelAlpha * shadowDirectional);
         }
     } else {
