@@ -20,6 +20,7 @@ package com.subhankar.lumenglass.core
  * @property contrast colour contrast multiplier (`1f` = unchanged).
  * @property edgeLight specular edge-band strength; `0f` disables it.
  * @property bezel optional bezel inner-shadow; `null` = none.
+ * @property cornerRadiusDp corner radius of the glass surface in dp; `0f` = sharp rectangle.
  */
 data class GlassSpec(
     val lens: LensModel = LensModel.Blend(centre = 0.6f, rim = 0.4f),

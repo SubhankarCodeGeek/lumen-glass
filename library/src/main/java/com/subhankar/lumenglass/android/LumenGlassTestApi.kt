@@ -28,6 +28,7 @@ package com.subhankar.lumenglass.android
  * > **Everything here may change without notice.** It exists to let the shader be verified on real
  * > hardware. Do not call it from app code; use the `compose/` API instead.
  */
+@androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
 public object LumenGlassTestApi {
 
     /**

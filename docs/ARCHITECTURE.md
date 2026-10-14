@@ -177,14 +177,15 @@ Box {
 > 1. **`LumenSource` is a composable taking a content lambda**, not a bare `Modifier.lumenSource`.
 >    Recording Compose content into a capture layer requires re-emitting a draw pass, and a draw
 >    pass only exists inside a `DrawScope`. A bare `Modifier` cannot obtain one.
-> 2. **The capture is Lumen Glass's own `RenderNode`, wired via `CanvasDrawScope`.** Compose's
->    `rememberGraphicsLayer()` is not usable here: `GraphicsLayer` exposes no `RenderNode` and no
->    `renderEffect` setter, and the only route to its native node is an *internal* Compose API.
->    Depending on that would break silently on Compose upgrades, so the library owns its capture
->    instead — consistent with the Q2 substrate decision.
+> 2. **The capture substrate uses Compose 1.7 `GraphicsLayer` + AGSL `RenderEffect`.** `LumenSource`
+>    records its subtree directly into a `rememberGraphicsLayer()` via `layer.record { drawContent() }`
+>    and presents it to screen with `drawLayer(layer)`. The overlay `LumenGlassNode` allocates a
+>    `GraphicsLayer` via `requireGraphicsContext().createGraphicsLayer()`, translates with sub-pixel
+>    alignment, binds the AGSL `RenderEffect`, and draws crisp composable content on top.
 >
 > The DSL also builds through a `GlassSpecBuilder` rather than assigning to properties directly, so
-> that `GlassSpec` can stay an immutable `data class`.
+> that `GlassSpec` can stay an immutable `data class`. Dynamic `cornerRadius: Dp` is mapped to the
+> shader's rounded-rect SDF.
 
 **Principles**
 - **Overlap-safe** (see §4) — enforced, not just documented: the guard runs inside the modifier and

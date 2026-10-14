@@ -12,19 +12,19 @@ import com.subhankar.lumenglass.core.resolveFeatures
 import com.subhankar.lumenglass.core.selectTier
 
 /**
- * Holds the state shared between `Modifier.lumenSource` and `Modifier.lumenGlass`.
+ * Holds the state shared between [LumenSource] and [Modifier.lumenGlass].
  *
  * A glass surface needs two things that must agree:
  *
- * 1. **Captured content** — the content *behind* the glass, recorded into a layer (`lumenSource`).
- * 2. **The material** — the shader that refracts that content (`lumenGlass`).
+ * 1. **Captured content** — the content *behind* the glass, recorded into a layer ([LumenSource]).
+ * 2. **The material** — the shader that refracts that content ([lumenGlass]).
  *
  * This object is that shared point, which is why both modifiers take the same instance.
  *
  * ## The overlap requirement (read this — it is the one gotcha)
  *
  * > [!IMPORTANT]
- * > **The `lumenGlass` surface MUST overlap the region marked with `lumenSource`.**
+ * > **The `lumenGlass` surface MUST overlap the region marked with `LumenSource`.**
  * >
  * > If it does not, the shader samples empty space and renders **near-black** — a surface that
  * > looks broken rather than like glass. This is the single most common way to misuse the library,
@@ -33,7 +33,7 @@ import com.subhankar.lumenglass.core.selectTier
  * >
  * > In debug builds the library logs a warning naming both rectangles when it detects a
  * > non-overlap, so the cause is visible rather than mysterious. See
- * > `Modifier.lumenSource` for a worked example.
+ * > [LumenSource] for a worked example.
  *
  * ## Quality
  *
@@ -103,12 +103,16 @@ public class LumenGlassState internal constructor(
  * val glass = rememberLumenGlassState()
  *
  * Box {
- *     ScrollingContent(Modifier.lumenSource(glass))   // marks what the glass refracts
- *     Card(Modifier.lumenGlass(glass) {               // the material itself
- *         lens       = LensModel.Blend(centre = 0.6f, rim = 0.4f)
- *         refraction = 1.0f
- *         frost      = 6.dp
- *     })
+ *     LumenSource(glass) {                           // marks what the glass refracts
+ *         ScrollingContent()
+ *     }
+ *     Card(
+ *         Modifier.lumenGlass(glass, cornerRadius = 16.dp) { // the material itself
+ *             lens       = LensModel.Blend(centre = 0.6f, rim = 0.4f)
+ *             refraction = 1.0f
+ *             frost      = 6.dp
+ *         }
+ *     )
  * }
  * ```
  *

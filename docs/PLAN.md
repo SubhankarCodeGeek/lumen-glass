@@ -226,7 +226,7 @@ Box {
 | **P2 — Own substrate** | `GlassSource`/`GlassEffect` (capture + RenderEffect) without `backdrop` | ✅ Done — zero `backdrop`/`kyant` references in `library/` or `app/`. |
 | **P3 — Dual lens model** | `LensModel` blend (centre/rim) + dispersion | ✅ Done — three-pane comparison in `LensComparisonActivity`; dispersion toggle on device. |
 | **P3.5 — Performance tiers** | Reduced-res capture, separable blur, adaptive tiers (§5.2) | **≥ 60fps on a low-end reference device** with the glass animating; tier auto-selection verified. **Also closes the two P1 gaps recorded in `PARITY.md` (blur, bezel).** |
-| **P4 — Public API + module** | standalone module, `Modifier.lumenGlass`, KDoc | Compiles standalone; sample app runs |
+| **P4 — Public API + module** | standalone module, `Modifier.lumenGlass`, KDoc | ✅ Done — clean public API surface (`LumenSource`, `Modifier.lumenGlass`, `rememberLumenGlassState`), `cornerRadius: Dp` support, comprehensive KDocs, compiles standalone and verified on device. |
 | **P5 — Packaging** | Maven publishing (JitPack or Sonatype/`mavenCentral`), versioning, licences | A throwaway consumer project resolves + renders |
 | **P6 — Polish & docs** | README, API docs, runbook, perf notes, goldens | Ready to announce |
 
