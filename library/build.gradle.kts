@@ -64,7 +64,7 @@ publishing {
             pom {
                 name.set("Lumen Glass")
                 description.set("A physically accurate, clean-room Liquid Glass rendering library for Android & Jetpack Compose.")
-                url.set("https://github.com/Subhankar/LumenGlass")
+                url.set("https://github.com/SubhankarCodeGeek/lumen-glass")
                 licenses {
                     license {
                         name.set("The Apache Software License, Version 2.0")
@@ -78,9 +78,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://github.com/Subhankar/LumenGlass.git")
-                    developerConnection.set("scm:git:ssh://github.com/Subhankar/LumenGlass.git")
-                    url.set("https://github.com/Subhankar/LumenGlass")
+                    connection.set("scm:git:git://github.com/SubhankarCodeGeek/lumen-glass.git")
+                    developerConnection.set("scm:git:ssh://github.com/SubhankarCodeGeek/lumen-glass.git")
+                    url.set("https://github.com/SubhankarCodeGeek/lumen-glass")
                 }
             }
         }
