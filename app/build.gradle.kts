@@ -91,4 +91,10 @@ dependencies {
     //   ./gradlew :app:connectedDebugAndroidTest
     androidTestImplementation(libs.androidx.test.junit.ext)
     androidTestImplementation(libs.androidx.test.runner)
+    // Compose UI testing: drives the real UI on a device and asserts on the semantics tree AND on
+    // rendered pixels (`captureToImage()`). Needed because a glass effect can be "present" in the
+    // tree while rendering nothing — which is exactly the bug these tests exist to catch.
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.uitest.junit4)
+    debugImplementation(libs.uitest.manifest)
 }

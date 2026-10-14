@@ -29,6 +29,13 @@ androidx-material3 = { module = "androidx.compose.material3:material3" }
 # accessor inside a dependencies {} block.
 androidx-test-junit-ext = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+# Compose UI testing — drives real UI journeys on a device and inspects the semantics tree.
+# `ui-test-junit4` also provides `captureToImage()` for pixel-level assertions.
+# NOTE: deliberately flat names. Nested aliases here collide with the Kotlin DSL's own accessors:
+# `androidx-ui-test-junit4` -> `libs.androidx.ui.test.junit4` (`.test` clash) and
+# `compose-ui-test-junit4` -> `libs.compose.ui...` (`compose` is already a group accessor).
+uitest-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+uitest-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 # Macrobenchmark: frame-timing measurement (PLAN §6.1 prescribes it). Separate from the
 # androidTest deps because it runs in its own :benchmark module against a profileable build.
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmarkMacroJunit4" }

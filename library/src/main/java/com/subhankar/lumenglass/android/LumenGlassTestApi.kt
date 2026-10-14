@@ -179,4 +179,8 @@ public object LumenGlassTestApi {
     public fun drawCapture(capture: GlassCapture, canvas: android.graphics.Canvas) {
         (canvas as? android.graphics.RecordingCanvas)?.drawRenderNode(capture.node)
     }
+
+    /** Accesses the recorded source GraphicsLayer for tests. */
+    public fun getSourceLayer(state: com.subhankar.lumenglass.compose.LumenGlassState): androidx.compose.ui.graphics.layer.GraphicsLayer? =
+        state.sourceLayer
 }

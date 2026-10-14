@@ -69,12 +69,25 @@ public class LumenGlassState internal constructor(
     internal var capture: GlassCapture? = null
 
     /**
-     * Where the captured content sits, in the coordinate space `lumenSource` reports.
+     * The Compose [androidx.compose.ui.graphics.layer.GraphicsLayer] recorded by [LumenSource]
+     * and sampled by [LumenGlassNode].
+     */
+    internal var sourceLayer: androidx.compose.ui.graphics.layer.GraphicsLayer? = null
+
+    /**
+     * Where the captured content sits, in **screen (root) coordinates**.
      *
-     * Set by `lumenSource` and read by `lumenGlass` so the overlap guard can compare like with
-     * like. `null` until the source has drawn once.
+     * Set by `lumenSource`, read by `lumenGlass` so the overlap guard can compare the two in a
+     * common space. `null` until each has been laid out once.
+     *
+     * Screen coordinates matter: comparing each rect against its own origin makes every
+     * correctly-sized pair look fully overlapped, which is a false negative in the exact check that
+     * exists to catch ARCHITECTURE §4.
      */
     internal var sourceBounds: androidx.compose.ui.geometry.Rect? = null
+
+    /** Where the glass surface sits, in **screen (root) coordinates**. See [sourceBounds]. */
+    internal var surfaceBounds: androidx.compose.ui.geometry.Rect? = null
 
     /** Whether the underlying capture can run at all on this device (AGSL present). */
     public val canRunShader: Boolean get() = resolvedFeatures.useShader
@@ -120,6 +133,7 @@ public fun rememberLumenGlassState(quality: QualityTier? = null): LumenGlassStat
         onDispose {
             // `release()` is API 29+ (unlike the rest of the capture path, which is gated at 33 by
             // AGSL). On older devices no capture was ever created, so there is nothing to release.
+            state.sourceLayer = null
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 state.capture?.release()
             }

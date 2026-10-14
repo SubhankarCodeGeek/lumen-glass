@@ -3,27 +3,26 @@ package com.subhankar.lumenglass.compose
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
-import androidx.compose.ui.unit.IntSize
-import com.subhankar.lumenglass.android.GlassCapture
 import com.subhankar.lumenglass.android.GlassUniforms
 import com.subhankar.lumenglass.android.RENDER_EFFECT_MIN_API
-import com.subhankar.lumenglass.android.RENDER_NODE_MIN_API
 import com.subhankar.lumenglass.android.TIER_BALANCED
 import com.subhankar.lumenglass.android.TIER_HIGH
-import com.subhankar.lumenglass.android.applyGlassEffect
+import com.subhankar.lumenglass.android.buildGlassRenderEffectOrNull
 import com.subhankar.lumenglass.android.checkOverlap
 import com.subhankar.lumenglass.android.logOverlapVerdict
 import com.subhankar.lumenglass.android.toOverlapRect
@@ -45,16 +44,11 @@ import com.subhankar.lumenglass.core.GlassSpec
  * }
  * ```
  *
- * ## Why this is a composable taking a lambda, rather than a bare `Modifier`
+ * ## Architecture
  *
- * Recording Compose content into a capture layer requires re-emitting a draw pass, and a draw pass
- * only exists inside a Compose draw scope. A plain `Modifier` cannot obtain one. Taking the content
- * as a lambda gives the modifier the scope it needs, and keeps the consumer's code simple — the
- * alternative would push capture plumbing onto every caller.
- *
- * (The design also cannot use Compose's `rememberGraphicsLayer()`: `GraphicsLayer` exposes no
- * `RenderNode`, and the only route to one is an internal Compose API. Lumen Glass therefore owns
- * its capture, consistent with the Q2 substrate decision.)
+ * Under the hood, this composable records the subtree into a Compose 1.7 [GraphicsLayer]
+ * and draws it to the screen. The overlay [lumenGlass] modifier accesses this layer and samples
+ * it through the AGSL refraction shader.
  *
  * ## The overlap requirement
  *
@@ -75,63 +69,24 @@ public fun LumenSource(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    // Pre-AGSL there is nothing to record into: draw the content plainly and skip the capture
-    // entirely. This keeps the common case free of a layer that would never be sampled.
     if (!state.canRunShader) {
         Box(modifier) { content() }
         return
     }
 
-    val capture = remember(state) { GlassCapture().also { state.capture = it } }
-
-    // The capture owns a native node; release it when this composition leaves.
-    DisposableEffect(capture) {
-        onDispose {
-            capture.release()
-            if (state.capture === capture) state.capture = null
-        }
-    }
+    val layer = rememberGraphicsLayer()
+    state.sourceLayer = layer
 
     Box(
         modifier = modifier
-            .onSizeChanged { size: IntSize ->
-                // Record the region in the coordinate space the glass surface reports, so the
-                // overlap guard compares like with like.
-                state.sourceBounds =
-                    Rect(Offset.Zero, Offset(size.width.toFloat(), size.height.toFloat()))
+            .onGloballyPositioned { coordinates ->
+                state.sourceBounds = coordinates.boundsInRoot()
             }
             .drawWithContent {
-                state.sourceBounds = Rect(Offset.Zero, size)
-
-                // Draw this subtree's content normally — the glass surface composites over it, and
-                // the region must be visible even if the surface is mispositioned.
-                drawContent()
-
-                // Re-emit the SAME content into the capture, so the shader has something to refract.
-                //
-                // The content can only be re-emitted from within a draw scope, which is why
-                // [LumenSource] takes a content lambda. A `CanvasDrawScope` re-targets this scope's
-                // draw at the capture's recording canvas — that is the supported way to run Compose
-                // drawing against a foreign canvas, and it avoids depending on any Compose internal.
-                capture.record(
-                    left = 0f,
-                    top = 0f,
-                    right = size.width,
-                    bottom = size.height,
-                    scale = state.resolvedFeatures.captureScale,
-                ) { recordCanvas ->
-                    val captureScope = androidx.compose.ui.graphics.drawscope.CanvasDrawScope()
-                    captureScope.draw(
-                        density = this,
-                        layoutDirection = layoutDirection,
-                        canvas = androidx.compose.ui.graphics.Canvas(recordCanvas),
-                        size = androidx.compose.ui.geometry.Size(size.width, size.height),
-                    ) {
-                        // `this` is a DrawScope aimed at the recording canvas. Re-emitting the
-                        // subtree's content here is what puts it in the capture.
-                        this@drawWithContent.drawContent()
-                    }
+                layer.record {
+                    this@drawWithContent.drawContent()
                 }
+                drawLayer(layer)
             },
     ) {
         content()
@@ -166,27 +121,47 @@ public fun LumenSource(
 public fun Modifier.lumenGlass(
     state: LumenGlassState,
     spec: GlassSpecBuilder.() -> Unit = {},
-): Modifier = this then LumenGlassElement(state, GlassSpecBuilder().apply(spec))
+): Modifier = this
+    // Record this surface's own rect in SCREEN coordinates, so the overlap guard compares it with
+    // the source rect in a common space.
+    .onGloballyPositioned { coordinates -> state.surfaceBounds = coordinates.boundsInRoot() }
+    .then(LumenGlassElement(state, GlassSpecBuilder().apply(spec)))
 
 /**
- * Draws the glass material over the capture that [LumenSource] recorded.
+ * Draws the glass material over the backdrop recorded by [LumenSource].
  *
  * When no shader can run, this draws a frosted panel — the documented degraded appearance.
  */
 internal class LumenGlassNode(
     private val state: LumenGlassState,
-    private val spec: GlassSpec,
+    private var spec: GlassSpec,
 ) : androidx.compose.ui.Modifier.Node(), DrawModifierNode {
+
+    private var glassLayer: GraphicsLayer? = null
+
+    fun updateSpec(newSpec: GlassSpec) {
+        spec = newSpec
+    }
+
+    override fun onDetach() {
+        glassLayer?.let { layer ->
+            requireGraphicsContext().releaseGraphicsLayer(layer)
+        }
+        glassLayer = null
+        super.onDetach()
+    }
 
     @RequiresApi(RENDER_EFFECT_MIN_API)
     override fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.draw() {
-        val capture = state.capture
+        val sourceLayer = state.sourceLayer
+        val sourceBounds = state.sourceBounds
+        val surfaceBounds = state.surfaceBounds
 
         // Below AGSL, or before the source has recorded: show a deliberate frost panel rather than
         // nothing at all. A blank surface would read as a bug.
-        if (capture == null || !state.canRunShader) {
-            drawContent()
+        if (sourceLayer == null || sourceBounds == null || surfaceBounds == null || !state.canRunShader) {
             drawFrostPanel()
+            drawContent()
             return
         }
 
@@ -199,37 +174,52 @@ internal class LumenGlassNode(
             widthPx = size.width,
             heightPx = size.height,
             cornerRadiusPx = 0f,
+            dispersion = if (state.resolvedFeatures.useDispersion) spec.dispersion else 0f,
+            refraction = spec.refraction,
             tier = if (state.resolvedFeatures.useDispersion) TIER_HIGH else TIER_BALANCED,
+            bezelRadiusPx = if (state.resolvedFeatures.useDispersion) (spec.bezel?.radiusDp ?: 0f) * density else 0f,
         )
 
-        val applied = applyGlassEffect(
-            capture = capture,
+        val effect = buildGlassRenderEffectOrNull(
             uniforms = uniforms,
-            frostRadiusPx = if (state.resolvedFeatures.useBlur) spec.frostDp else 0f,
+            frostRadiusPx = if (state.resolvedFeatures.useBlur) spec.frostDp * density else 0f,
         )
-        if (!applied) {
-            drawContent()
+        if (effect == null) {
             drawFrostPanel()
+            drawContent()
             return
         }
 
-        // The capture's node carries the effect chain (blur -> lens). Drawing the node renders the
-        // finished material. `RenderNode` is drawn by its parent canvas, which on a
-        // hardware-accelerated Compose canvas is the same recording canvas.
-        drawIntoCanvas { canvas ->
-            (canvas.nativeCanvas as? android.graphics.RecordingCanvas)
-                ?.drawRenderNode(capture.node)
+        var layer = glassLayer
+        if (layer == null) {
+            layer = requireGraphicsContext().createGraphicsLayer()
+            glassLayer = layer
         }
+
+        layer.renderEffect = effect.asComposeRenderEffect()
+
+        val offsetX = surfaceBounds.left - sourceBounds.left
+        val offsetY = surfaceBounds.top - sourceBounds.top
+
+        layer.record {
+            translate(-offsetX, -offsetY) {
+                drawLayer(sourceLayer)
+            }
+        }
+
+        drawLayer(layer)
+        drawContent()
     }
 
     /**
      * Checks that this surface overlaps the captured region, warning (in debug) when it does not.
+     *
+     * Both rects are in **screen coordinates** (recorded via `onGloballyPositioned`), so this tests
+     * real on-screen overlap — not merely that two correctly-sized boxes exist.
      */
     private fun androidx.compose.ui.graphics.drawscope.DrawScope.reportOverlap() {
         val source = state.sourceBounds ?: return
-        val surface = Rect(Offset.Zero, size)
-        // `toOverlapRect()` extends android.graphics.RectF, and the pure overlap maths lives in the
-        // framework-free `android/` layer, so bridge across here.
+        val surface = state.surfaceBounds ?: return
         logOverlapVerdict(
             checkOverlap(
                 surface.toAndroidRectF().toOverlapRect(),
@@ -262,7 +252,9 @@ internal data class LumenGlassElement(
     private val builder: GlassSpecBuilder,
 ) : ModifierNodeElement<LumenGlassNode>() {
     override fun create(): LumenGlassNode = LumenGlassNode(state, builder.build(density = 1f))
-    override fun update(node: LumenGlassNode) = Unit
+    override fun update(node: LumenGlassNode) {
+        node.updateSpec(builder.build(density = 1f))
+    }
     override fun InspectorInfo.inspectableProperties() {
         name = "lumenGlass"
     }
