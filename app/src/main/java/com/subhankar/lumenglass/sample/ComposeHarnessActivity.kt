@@ -198,6 +198,7 @@ private fun ComposeHarness() {
                             when (profile) {
                                 com.subhankar.lumenglass.core.RimProfile.TORIC -> "Pattern A (Toric Meniscus)"
                                 com.subhankar.lumenglass.core.RimProfile.SMOOTH -> "Pattern B (Smooth Hermite)"
+                                com.subhankar.lumenglass.core.RimProfile.DROPLET -> "Pattern C (Liquid Droplet)"
                                 com.subhankar.lumenglass.core.RimProfile.LEGACY -> "Legacy Squircle"
                             },
                             fontSize = 11.sp,

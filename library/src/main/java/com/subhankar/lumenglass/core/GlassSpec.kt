@@ -94,9 +94,15 @@ enum class RimProfile {
 
     /**
      * Pattern B: Quintic Hermite Bevel (iOS Control Center look).
-     * Smooth polynomial curve with zero derivative at boundary and flat core.
+     * Smooth polynomial curve with soft progressive magnification.
      */
     SMOOTH,
+
+    /**
+     * Pattern C: Liquid Droplet (macOS / Fluid Glass look).
+     * Bipolar droplet meniscus producing dual-zone fluid refraction.
+     */
+    DROPLET,
 
     /** Legacy squircle displacement field. */
     LEGACY,

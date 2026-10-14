@@ -112,7 +112,8 @@ data class GlassUniforms(
                 rimProfile = when (spec.rimProfile) {
                     com.subhankar.lumenglass.core.RimProfile.TORIC -> 0f
                     com.subhankar.lumenglass.core.RimProfile.SMOOTH -> 1f
-                    com.subhankar.lumenglass.core.RimProfile.LEGACY -> 2f
+                    com.subhankar.lumenglass.core.RimProfile.DROPLET -> 2f
+                    com.subhankar.lumenglass.core.RimProfile.LEGACY -> 3f
                 },
             )
         }

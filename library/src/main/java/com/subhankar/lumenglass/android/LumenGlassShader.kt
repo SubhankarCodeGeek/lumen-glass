@@ -154,10 +154,22 @@ half4 main(float2 fragCoord) {
             float2 centreOffset = -n * ((1.0 - sq) * centreWeight * refraction * scale);
             offset = rimOffset + centreOffset;
         } else if (rimProfile < 1.5) {
-            // Pattern B: Quintic / Hermite Smoothstep Bevel
-            float smoothCurve = smoothstep(0.0, 1.0, u);
-            float maxDisp = rimWidthPx * min(0.38 * rimWeight * refraction, 0.50);
+            // Pattern B: Smooth Hermite (iOS Control Center look)
+            // Continuous G2-curvature fillet: gentle linear ramp + quadratic acceleration.
+            // Delivers velvety, progressive magnification without abrupt slope jumps.
+            float smoothCurve = 0.30 * u + 0.70 * (u * u);
+            float maxDisp = rimWidthPx * min(0.40 * rimWeight * refraction, 0.48);
             float2 rimOffset = -normal * (smoothCurve * maxDisp);
+            float2 centreOffset = -n * ((1.0 - sq) * centreWeight * refraction * scale);
+            offset = rimOffset + centreOffset;
+        } else if (rimProfile < 2.5) {
+            // Pattern C: Liquid Droplet (macOS / Fluid Glass look)
+            // Bipolar fluid droplet meniscus: outward environmental refraction bulge combined with
+            // perimeter inward magnification.
+            float bulge = sin(u * 3.14159265);
+            float inwardZoom = 1.0 - sqrt(max(0.0, 1.0 - u * u));
+            float maxDisp = rimWidthPx * min(0.45 * rimWeight * refraction, 0.50);
+            float2 rimOffset = normal * (bulge * 0.35 * maxDisp) - normal * (inwardZoom * maxDisp);
             float2 centreOffset = -n * ((1.0 - sq) * centreWeight * refraction * scale);
             offset = rimOffset + centreOffset;
         } else {
