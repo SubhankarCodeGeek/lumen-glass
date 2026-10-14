@@ -1,3 +1,8 @@
+/*
+ * Copyright 2026 Subhankar Bag.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.subhankar.lumenglass.android
 
 import android.graphics.Canvas

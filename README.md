@@ -324,6 +324,21 @@ Feel free to open an issue or submit a pull request.
 
 ---
 
-## 📄 License
+## Copyright and License
 
-Distributed under the **Apache License, Version 2.0**. See [`LICENSE`](LICENSE) for details.
+Copyright © 2026 Subhankar Bag.
+
+Lumen Glass is open-source software licensed under the Apache License, Version 2.0.
+
+You are free to use, modify, and distribute the software in accordance with the licence terms.
+
+See the [LICENSE](LICENSE) file for details.
+
+In individual source files: you can use a concise copyright and SPDX header where appropriate:
+
+```kotlin
+/*
+ * Copyright 2026 Subhankar Bag.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+```
