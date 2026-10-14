@@ -151,9 +151,23 @@ half4 main(float2 fragCoord) {
     color.rgb = gradeColor(color.rgb);
     color.rgb = mix(color.rgb, tint.rgb, tint.a);
 
-    // Edge / specular lighting: brightest where the SDF normal faces the light.
+    // Edge / specular lighting: directional chamfer highlight simulating top-left light.
+    // Outward-facing SDF normal derived via forward finite differences:
+    float2 normal = float2(
+        roundedRectSdf(p + float2(1.0, 0.0), halfSize, cornerRadius) - sdf,
+        roundedRectSdf(p + float2(0.0, 1.0), halfSize, cornerRadius) - sdf
+    );
+    float nLen = length(normal);
+    normal = (nLen > 1e-4) ? (normal / nLen) : float2(0.0, -1.0);
+
+    // Light source positioned at top-left (-x, -y in screen space). Outward normal pointing
+    // towards (-0.35, -0.93) receives peak specular sheen; opposite edges retain subtle ambient rim.
+    float2 vecToLight = normalize(float2(-0.35, -0.93));
+    float directional = clamp(dot(normal, vecToLight), 0.0, 1.0);
+    float lightFactor = 0.35 + 0.65 * directional;
+
     float edgeBand = smoothstep(-max(edgeLight, 1e-4) * 24.0, 0.0, sdf);
-    color.rgb += half3(edgeBand * edgeLight);
+    color.rgb += half3(edgeBand * edgeLight * lightFactor);
 
     // Bezel — a soft dark inner edge that gives the glass depth. Derived from the SAME `sdf` the
     // mask uses, so it costs almost nothing: dark where the pixel is just inside the border,
@@ -164,7 +178,8 @@ half4 main(float2 fragCoord) {
         //   sdf = 0 at the edge  ->  strongest shadow
         //   sdf = -bezelRadiusPx ->  no shadow
         float bezel = 1.0 - smoothstep(-max(bezelRadiusPx, 1e-4), 0.0, sdf);
-        color.rgb *= half(1.0 - bezel * bezelAlpha);
+        float shadowDirectional = 0.5 + 0.5 * clamp(dot(normal, vecToLight), 0.0, 1.0);
+        color.rgb *= half(1.0 - bezel * bezelAlpha * shadowDirectional);
     }
 
     return color * coverage;

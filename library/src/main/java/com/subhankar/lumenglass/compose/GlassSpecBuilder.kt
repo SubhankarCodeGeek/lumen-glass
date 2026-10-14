@@ -60,6 +60,15 @@ public class GlassSpecBuilder {
     /** Strength of the specular edge band. `0f` disables it. */
     public var edgeLight: Float = 0.1f
 
+    /**
+     * Corner radius of the glass surface.
+     *
+     * Informs the shader's signed distance field (SDF) of the surface curvature, ensuring
+     * refraction, specular chamfer highlights, and the inner bezel shadow perfectly follow
+     * rounded card corners. Default is `0.dp` (sharp rectangle).
+     */
+    public var cornerRadius: Dp = 0.dp
+
     /** Optional inner-shadow bezel. Configure via [bezel]. */
     public var bezel: BezelBuilder? = null
 
@@ -103,6 +112,7 @@ public class GlassSpecBuilder {
                 alpha = b.alpha,
             )
         },
+        cornerRadiusDp = cornerRadius.value * density,
     )
 }
 

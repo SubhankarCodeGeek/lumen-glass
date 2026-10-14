@@ -26,6 +26,8 @@ import com.subhankar.lumenglass.android.buildGlassRenderEffectOrNull
 import com.subhankar.lumenglass.android.checkOverlap
 import com.subhankar.lumenglass.android.logOverlapVerdict
 import com.subhankar.lumenglass.android.toOverlapRect
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.subhankar.lumenglass.core.GlassSpec
 
 /**
@@ -116,16 +118,29 @@ public fun LumenSource(
  * look deliberate, not broken (`PLAN.md` §5.2). The library never silently renders nothing.
  *
  * @param state the shared state from `rememberLumenGlassState`.
+ * @param cornerRadius optional corner radius of the glass surface (default `0.dp`). Can also be
+ *   configured inside [spec].
  * @param spec configure the optics here. See [GlassSpecBuilder].
  */
 public fun Modifier.lumenGlass(
     state: LumenGlassState,
+    cornerRadius: Dp = 0.dp,
     spec: GlassSpecBuilder.() -> Unit = {},
 ): Modifier = this
     // Record this surface's own rect in SCREEN coordinates, so the overlap guard compares it with
     // the source rect in a common space.
     .onGloballyPositioned { coordinates -> state.surfaceBounds = coordinates.boundsInRoot() }
-    .then(LumenGlassElement(state, GlassSpecBuilder().apply(spec)))
+    .then(
+        LumenGlassElement(
+            state,
+            GlassSpecBuilder().apply {
+                if (cornerRadius > 0.dp) {
+                    this.cornerRadius = cornerRadius
+                }
+                spec()
+            },
+        ),
+    )
 
 /**
  * Draws the glass material over the backdrop recorded by [LumenSource].
@@ -173,7 +188,7 @@ internal class LumenGlassNode(
             spec = spec,
             widthPx = size.width,
             heightPx = size.height,
-            cornerRadiusPx = 0f,
+            cornerRadiusPx = spec.cornerRadiusDp * density,
             dispersion = if (state.resolvedFeatures.useDispersion) spec.dispersion else 0f,
             refraction = spec.refraction,
             tier = if (state.resolvedFeatures.useDispersion) TIER_HIGH else TIER_BALANCED,

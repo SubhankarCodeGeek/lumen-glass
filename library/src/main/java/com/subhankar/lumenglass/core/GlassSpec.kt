@@ -31,6 +31,7 @@ data class GlassSpec(
     val contrast: Float = 1f,
     val edgeLight: Float = 0.1f,
     val bezel: Bezel? = null,
+    val cornerRadiusDp: Float = 0f,
 ) {
     companion object {
         /** A neutral, effect-light default suitable for previews / fallbacks. */

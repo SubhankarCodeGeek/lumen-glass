@@ -192,7 +192,7 @@ private fun ComposeHarness() {
                             .fillMaxWidth(0.85f)
                             .height(200.dp)
                             .clip(RoundedCornerShape(24.dp))
-                            .lumenGlass(glass) {
+                            .lumenGlass(glass, cornerRadius = 24.dp) {
                                 lens = LensModel.Blend(centre = centreWeight, rim = rimWeight)
                                 this.refraction = refraction
                                 this.dispersion = dispersion
@@ -252,7 +252,7 @@ private fun ComposeHarness() {
                             .padding(bottom = 16.dp)
                             .height(72.dp)
                             .clip(RoundedCornerShape(36.dp))
-                            .lumenGlass(glass) {
+                            .lumenGlass(glass, cornerRadius = 36.dp) {
                                 lens = LensModel.Blend(centre = centreWeight, rim = rimWeight)
                                 this.refraction = refraction
                                 this.dispersion = dispersion
@@ -282,7 +282,7 @@ private fun ComposeHarness() {
                             .fillMaxWidth(0.55f)
                             .fillMaxSize()
                             .clip(RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp))
-                            .lumenGlass(glass) {
+                            .lumenGlass(glass, cornerRadius = 24.dp) {
                                 lens = LensModel.Blend(centre = centreWeight, rim = rimWeight)
                                 this.refraction = refraction
                                 this.dispersion = dispersion
