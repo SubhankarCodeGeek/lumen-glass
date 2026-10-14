@@ -18,8 +18,37 @@
 </p>
 
 <p align="center">
-  <img src="assets/device_screen_live.png" width="340" alt="LumenGlass Studio running live on device" />
+  <img src="assets/lumen_interactive_demo.gif" width="360" alt="LumenGlass Interactive Studio Demo (GIF)" />
 </p>
+
+---
+
+## 📸 Showcase & Visual Bending Modes
+
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <strong>Pattern A: Toric Meniscus</strong><br />
+      <sub>Spherical rim zoom & physical magnification</sub><br />
+      <img src="assets/demo_pattern_a_toric.png" width="240" alt="Toric Meniscus Mode" />
+    </td>
+    <td align="center" width="25%">
+      <strong>Legacy Diffuse & Bending</strong><br />
+      <sub>Intense pixel warping & chromatic dispersion</sub><br />
+      <img src="assets/demo_legacy_squircle.png" width="240" alt="Legacy Diffuse Mode" />
+    </td>
+    <td align="center" width="25%">
+      <strong>Liquid Glass Bottom Dock</strong><br />
+      <sub>Pill navigation with continuous rim refraction</sub><br />
+      <img src="assets/demo_bottom_dock.png" width="240" alt="Bottom Navigation Dock" />
+    </td>
+    <td align="center" width="25%">
+      <strong>Split Comparison View</strong><br />
+      <sub>Raw background content vs. Refracted glass</sub><br />
+      <img src="assets/demo_split_view.png" width="240" alt="Split Comparison View" />
+    </td>
+  </tr>
+</table>
 
 ---
 
