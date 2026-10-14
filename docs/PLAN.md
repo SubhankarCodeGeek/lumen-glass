@@ -227,7 +227,7 @@ Box {
 | **P3 — Dual lens model** | `LensModel` blend (centre/rim) + dispersion | ✅ Done — three-pane comparison in `LensComparisonActivity`; dispersion toggle on device. |
 | **P3.5 — Performance tiers** | Reduced-res capture, separable blur, adaptive tiers (§5.2) | **≥ 60fps on a low-end reference device** with the glass animating; tier auto-selection verified. **Also closes the two P1 gaps recorded in `PARITY.md` (blur, bezel).** |
 | **P4 — Public API + module** | standalone module, `Modifier.lumenGlass`, KDoc | ✅ Done — clean public API surface (`LumenSource`, `Modifier.lumenGlass`, `rememberLumenGlassState`), `cornerRadius: Dp` support, comprehensive KDocs, compiles standalone and verified on device. |
-| **P5 — Packaging** | Maven publishing (JitPack or Sonatype/`mavenCentral`), versioning, licences | A throwaway consumer project resolves + renders |
+| **P5 — Packaging** | Maven publishing (`maven-publish` + JitPack), Apache-2.0, versioning | ✅ Done — `lumenglass-0.1.0.aar`, sources JAR, POM metadata, and `jitpack.yml` configured and verified via `publishToMavenLocal`. |
 | **P6 — Polish & docs** | README, API docs, runbook, perf notes, goldens | Ready to announce |
 
 Each phase is independently valuable; P1–P3.5 justify the work **even if we never publish**.

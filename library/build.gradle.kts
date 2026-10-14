@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    `maven-publish`
 }
 
 android {
@@ -40,6 +41,49 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.subhankar.lumenglass"
+            artifactId = "lumenglass"
+            version = "0.1.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+
+            pom {
+                name.set("Lumen Glass")
+                description.set("A physically accurate, clean-room Liquid Glass rendering library for Android & Jetpack Compose.")
+                url.set("https://github.com/Subhankar/LumenGlass")
+                licenses {
+                    license {
+                        name.set("The Apache Software License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("subhankar")
+                        name.set("Subhankar")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/Subhankar/LumenGlass.git")
+                    developerConnection.set("scm:git:ssh://github.com/Subhankar/LumenGlass.git")
+                    url.set("https://github.com/Subhankar/LumenGlass")
+                }
+            }
+        }
     }
 }
 
