@@ -60,6 +60,10 @@ uniform float  tier;
 // Bezel (inner shadow). Gated on the HIGH tier; disabled by passing bezelAlpha = 0.
 uniform float  bezelAlpha;
 uniform float  bezelRadiusPx;
+// Toggle: 1.0 = Apple precision mode (hairline specular + normal-aligned rim), 0.0 = legacy diffuse
+uniform float  precisionMode;
+// Edge curvature profile: 0.0 = Pattern A Toric (visionOS / Apple Watch), 1.0 = Pattern B Smooth, 2.0 = Legacy
+uniform float  rimProfile;
 
 // Signed distance to a rounded rectangle (<= 0 inside). Mirrors GlassMath.roundedRectSdf.
 float roundedRectSdf(float2 p, float2 halfSize, float radius) {
@@ -106,6 +110,14 @@ half4 main(float2 fragCoord) {
         return half4(0.0);
     }
 
+    // Outward-facing SDF boundary normal derived via forward finite differences:
+    float2 normal = float2(
+        roundedRectSdf(p + float2(1.0, 0.0), halfSize, cornerRadius) - sdf,
+        roundedRectSdf(p + float2(0.0, 1.0), halfSize, cornerRadius) - sdf
+    );
+    float nLen = length(normal);
+    normal = (nLen > 1e-4) ? (normal / nLen) : float2(0.0, -1.0);
+
     // Aspect-agnostic normalized coords (-1..1 per axis) + squircle field.
     //
     // CONTRACT: the terms below are specified by `core/GlassMath` and enforced numerically on
@@ -122,7 +134,41 @@ half4 main(float2 fragCoord) {
     // min(halfSize.x, halfSize.y) — the same `min` GlassMath.lensOffset performs internally (Q-I).
     float weight = ${ProbeShaderText.LENS_WEIGHT_EXPR};
     float scale = ${ProbeShaderText.LENS_SCALE_EXPR};
-    float2 offset = -n * weight * scale;
+    float2 offset;
+    if (precisionMode > 0.5) {
+        // Physical rim width scales with the surface's corner curvature, giving a generous
+        // tactile glass bevel rather than an artificial hairline.
+        float rimWidthPx = clamp(cornerRadius > 0.0 ? cornerRadius : 36.0, 16.0, min(halfSize.x, halfSize.y) * 0.55);
+        // Normalized progress u: 0.0 at the flat interior transition, 1.0 at the outer rim perimeter.
+        float distFromEdge = max(0.0, -sdf);
+        float u = clamp(1.0 - distFromEdge / rimWidthPx, 0.0, 1.0);
+
+        if (rimProfile < 0.5) {
+            // Pattern A: Toric Meniscus (Curved Lens Arc) - Physical spherical lens profile
+            // Evaluates the canonical lens arc: 1.0 - sqrt(1.0 - u^2).
+            // Zero derivative at interior boundary (seamless flat core) and steep slope at the perimeter,
+            // producing dramatic optical magnification (zoom-in) along the boundary normal.
+            float toricCurve = 1.0 - sqrt(max(0.0, 1.0 - u * u));
+            float maxDisp = rimWidthPx * min(0.48 * rimWeight * refraction, 0.52);
+            float2 rimOffset = -normal * (toricCurve * maxDisp);
+            float2 centreOffset = -n * ((1.0 - sq) * centreWeight * refraction * scale);
+            offset = rimOffset + centreOffset;
+        } else if (rimProfile < 1.5) {
+            // Pattern B: Quintic / Hermite Smoothstep Bevel
+            float smoothCurve = smoothstep(0.0, 1.0, u);
+            float maxDisp = rimWidthPx * min(0.38 * rimWeight * refraction, 0.50);
+            float2 rimOffset = -normal * (smoothCurve * maxDisp);
+            float2 centreOffset = -n * ((1.0 - sq) * centreWeight * refraction * scale);
+            offset = rimOffset + centreOffset;
+        } else {
+            // Normal-blended squircle
+            float2 dispDir = mix(-n, -normal, sq * sq);
+            offset = dispDir * weight * scale;
+        }
+    } else {
+        // Legacy mode: purely radial -n displacement.
+        offset = -n * weight * scale;
+    }
     float2 sampleCoord = fragCoord + offset;
 
     // Sample, with optional chromatic dispersion (3 taps) on the HIGH tier.
@@ -151,35 +197,42 @@ half4 main(float2 fragCoord) {
     color.rgb = gradeColor(color.rgb);
     color.rgb = mix(color.rgb, tint.rgb, tint.a);
 
-    // Edge / specular lighting: directional chamfer highlight simulating top-left light.
-    // Outward-facing SDF normal derived via forward finite differences:
-    float2 normal = float2(
-        roundedRectSdf(p + float2(1.0, 0.0), halfSize, cornerRadius) - sdf,
-        roundedRectSdf(p + float2(0.0, 1.0), halfSize, cornerRadius) - sdf
-    );
-    float nLen = length(normal);
-    normal = (nLen > 1e-4) ? (normal / nLen) : float2(0.0, -1.0);
-
-    // Light source positioned at top-left (-x, -y in screen space). Outward normal pointing
-    // towards (-0.35, -0.93) receives peak specular sheen; opposite edges retain subtle ambient rim.
-    float2 vecToLight = normalize(float2(-0.35, -0.93));
+    // Edge / specular lighting & bezel shadow
+    float2 vecToLight = normalize(float2(-0.25, -0.96));
     float directional = clamp(dot(normal, vecToLight), 0.0, 1.0);
-    float lightFactor = 0.35 + 0.65 * directional;
 
-    float edgeBand = smoothstep(-max(edgeLight, 1e-4) * 24.0, 0.0, sdf);
-    color.rgb += half3(edgeBand * edgeLight * lightFactor);
+    if (precisionMode > 0.5) {
+        // Apple precision mode:
+        // 1. Asymmetric overhead lighting (5% ambient floor, 95% directional power)
+        float lightFactor = 0.05 + 0.95 * pow(directional, 1.3);
 
-    // Bezel — a soft dark inner edge that gives the glass depth. Derived from the SAME `sdf` the
-    // mask uses, so it costs almost nothing: dark where the pixel is just inside the border,
-    // fading to nothing toward the middle. Gated on the HIGH tier, and a no-op when bezelAlpha
-    // is 0 (which is what the cheaper tiers pass).
-    if (tier >= 2.0 && bezelAlpha > 0.0) {
-        // `sdf` is <= 0 inside. A band of width bezelRadiusPx inside the border:
-        //   sdf = 0 at the edge  ->  strongest shadow
-        //   sdf = -bezelRadiusPx ->  no shadow
-        float bezel = 1.0 - smoothstep(-max(bezelRadiusPx, 1e-4), 0.0, sdf);
-        float shadowDirectional = 0.5 + 0.5 * clamp(dot(normal, vecToLight), 0.0, 1.0);
-        color.rgb *= half(1.0 - bezel * bezelAlpha * shadowDirectional);
+        // 2. Dual-lobe highlight:
+        // Lobe A: Hairline 1.2px specular stroke right on the boundary
+        float strokeWidth = 1.2;
+        float hairline = smoothstep(-strokeWidth - 0.5, -strokeWidth, sdf) * (1.0 - smoothstep(-0.5, 0.0, sdf));
+        // Lobe B: Soft 4.5px subsurface Fresnel sheen
+        float fresnel = (1.0 - smoothstep(-4.5, 0.0, sdf)) * 0.25;
+
+        float edgeHighlight = (hairline * 0.85 + fresnel) * edgeLight * lightFactor;
+        color.rgb += half3(edgeHighlight);
+
+        // 3. Bezel: Inner shadow on edges facing AWAY from light
+        if (tier >= 2.0 && bezelAlpha > 0.0) {
+            float bezel = 1.0 - smoothstep(-max(bezelRadiusPx, 1e-4), 0.0, sdf);
+            float shadowDirectional = 0.2 + 0.8 * clamp(dot(normal, -vecToLight), 0.0, 1.0);
+            color.rgb *= half(1.0 - bezel * bezelAlpha * shadowDirectional);
+        }
+    } else {
+        // Legacy mode:
+        float lightFactor = 0.35 + 0.65 * directional;
+        float edgeBand = smoothstep(-max(edgeLight, 1e-4) * 24.0, 0.0, sdf);
+        color.rgb += half3(edgeBand * edgeLight * lightFactor);
+
+        if (tier >= 2.0 && bezelAlpha > 0.0) {
+            float bezel = 1.0 - smoothstep(-max(bezelRadiusPx, 1e-4), 0.0, sdf);
+            float shadowDirectional = 0.5 + 0.5 * clamp(dot(normal, vecToLight), 0.0, 1.0);
+            color.rgb *= half(1.0 - bezel * bezelAlpha * shadowDirectional);
+        }
     }
 
     return color * coverage;
@@ -214,4 +267,6 @@ internal val LUMEN_GLASS_UNIFORMS: List<String> = listOf(
     "tier",
     "bezelAlpha",
     "bezelRadiusPx",
+    "precisionMode",
+    "rimProfile",
 )

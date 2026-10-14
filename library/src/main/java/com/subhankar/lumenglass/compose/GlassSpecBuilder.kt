@@ -86,6 +86,17 @@ public class GlassSpecBuilder {
     }
 
     /**
+     * When true (default), enables Apple-calibrated dual-lobe hairline highlights, asymmetric
+     * directional lighting, and normal-aligned rim refraction. When false, runs legacy diffuse mode.
+     */
+    public var precisionMode: Boolean = true
+
+    /**
+     * Edge bending pattern (Pattern A Toric by default).
+     */
+    public var rimProfile: com.subhankar.lumenglass.core.RimProfile = com.subhankar.lumenglass.core.RimProfile.TORIC
+
+    /**
      * Builds the immutable [GlassSpec].
      *
      * `internal` — consumers describe what they want and the modifier constructs the spec; they never
@@ -113,6 +124,8 @@ public class GlassSpecBuilder {
             )
         },
         cornerRadiusDp = cornerRadius.value * density,
+        precisionMode = precisionMode,
+        rimProfile = rimProfile,
     )
 }
 

@@ -83,6 +83,8 @@ private data class TintPreset(val name: String, val color: Color)
 
 private val TINT_PRESETS = listOf(
     TintPreset("Clear", Color.White.copy(alpha = 0.08f)),
+    TintPreset("Apple Light", Color.White.copy(alpha = 0.45f)),
+    TintPreset("Apple Dark", Color(0xFF1C1D22).copy(alpha = 0.65f)),
     TintPreset("Sunset Rose", Color(0xFFFF3B30).copy(alpha = 0.20f)),
     TintPreset("Ice Cyan", Color(0xFF00E5FF).copy(alpha = 0.18f)),
     TintPreset("Golden Amber", Color(0xFFFFB300).copy(alpha = 0.22f)),
@@ -92,13 +94,15 @@ private val TINT_PRESETS = listOf(
 @Composable
 private fun ComposeHarness() {
     var selectedUsecase by remember { mutableStateOf(GlassUsecase.FLOATING_CARD) }
-    var selectedTint by remember { mutableStateOf(TINT_PRESETS[1]) }
+    var selectedTint by remember { mutableStateOf(TINT_PRESETS[1]) } // Default to Apple Light
 
-    var refraction by remember { mutableFloatStateOf(1.2f) }
-    var dispersion by remember { mutableFloatStateOf(0.15f) }
-    var centreWeight by remember { mutableFloatStateOf(0.6f) }
-    var rimWeight by remember { mutableFloatStateOf(0.4f) }
+    var refraction by remember { mutableFloatStateOf(1.0f) }
+    var dispersion by remember { mutableFloatStateOf(0.06f) }
+    var centreWeight by remember { mutableFloatStateOf(0.05f) }
+    var rimWeight by remember { mutableFloatStateOf(0.55f) }
     var frostDp by remember { mutableFloatStateOf(6f) }
+    var precisionMode by remember { mutableStateOf(true) }
+    var selectedRimProfile by remember { mutableStateOf(com.subhankar.lumenglass.core.RimProfile.TORIC) }
 
     val glass = rememberLumenGlassState()
 
@@ -112,7 +116,7 @@ private fun ComposeHarness() {
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -131,20 +135,24 @@ private fun ComposeHarness() {
                 )
             }
 
-            // Status chip
-            Box(
-                Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF263238))
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
-            ) {
-                Text(
-                    text = "Clean-Room GPU",
-                    color = Color(0xFF80DEEA),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+            // Mode Toggle: Apple Precision vs Legacy Diffuse
+            FilterChip(
+                selected = precisionMode,
+                onClick = { precisionMode = !precisionMode },
+                label = {
+                    Text(
+                        if (precisionMode) "✨ Precision ON" else "⚙ Legacy Diffuse",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color(0xFF00E5FF),
+                    selectedLabelColor = Color.Black,
+                    containerColor = Color(0xFF263238),
+                    labelColor = Color(0xFFB0BEC5),
+                ),
+            )
         }
 
         // Use case selector chips
@@ -152,7 +160,7 @@ private fun ComposeHarness() {
             Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             GlassUsecase.entries.forEach { usecase ->
@@ -162,6 +170,40 @@ private fun ComposeHarness() {
                     label = { Text(usecase.label, fontSize = 12.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = Color(0xFF00E5FF),
+                        selectedLabelColor = Color.Black,
+                        containerColor = Color(0xFF1E2630),
+                        labelColor = Color(0xFFB0BEC5),
+                    ),
+                )
+            }
+        }
+
+        // Rim Bending Pattern selector chips
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Rim Pattern:", color = Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+            com.subhankar.lumenglass.core.RimProfile.entries.forEach { profile ->
+                FilterChip(
+                    selected = selectedRimProfile == profile,
+                    onClick = { selectedRimProfile = profile },
+                    label = {
+                        Text(
+                            when (profile) {
+                                com.subhankar.lumenglass.core.RimProfile.TORIC -> "Pattern A (Toric Meniscus)"
+                                com.subhankar.lumenglass.core.RimProfile.SMOOTH -> "Pattern B (Smooth Hermite)"
+                                com.subhankar.lumenglass.core.RimProfile.LEGACY -> "Legacy Squircle"
+                            },
+                            fontSize = 11.sp,
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color(0xFFFFD54F),
                         selectedLabelColor = Color.Black,
                         containerColor = Color(0xFF1E2630),
                         labelColor = Color(0xFFB0BEC5),
@@ -198,7 +240,12 @@ private fun ComposeHarness() {
                                 this.dispersion = dispersion
                                 this.tint = selectedTint.color
                                 this.frost = frostDp.dp
-                                this.edgeLight = 0.2f
+                                this.edgeLight = if (precisionMode) 0.35f else 0.2f
+                                this.precisionMode = precisionMode
+                                this.rimProfile = selectedRimProfile
+                                if (precisionMode) {
+                                    bezel { radius = 10.dp; alpha = 0.16f }
+                                }
                             }
                             .padding(20.dp),
                     ) {
@@ -258,7 +305,12 @@ private fun ComposeHarness() {
                                 this.dispersion = dispersion
                                 this.tint = selectedTint.color
                                 this.frost = frostDp.dp
-                                this.edgeLight = 0.25f
+                                this.edgeLight = if (precisionMode) 0.38f else 0.25f
+                                this.precisionMode = precisionMode
+                                this.rimProfile = selectedRimProfile
+                                if (precisionMode) {
+                                    bezel { radius = 12.dp; alpha = 0.18f }
+                                }
                             }
                             .padding(horizontal = 24.dp),
                     ) {
@@ -288,7 +340,12 @@ private fun ComposeHarness() {
                                 this.dispersion = dispersion
                                 this.tint = selectedTint.color
                                 this.frost = frostDp.dp
-                                this.edgeLight = 0.15f
+                                this.edgeLight = if (precisionMode) 0.30f else 0.15f
+                                this.precisionMode = precisionMode
+                                this.rimProfile = selectedRimProfile
+                                if (precisionMode) {
+                                    bezel { radius = 10.dp; alpha = 0.14f }
+                                }
                             }
                             .padding(16.dp),
                     ) {
@@ -322,7 +379,24 @@ private fun ComposeHarness() {
             TINT_PRESETS.forEach { preset ->
                 FilterChip(
                     selected = selectedTint == preset,
-                    onClick = { selectedTint = preset },
+                    onClick = {
+                        selectedTint = preset
+                        if (preset.name == "Apple Light") {
+                            frostDp = 6f
+                            refraction = 0.9f
+                            dispersion = 0.05f
+                            centreWeight = 0.05f
+                            rimWeight = 0.50f
+                            precisionMode = true
+                        } else if (preset.name == "Apple Dark") {
+                            frostDp = 8f
+                            refraction = 1.0f
+                            dispersion = 0.08f
+                            centreWeight = 0.05f
+                            rimWeight = 0.55f
+                            precisionMode = true
+                        }
+                    },
                     label = { Text(preset.name, fontSize = 11.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = Color(0xFFFF4081),

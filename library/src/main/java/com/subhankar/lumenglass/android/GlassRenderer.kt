@@ -62,6 +62,8 @@ data class GlassUniforms(
     val tier: Float,
     val bezelAlpha: Float = 0f,
     val bezelRadiusPx: Float = 0f,
+    val precisionMode: Float = 1f,
+    val rimProfile: Float = 0f,
 ) {
     companion object {
         /** Superellipse exponent matching the reference squircle field. */
@@ -106,6 +108,12 @@ data class GlassUniforms(
                 // a no-op rather than an untested branch.
                 bezelAlpha = if (tier >= TIER_HIGH) spec.bezel?.alpha ?: 0f else 0f,
                 bezelRadiusPx = if (tier >= TIER_HIGH) bezelRadiusPx else 0f,
+                precisionMode = if (spec.precisionMode) 1f else 0f,
+                rimProfile = when (spec.rimProfile) {
+                    com.subhankar.lumenglass.core.RimProfile.TORIC -> 0f
+                    com.subhankar.lumenglass.core.RimProfile.SMOOTH -> 1f
+                    com.subhankar.lumenglass.core.RimProfile.LEGACY -> 2f
+                },
             )
         }
     }
@@ -187,6 +195,8 @@ internal fun buildGlassShader(uniforms: GlassUniforms): RuntimeShader {
     shader.setFloatUniform("tier", uniforms.tier)
     shader.setFloatUniform("bezelAlpha", uniforms.bezelAlpha)
     shader.setFloatUniform("bezelRadiusPx", uniforms.bezelRadiusPx)
+    shader.setFloatUniform("precisionMode", uniforms.precisionMode)
+    shader.setFloatUniform("rimProfile", uniforms.rimProfile)
 
     // `tint` is declared `layout(color) uniform half4`, so it must be bound as a colour — a
     // setFloatUniform here would throw. This is exactly the kind of per-uniform detail that is easy
