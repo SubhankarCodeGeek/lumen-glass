@@ -29,6 +29,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Search Console "HTML file" ownership verification depends on this exact
+      # file being served at the site root. Deleting it revokes verification, so
+      # fail the build rather than silently un-publish the site's ownership proof.
+      - name: Guard Search Console verification file (source)
+        run: |
+          set -euo pipefail
+          file=google09ae51d459da8d85.html
+          want="google-site-verification: ${file}"
+
+          if [ ! -f "$file" ]; then
+            echo "::error::$file is missing from the repository root. Removing it revokes Google Search Console ownership verification."
+            exit 1
+          fi
+
+          got="$(tr -d '\r\n' < "$file")"
+          if [ "$got" != "$want" ]; then
+            echo "::error::$file content mismatch. Expected '$want' but found '$got'."
+            exit 1
+          fi
+
+          echo "$file is present and its body is correct."
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -37,6 +59,21 @@ jobs:
         with:
           source: ./
           destination: ./_site
+
+      # Guards the other failure mode: the file exists in git but never reaches
+      # the published site because an _config.yml `exclude:` entry (or a future
+      # Jekyll processing rule) swallowed it.
+      - name: Guard Search Console verification file (built site)
+        run: |
+          set -euo pipefail
+          file=_site/google09ae51d459da8d85.html
+
+          if [ ! -f "$file" ]; then
+            echo "::error::$file was not published. Check the exclude: list in _config.yml."
+            exit 1
+          fi
+
+          echo "Verification file survived the Jekyll build."
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
