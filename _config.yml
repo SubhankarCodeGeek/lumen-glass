@@ -29,9 +29,18 @@ description: >-
 url: "https://subhankarcodegeek.github.io"
 baseurl: "/lumen-glass"
 
-# Social preview card, 1200x630. jekyll-seo-tag resolves this against
-# url + baseurl and upgrades twitter:card to summary_large_image automatically.
+# Social preview card, 1200x630.
+#
+# Note: jekyll-seo-tag reads page.image (front matter), NOT site.image, so the
+# defaults block below is what actually applies this. With it set the tag emits
+# og:image + twitter:image and upgrades twitter:card to summary_large_image.
 image: /assets/og-image.png
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/og-image.png
 
 author: SubhankarCodeGeek
 
