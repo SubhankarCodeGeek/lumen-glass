@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Google Search Console ownership proof — not a content page.
+Disallow: /google09ae51d459da8d85.html
+
+Sitemap: https://subhankarcodegeek.github.io/lumen-glass/sitemap.xml

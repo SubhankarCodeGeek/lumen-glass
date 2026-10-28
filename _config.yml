@@ -11,14 +11,29 @@
 # the verification fails), so keeping the build small and reliable matters.
 # ---------------------------------------------------------------------------
 
-title: lumen-glass
+# Shown as the page heading and in og:site_name.
+title: Lumen Glass
+
+# jekyll-seo-tag builds <title> as "title | tagline" — keep it keyword-led and
+# under ~60 characters so it is not truncated in search results.
+tagline: Liquid glass shaders for Android & Jetpack Compose
+
+# Used for <meta name="description"> and og:description. ~155 characters keeps
+# it intact in the SERP snippet, and it carries the terms people actually search
+# for: AGSL shader library, Android, Jetpack Compose, glassmorphism, refraction.
 description: >-
-  Liquid Glass for Android and Jetpack Compose. An open-source AGSL shader
-  library featuring GPU-accelerated refraction, chromatic dispersion, dynamic
-  highlights, and customizable glass effects.
+  Open-source AGSL shader library for Android & Jetpack Compose.
+  GPU-accelerated liquid glass with real refraction, chromatic dispersion
+  and adaptive blur.
 
 url: "https://subhankarcodegeek.github.io"
 baseurl: "/lumen-glass"
+
+# Social preview card, 1200x630. jekyll-seo-tag resolves this against
+# url + baseurl and upgrades twitter:card to summary_large_image automatically.
+image: /assets/og-image.png
+
+author: SubhankarCodeGeek
 
 # Pinned to the theme already in use, so the styling does not depend on the
 # repository's Pages setting surviving future configuration changes.
@@ -26,9 +41,10 @@ theme: jekyll-theme-primer
 
 plugins:
   - jekyll-seo-tag
-  # Emits /sitemap.xml listing every rendered page, so Search Console can
-  # discover docs/*.html and CLEANROOM.html, which nothing else links to.
-  - jekyll-sitemap
+
+# sitemap.xml and robots.txt are maintained by hand instead of via
+# jekyll-sitemap: the plugin also listed /assets/ (a rendering artifact) and the
+# Search Console verification file, neither of which belongs in a sitemap.
 
 markdown: kramdown
 kramdown:
@@ -58,5 +74,6 @@ exclude:
   - .github
   - .vscode
 
-  # --- Binaries not referenced by the rendered site ---
+  # --- Binaries / notes not referenced by the rendered site ---
   - assets/lumen_demo.mp4
+  - assets/README.md
