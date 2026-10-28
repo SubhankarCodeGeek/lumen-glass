@@ -78,6 +78,8 @@
     'uniform float uCentreW;    // LensModel weights, already clamped',
     'uniform float uRimW;',
     'uniform vec2  uLight;      // to-light vector, normalised',
+    'uniform vec2  uSheenPos;   // face highlight centre, local -1..1',
+    'uniform float uSheen;      // face highlight strength',
     '',
     '// Mirrors GlassMath.roundedRectSdf.',
     'float sdRoundRect(vec2 p, vec2 halfSize, float r) {',
@@ -192,6 +194,14 @@
     '',
     '  // Material tint.',
     '  color = mix(color, vec3(1.0), uTint);',
+    '',
+    '  // A soft sheen across the face that tracks the interaction point. Kept',
+    '  // deliberately broad and faint: it is a reflection, not a spotlight.',
+    '  if (uSheen > 0.001) {',
+    '    vec2 sheenDelta = nx - uSheenPos;',
+    '    float halo = exp(-dot(sheenDelta, sheenDelta) * 2.6);',
+    '    color += vec3(halo * uSheen * 0.085);',
+    '  }',
     '',
     '  // ---- Dual-lobe lighting ---------------------------------------------',
     '  float directional = clamp(dot(normal, uLight), 0.0, 1.0);',
@@ -400,6 +410,31 @@
       renderScale: 1
     };
 
+    // Pointer in stage-normalised 0..1 space, plus whether it is over the stage.
+    var pointer = { x: 0.5, y: 0.5, inside: false };
+
+    // Motion state. `tx/ty` is where the pointer wants the glass; `x/y` is where
+    // it currently is. Events never write to the DOM directly — they only move
+    // the target — so a burst of pointermoves produces one smooth glide instead
+    // of a burst of layout writes.
+    var motion = { x: 0, y: 0, tx: 0, ty: 0, speed: 0 };
+
+    // Face highlight position in the glass's own -1..1 space.
+    var sheen = { x: -0.35, y: -0.5, tx: -0.35, ty: -0.5 };
+
+    // Cached measurements. Offset/size are read on resize only, never inside the
+    // animation loop, so per-frame work cannot trigger a synchronous layout.
+    var geom = {
+      ready: false, stageW: 0, stageH: 0, halfW: 0, halfH: 0,
+      radius: 22, travelX: 0, travelY: 0
+    };
+
+    // Time constants (ms). Position slightly slower than light so the surface
+    // reads as having mass while the highlight feels immediate.
+    var TAU_POS = 105;
+    var TAU_LIGHT = 85;
+    var TAU_SHEEN = 140;
+
     var gl = null;
     var program = null;
     var uniforms = {};
@@ -470,7 +505,7 @@
         'uResolution', 'uCenter', 'uHalfSize', 'uCornerRadius', 'uRimWidth',
         'uBackdrop', 'uRefraction', 'uDispersion', 'uExponent', 'uRimProfile',
         'uEdgeLight', 'uTint', 'uSaturation', 'uContrast', 'uBezelAlpha',
-        'uBezelPx', 'uFrost', 'uCentreW', 'uRimW', 'uLight'
+        'uBezelPx', 'uFrost', 'uCentreW', 'uRimW', 'uLight', 'uSheenPos', 'uSheen'
       ].forEach(function (name) {
         uniforms[name] = gl.getUniformLocation(program, name);
       });
@@ -520,9 +555,34 @@
       return coarsePointer ? 1.75 : 2;
     }
 
-    function resize() {
+    // Measures everything the render loop needs, once per resize.
+    //
+    // offsetWidth/offsetHeight are *layout* sizes: a transform does not change
+    // them, so these stay valid while the glass moves. The travel limits are the
+    // slack between the glass and the stage, which also guarantees the panel can
+    // never overflow its container or clip its own rounded corners.
+    function measure() {
       var rect = stage.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
+      if (!rect.width || !rect.height) return null;
+
+      geom.stageW = rect.width;
+      geom.stageH = rect.height;
+      geom.halfW = panel.offsetWidth * 0.5 || 1;
+      geom.halfH = panel.offsetHeight * 0.5 || 1;
+      geom.radius =
+        parseFloat(window.getComputedStyle(panel).borderTopLeftRadius) || 22;
+
+      var slackX = Math.max(0, (geom.stageW - geom.halfW * 2) * 0.5);
+      var slackY = Math.max(0, (geom.stageH - geom.halfH * 2) * 0.5);
+      geom.travelX = Math.min(slackX * 0.86, 190);
+      geom.travelY = Math.min(slackY * 0.8, 115);
+      geom.ready = true;
+      return rect;
+    }
+
+    function resize() {
+      var rect = measure();
+      if (!rect) return;
 
       var dpr = Math.min(window.devicePixelRatio || 1, maxDpr()) * state.renderScale;
       var w = Math.max(1, Math.round(rect.width * dpr));
@@ -568,22 +628,29 @@
       var h = canvas.height;
       gl.viewport(0, 0, w, h);
 
-      var stageRect = stage.getBoundingClientRect();
-      var panelRect = panel.getBoundingClientRect();
-      var sx = w / stageRect.width;
-      var sy = h / stageRect.height;
+      if (!geom.ready) measure();
+      if (!geom.ready) return;
 
-      var cx = (panelRect.left - stageRect.left + panelRect.width * 0.5) * sx;
-      var cy = (panelRect.top - stageRect.top + panelRect.height * 0.5) * sy;
-      var halfW = panelRect.width * 0.5 * sx;
-      var halfH = panelRect.height * 0.5 * sy;
+      var sx = w / Math.max(geom.stageW, 1);
+      var sy = h / Math.max(geom.stageH, 1);
 
-      // Match the DOM's own corner radius so the shader and the CSS agree.
-      var cssRadius = parseFloat(
-        window.getComputedStyle(panel).borderTopLeftRadius
-      ) || 22;
-      var radiusPx = cssRadius * Math.min(sx, sy);
+      // The glass centre in the drawing buffer: stage centre plus the motion
+      // offset the simulation has produced.
+      var cx = (geom.stageW * 0.5 + motion.x) * sx;
+      var cy = (geom.stageH * 0.5 + motion.y) * sy;
+      var halfW = geom.halfW * sx;
+      var halfH = geom.halfH * sy;
+      var radiusPx = geom.radius * Math.min(sx, sy);
       var high = state.tier === 'high';
+
+      // How far the glass is displaced from rest, 0..1. Used to deepen the lens
+      // slightly toward the leading edge without overriding the preset.
+      var travel = Math.max(geom.travelX, geom.travelY, 1);
+      var offsetNorm = Math.min(
+        1,
+        Math.sqrt(motion.x * motion.x + motion.y * motion.y) / travel
+      );
+      var speedNorm = Math.min(1, motion.speed / 1400);
 
       gl.uniform2f(uniforms.uResolution, w, h);
       gl.uniform2f(uniforms.uCenter, cx, cy);
@@ -591,11 +658,15 @@
       gl.uniform1f(uniforms.uCornerRadius, radiusPx);
       gl.uniform1f(uniforms.uRimWidth, Math.min(halfW, halfH) * 0.42);
 
-      gl.uniform1f(uniforms.uRefraction, state.refraction);
-      gl.uniform1f(uniforms.uDispersion, high ? state.dispersion : 0.0);
+      // Preset/slider value is the baseline; movement only adds a few percent.
+      gl.uniform1f(uniforms.uRefraction, state.refraction * (1 + 0.14 * offsetNorm));
+      gl.uniform1f(
+        uniforms.uDispersion,
+        high ? state.dispersion * (1 + 0.55 * speedNorm) : 0.0
+      );
       gl.uniform1f(uniforms.uExponent, state.exponent);
       gl.uniform1f(uniforms.uRimProfile, RIM_INDEX[state.rim] || 0);
-      gl.uniform1f(uniforms.uEdgeLight, state.edge);
+      gl.uniform1f(uniforms.uEdgeLight, state.edge * (1 + 0.2 * offsetNorm));
       gl.uniform1f(uniforms.uTint, state.tint);
       gl.uniform1f(uniforms.uSaturation, state.sat);
       gl.uniform1f(uniforms.uContrast, state.contrast);
@@ -605,6 +676,8 @@
       gl.uniform1f(uniforms.uCentreW, state.centre);
       gl.uniform1f(uniforms.uRimW, state.rimW);
       gl.uniform2f(uniforms.uLight, state.light.x, state.light.y);
+      gl.uniform2f(uniforms.uSheenPos, sheen.x, sheen.y);
+      gl.uniform1f(uniforms.uSheen, 0.55 + 0.45 * offsetNorm);
 
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, backdropTex);
@@ -653,37 +726,153 @@
 
     /* ---- Animation ------------------------------------------------------ */
 
+    // Frame-rate independent exponential approach. Never overshoots, which is
+    // what keeps the motion precise rather than bouncy.
+    function approach(current, target, tau, dt) {
+      var alpha = 1 - Math.exp(-dt / tau);
+      return current + (target - current) * alpha;
+    }
+
+    function clampToTravel() {
+      if (motion.tx > geom.travelX) motion.tx = geom.travelX;
+      if (motion.tx < -geom.travelX) motion.tx = -geom.travelX;
+      if (motion.ty > geom.travelY) motion.ty = geom.travelY;
+      if (motion.ty < -geom.travelY) motion.ty = -geom.travelY;
+    }
+
+    // The highlight and the light are derived from the pointer's position
+    // *relative to the glass as it currently is*, so they keep tracking even
+    // while the glass itself is still travelling toward the pointer.
+    function updateTargets() {
+      if (!geom.ready) return;
+
+      if (pointer.inside && !coarsePointer) {
+        var nx = pointer.x * 2 - 1;
+        var ny = pointer.y * 2 - 1;
+        motion.tx = nx * geom.travelX;
+        motion.ty = ny * geom.travelY;
+        clampToTravel();
+      } else {
+        // Touch has no hover, so the glass rests; only the light follows a tap.
+        motion.tx = 0;
+        motion.ty = 0;
+      }
+
+      var glassCx = geom.stageW * 0.5 + motion.x;
+      var glassCy = geom.stageH * 0.5 + motion.y;
+
+      if (pointer.inside) {
+        var lx = pointer.x * geom.stageW - glassCx;
+        var ly = pointer.y * geom.stageH - glassCy;
+        var len = Math.sqrt(lx * lx + ly * ly) || 1;
+        state.targetLight.x = lx / len;
+        state.targetLight.y = ly / len;
+
+        // Local position inside the glass, clamped so the sheen stays on the
+        // face even when the pointer is beyond an edge.
+        var sxLocal = (pointer.x * geom.stageW - glassCx) / Math.max(geom.halfW, 1);
+        var syLocal = (pointer.y * geom.stageH - glassCy) / Math.max(geom.halfH, 1);
+        sheen.tx = Math.max(-1.2, Math.min(1.2, sxLocal));
+        sheen.ty = Math.max(-1.2, Math.min(1.2, syLocal));
+      } else {
+        state.targetLight.x = -0.6;
+        state.targetLight.y = -0.8;
+        sheen.tx = -0.35;
+        sheen.ty = -0.5;
+      }
+    }
+
+    function writeTransform() {
+      if (reduceMotion.matches || !geom.ready) return;
+
+      var tiltY = (motion.x / Math.max(geom.travelX, 1)) * 2.0;
+      var tiltX = -(motion.y / Math.max(geom.travelY, 1)) * 1.6;
+
+      panel.style.transform =
+        'translate3d(' + motion.x.toFixed(2) + 'px,' + motion.y.toFixed(2) + 'px,0)' +
+        ' perspective(900px) rotateX(' + tiltX.toFixed(2) + 'deg)' +
+        ' rotateY(' + tiltY.toFixed(2) + 'deg)';
+    }
+
     function tick() {
       rafId = 0;
 
       var now = window.performance ? performance.now() : 0;
+      var dt = lastTickAt ? Math.min(now - lastTickAt, 64) : 16.7;
       if (lastTickAt) intervals.push(now - lastTickAt);
       lastTickAt = now;
       if (intervals.length > 40) intervals.shift();
 
-      var dx = state.targetLight.x - state.light.x;
-      var dy = state.targetLight.y - state.light.y;
-      var moving = Math.abs(dx) > 0.003 || Math.abs(dy) > 0.003;
+      if (reduceMotion.matches) {
+        motion.x = motion.y = motion.tx = motion.ty = 0;
+        motion.speed = 0;
+        state.light.x = state.targetLight.x = -0.6;
+        state.light.y = state.targetLight.y = -0.8;
+        sheen.x = sheen.tx = -0.35;
+        sheen.y = sheen.ty = -0.5;
+        if (needsRender) {
+          uploadBackdrop();
+          render();
+          needsRender = false;
+        }
+        return;
+      }
 
-      if (moving) {
-        state.light.x += dx * 0.2;
-        state.light.y += dy * 0.2;
+      updateTargets();
+
+      var prevX = motion.x;
+      var prevY = motion.y;
+      motion.x = approach(motion.x, motion.tx, TAU_POS, dt);
+      motion.y = approach(motion.y, motion.ty, TAU_POS, dt);
+
+      var movedNow = Math.sqrt(
+        (motion.x - prevX) * (motion.x - prevX) +
+          (motion.y - prevY) * (motion.y - prevY)
+      );
+      // Smooth the speed signal so the dispersion response cannot flicker.
+      var instantSpeed = dt > 0 ? (movedNow / dt) * 1000 : 0;
+      motion.speed += (instantSpeed - motion.speed) * 0.25;
+
+      var lightDx = state.targetLight.x - state.light.x;
+      var lightDy = state.targetLight.y - state.light.y;
+      var lightMoving = Math.abs(lightDx) > 0.002 || Math.abs(lightDy) > 0.002;
+      state.light.x = approach(state.light.x, state.targetLight.x, TAU_LIGHT, dt);
+      state.light.y = approach(state.light.y, state.targetLight.y, TAU_LIGHT, dt);
+
+      sheen.x = approach(sheen.x, sheen.tx, TAU_SHEEN, dt);
+      sheen.y = approach(sheen.y, sheen.ty, TAU_SHEEN, dt);
+
+      var glassMoving =
+        Math.abs(motion.tx - motion.x) > 0.05 ||
+        Math.abs(motion.ty - motion.y) > 0.05;
+      var sheenMoving =
+        Math.abs(sheen.tx - sheen.x) > 0.002 || Math.abs(sheen.ty - sheen.y) > 0.002;
+
+      if (glassMoving || lightMoving || sheenMoving) {
         needsRender = true;
       } else {
+        // Snap the last sliver so the rest state is exact, then stop.
+        motion.x = motion.tx;
+        motion.y = motion.ty;
         state.light.x = state.targetLight.x;
         state.light.y = state.targetLight.y;
+        sheen.x = sheen.tx;
+        sheen.y = sheen.ty;
+        motion.speed = 0;
       }
+
+      writeTransform();
 
       if (needsRender) {
         uploadBackdrop();
         render();
         needsRender = false;
-        if (moving) adaptQuality();
+        if (glassMoving) adaptQuality();
       }
 
-      // Keep easing only while the light is still travelling, then stop: an idle
-      // stage does no work at all.
-      if (moving) schedule();
+      // Keep animating only while something is still settling; an idle stage
+      // does no work at all.
+      if (glassMoving || lightMoving || sheenMoving) schedule();
     }
 
     function schedule() {
@@ -698,45 +887,42 @@
 
     /* ---- Pointer -------------------------------------------------------- */
 
+    // Events only record where the pointer is. Everything visual is derived in
+    // the animation loop, so a burst of pointermoves cannot cause a burst of
+    // layout writes or shader recompiles.
     function setLightFromPoint(clientX, clientY) {
       var rect = stage.getBoundingClientRect();
-      var x = (clientX - rect.left) / rect.width;
-      var y = (clientY - rect.top) / rect.height;
+      if (!rect.width || !rect.height) return;
 
-      var panelRect = panel.getBoundingClientRect();
-      var cx = (panelRect.left - rect.left + panelRect.width * 0.5) / rect.width;
-      var cy = (panelRect.top - rect.top + panelRect.height * 0.5) / rect.height;
+      pointer.x = (clientX - rect.left) / rect.width;
+      pointer.y = (clientY - rect.top) / rect.height;
+      pointer.inside = true;
 
-      // To-light vector from the glass centre toward the pointer, matching the
-      // shader's uLight semantics.
-      var lx = x - cx;
-      var ly = y - cy;
-      var len = Math.sqrt(lx * lx + ly * ly) || 1;
-      state.targetLight.x = lx / len;
-      state.targetLight.y = ly / len;
-
-      // Cheap CSS layer: glow position and panel tilt, no shader work of its own.
-      stage.style.setProperty('--light-x', (x * 100).toFixed(1) + '%');
-      stage.style.setProperty('--light-y', (y * 100).toFixed(1) + '%');
-
-      if (!reduceMotion.matches) {
-        panel.style.setProperty('--tilt-y', ((x - 0.5) * 2.2).toFixed(2) + 'deg');
-        panel.style.setProperty('--tilt-x', (-(y - 0.5) * 2.2).toFixed(2) + 'deg');
-      }
+      // Cheap CSS layer: the ambient glow and its position, no shader work.
+      stage.style.setProperty('--light-x', (pointer.x * 100).toFixed(1) + '%');
+      stage.style.setProperty('--light-y', (pointer.y * 100).toFixed(1) + '%');
 
       requestRender();
     }
 
     function onPointerMove(event) {
+      // Touch has no hover: a tap moves the light, but the glass does not chase a
+      // finger, which would fight scrolling. Handled in updateTargets().
       setLightFromPoint(event.clientX, event.clientY);
     }
 
     function onPointerLeave() {
-      // Ease back to the shader's real default: light from the top-left.
-      state.targetLight.x = -0.6;
-      state.targetLight.y = -0.8;
-      panel.style.setProperty('--tilt-x', '0deg');
-      panel.style.setProperty('--tilt-y', '0deg');
+      pointer.inside = false;
+      // updateTargets() returns the glass, light and sheen to rest.
+      requestRender();
+    }
+
+    function onMotionPreferenceChange() {
+      if (reduceMotion.matches) {
+        motion.x = motion.y = motion.tx = motion.ty = 0;
+        motion.speed = 0;
+        panel.style.transform = '';
+      }
       requestRender();
     }
 
@@ -936,6 +1122,10 @@
       if (!document.hidden) requestRender();
     });
 
+    if (reduceMotion.addEventListener) {
+      reduceMotion.addEventListener('change', onMotionPreferenceChange);
+    }
+
     // Small surface for the test suite and for debugging.
     //
     // snapshot() renders and then reads the framebuffer in the same task, so it
@@ -984,6 +1174,17 @@
       requestRender: requestRender,
       setLightFromPoint: setLightFromPoint,
       snapshot: snapshot,
+      // Exposed for the test suite: motion/geometry let it assert that the glass
+      // actually travels and settles rather than only that pixels changed.
+      motion: motion,
+      geometry: geom,
+      isSettled: function () {
+        return (
+          !rafId &&
+          Math.abs(motion.tx - motion.x) < 0.1 &&
+          Math.abs(motion.ty - motion.y) < 0.1
+        );
+      },
       getStats: function () {
         var median = medianInterval();
         return {

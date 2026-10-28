@@ -1372,10 +1372,10 @@ ol {
 
 /* The glass surface. In WebGL mode the shader paints the material, so this is
    only the type layer plus a hairline that the shader also draws — the DOM
-   border is what keeps the text legible if the canvas is mid-resize. */
+   border is what keeps the text legible if the canvas is mid-resize.
+   Its transform is owned by lumen-demo.js (translate + a slight tilt); the base
+   rule stays transform-free so the fallback tiers are not 3D-composited. */
 .demo__panel {
-  --tilt-x: 0deg;
-  --tilt-y: 0deg;
   position: relative;
   z-index: 2;
   display: grid;
@@ -1384,8 +1384,7 @@ ol {
   min-height: clamp(7.5rem, 18vw, 10rem);
   padding: clamp(1.1rem, 2.4vw, 1.6rem);
   border-radius: 22px;
-  transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
-  transform-style: preserve-3d;
+  transform: none;
   transition: transform 220ms var(--ease);
   pointer-events: none;
 }
@@ -1414,11 +1413,19 @@ ol {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* No tilt at all: a perspective transform with zero rotation still creates a
-     3D rendering context for no benefit. */
+  /* Forced: the script also stops writing the transform, but this keeps the
+     glass still even if a user flips the preference mid-session. */
   .demo__panel {
-    transform: none;
+    transform: none !important;
   }
+}
+
+/* In WebGL mode the loop writes the transform every frame; a CSS transition
+   would fight it and make the glass feel rubbery. The fallback tiers keep the
+   transition because nothing animates them. */
+.demo__stage.demo--webgl .demo__panel {
+  transition: none;
+  will-change: transform;
 }
 
 /* CSS tier: the previous approximation, used when WebGL is unavailable. */
