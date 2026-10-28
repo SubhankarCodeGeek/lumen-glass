@@ -1,21 +1,21 @@
----
-layout: null
-sitemap: false
----
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{%- comment -%}
-  Explicit allowlist rather than a scan of site.pages. Scanning pulls in the
-  Search Console verification file, the rendered assets/README.html and other
-  build artifacts, which pollutes the sitemap with URLs that should not rank.
-  Add a line here when a new documentation page is created.
-
-  changefreq and priority are intentionally omitted: Google ignores both.
-{%- endcomment -%}
-{%- assign paths = "/,/CLEANROOM.html,/docs/ARCHITECTURE.html,/docs/PARITY.html,/docs/PERF.html,/docs/PLAN.html" | split: "," -%}
-{%- for path in paths %}
   <url>
-    <loc>{{ path | absolute_url }}</loc>
+    <loc>https://subhankarcodegeek.github.io/lumen-glass/</loc>
   </url>
-{%- endfor %}
+  <url>
+    <loc>https://subhankarcodegeek.github.io/lumen-glass/CLEANROOM.html</loc>
+  </url>
+  <url>
+    <loc>https://subhankarcodegeek.github.io/lumen-glass/docs/ARCHITECTURE.html</loc>
+  </url>
+  <url>
+    <loc>https://subhankarcodegeek.github.io/lumen-glass/docs/PARITY.html</loc>
+  </url>
+  <url>
+    <loc>https://subhankarcodegeek.github.io/lumen-glass/docs/PERF.html</loc>
+  </url>
+  <url>
+    <loc>https://subhankarcodegeek.github.io/lumen-glass/docs/PLAN.html</loc>
+  </url>
 </urlset>
