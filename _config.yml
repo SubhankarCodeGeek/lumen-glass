@@ -26,6 +26,9 @@ theme: jekyll-theme-primer
 
 plugins:
   - jekyll-seo-tag
+  # Emits /sitemap.xml listing every rendered page, so Search Console can
+  # discover docs/*.html and CLEANROOM.html, which nothing else links to.
+  - jekyll-sitemap
 
 markdown: kramdown
 kramdown:
