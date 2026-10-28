@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------------------
+# GitHub Pages (Jekyll) configuration — https://subhankarcodegeek.github.io/lumen-glass/
+#
+# The published site is the documentation surface only: README.md renders as
+# index.html, docs/*.md render as docs/*.html, and assets/ holds the images the
+# README embeds.
+#
+# Everything Android/Gradle related is excluded so the Jekyll build stays fast
+# and deterministic. A stale or failed Pages build is the reason a
+# google-site-verification file can appear to "not exist" (Google gets a 404 and
+# the verification fails), so keeping the build small and reliable matters.
+# ---------------------------------------------------------------------------
+
+title: lumen-glass
+description: >-
+  Liquid Glass for Android and Jetpack Compose. An open-source AGSL shader
+  library featuring GPU-accelerated refraction, chromatic dispersion, dynamic
+  highlights, and customizable glass effects.
+
+url: "https://subhankarcodegeek.github.io"
+baseurl: "/lumen-glass"
+
+# Pinned to the theme already in use, so the styling does not depend on the
+# repository's Pages setting surviving future configuration changes.
+theme: jekyll-theme-primer
+
+plugins:
+  - jekyll-seo-tag
+
+markdown: kramdown
+kramdown:
+  input: GFM
+
+exclude:
+  # --- Android modules (source is not part of the site) ---
+  - app
+  - library
+  - benchmark
+
+  # --- Build output & Gradle ---
+  - build
+  - gradle
+  - gradlew
+  - gradlew.bat
+  - settings.gradle.kts
+  - build.gradle.kts
+  - gradle.properties
+  - local.properties
+  - jitpack.yml
+
+  # --- Tooling / IDE state ---
+  - .gradle
+  - .kotlin
+  - .idea
+  - .github
+  - .vscode
+
+  # --- Binaries not referenced by the rendered site ---
+  - assets/lumen_demo.mp4
