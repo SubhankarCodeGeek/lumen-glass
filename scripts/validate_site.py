@@ -39,6 +39,7 @@ REQUIRED = [
     "assets/site/styles.css",
     "assets/site/docs.css",
     "assets/site/script.js",
+    "assets/site/lumen-demo.js",
     "assets/site/favicon.svg",
     "assets/site/hero-poster.jpg",
     "assets/site/hero-demo.mp4",

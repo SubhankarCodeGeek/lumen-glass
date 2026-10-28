@@ -266,40 +266,6 @@
     }
   }
 
-  /* -- Optical console (CSS approximation) --------------------------------- */
-
-  function initConsole() {
-    var panel = document.getElementById('console-panel');
-    if (!panel) return;
-
-    var knobs = document.querySelectorAll('[data-knob]');
-    if (!knobs.length) return;
-
-    function setValue(knob) {
-      var name = knob.getAttribute('data-knob');
-      var raw = Number(knob.value);
-      var output = document.getElementById('out-' + name);
-
-      if (name === 'frost') {
-        panel.style.setProperty('--frost', raw + 'px');
-        if (output) output.textContent = raw + ' px';
-      } else if (name === 'tint') {
-        panel.style.setProperty('--tint', String(raw / 100));
-        if (output) output.textContent = (raw / 100).toFixed(2);
-      } else if (name === 'rim') {
-        panel.style.setProperty('--rim', String(raw / 100));
-        if (output) output.textContent = (raw / 100).toFixed(2);
-      }
-    }
-
-    Array.prototype.forEach.call(knobs, function (knob) {
-      setValue(knob);
-      knob.addEventListener('input', function () {
-        setValue(knob);
-      });
-    });
-  }
-
   /* -- Boot ---------------------------------------------------------------- */
 
   function boot() {
@@ -308,7 +274,8 @@
     initCopyButtons();
     initReveal();
     initHeroVideo();
-    initConsole();
+    // The interactive glass stage lives in lumen-demo.js: it is a separate
+    // concern (WebGL) with its own fallback ladder.
   }
 
   if (document.readyState === 'loading') {

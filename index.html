@@ -271,41 +271,102 @@ permalink: /
         </figure>
       </div>
 
-      <!-- Interactive CSS approximation of the material ------------------- -->
-      <div class="console" data-reveal>
-        <div class="console__stage">
-          <span class="console__backdrop" aria-hidden="true"></span>
-          <div class="console__panel" id="console-panel">
-            <span class="console__label">Lumen</span>
-          </div>
-        </div>
-        <div class="console__controls">
-          <div class="control">
-            <div class="control__top">
-              <label class="control__name" for="knob-frost">frost</label>
-              <output class="control__value" for="knob-frost" id="out-frost">6 px</output>
+      <!-- Live shader demo -------------------------------------------------
+           The canvas renders the library's own algorithm in GLSL. The panel
+           above it is DOM so the hero text stays crisp, selectable and
+           readable to a screen reader; the wordmark baked into the sampled
+           backdrop is what visibly refracts. -->
+      <div class="demo" data-reveal>
+        <div class="demo__stage" id="demo-stage">
+          <canvas class="demo__canvas" id="demo-canvas" role="img"
+                  aria-label="A glass panel refracting a colourful backdrop. Rounded edges bend the grid and the large LUMEN wordmark behind it, and a bright rim highlight follows the pointer."></canvas>
+
+          <div class="demo__panel" id="demo-panel">
+            <div class="demo__panel-inner">
+              <p class="demo__eyebrow">Liquid glass for Android</p>
+              <p class="demo__title">Lumen Glass</p>
             </div>
-            <input type="range" id="knob-frost" min="0" max="18" step="1" value="6" data-knob="frost">
           </div>
-          <div class="control">
-            <div class="control__top">
-              <label class="control__name" for="knob-tint">tint</label>
-              <output class="control__value" for="knob-tint" id="out-tint">0.10</output>
-            </div>
-            <input type="range" id="knob-tint" min="0" max="50" step="1" value="10" data-knob="tint">
-          </div>
-          <div class="control">
-            <div class="control__top">
-              <label class="control__name" for="knob-rim">rim light</label>
-              <output class="control__value" for="knob-rim" id="out-rim">0.28</output>
-            </div>
-            <input type="range" id="knob-rim" min="0" max="100" step="1" value="28" data-knob="rim">
-          </div>
-          <p class="console__note">
-            CSS approximation of the material, for illustration only. The real surface
-            is GPU-rendered by an AGSL shader and cannot be reproduced in a browser.
+
+          <p class="demo__hint">
+            Move your pointer across the stage
           </p>
         </div>
+
+        <div class="demo__bar">
+          <div class="demo__group">
+            <p class="demo__legend" id="legend-preset">Preset</p>
+            <div class="demo__pills" role="group" aria-labelledby="legend-preset">
+              <button type="button" class="pill" data-demo-preset="clear" aria-pressed="false">Clear</button>
+              <button type="button" class="pill" data-demo-preset="light" aria-pressed="true">Light</button>
+              <button type="button" class="pill" data-demo-preset="dark" aria-pressed="false">Dark</button>
+              <button type="button" class="pill" data-demo-preset="droplet" aria-pressed="false">Droplet</button>
+            </div>
+          </div>
+
+          <div class="demo__group">
+            <p class="demo__legend" id="legend-rim">Rim profile</p>
+            <div class="demo__pills" role="group" aria-labelledby="legend-rim">
+              <button type="button" class="pill pill--mono" data-demo-rim="toric" aria-pressed="true">TORIC</button>
+              <button type="button" class="pill pill--mono" data-demo-rim="smooth" aria-pressed="false">SMOOTH</button>
+              <button type="button" class="pill pill--mono" data-demo-rim="droplet" aria-pressed="false">DROPLET</button>
+              <button type="button" class="pill pill--mono" data-demo-rim="legacy" aria-pressed="false">LEGACY</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="demo__advanced">
+          <summary>Advanced controls</summary>
+          <div class="demo__advanced-body">
+            <div class="control">
+              <div class="control__top">
+                <label class="control__name" for="knob-refraction">refraction</label>
+                <output class="control__value" for="knob-refraction" id="out-refraction">0.90</output>
+              </div>
+              <input type="range" id="knob-refraction" min="0" max="200" step="1" value="90" data-demo="refraction">
+            </div>
+            <div class="control">
+              <div class="control__top">
+                <label class="control__name" for="knob-dispersion">dispersion</label>
+                <output class="control__value" for="knob-dispersion" id="out-dispersion">0.05</output>
+              </div>
+              <input type="range" id="knob-dispersion" min="0" max="20" step="1" value="5" data-demo="dispersion">
+            </div>
+            <div class="control">
+              <div class="control__top">
+                <label class="control__name" for="knob-tint">tint</label>
+                <output class="control__value" for="knob-tint" id="out-tint">0.34</output>
+              </div>
+              <input type="range" id="knob-tint" min="0" max="60" step="1" value="34" data-demo="tint">
+            </div>
+            <div class="control">
+              <div class="control__top">
+                <label class="control__name" for="knob-edge">rim light</label>
+                <output class="control__value" for="knob-edge" id="out-edge">0.28</output>
+              </div>
+              <input type="range" id="knob-edge" min="0" max="100" step="1" value="28" data-demo="edge">
+            </div>
+
+            <div class="demo__group demo__group--wide">
+              <p class="demo__legend" id="legend-tier">Quality tier</p>
+              <div class="demo__pills" role="group" aria-labelledby="legend-tier">
+                <button type="button" class="pill pill--mono" data-demo-tier="high" aria-pressed="true">HIGH</button>
+                <button type="button" class="pill pill--mono" data-demo-tier="balanced" aria-pressed="false">BALANCED</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div class="demo__foot">
+          <p class="demo__note" id="demo-note">
+            The library’s own shader maths — SDF, rim profiles, dispersion and
+            dual-lobe lighting — transcribed to GLSL and running live. Same algorithm,
+            not the Android AGSL runtime.
+          </p>
+          <p class="demo__status" id="demo-status">WebGL</p>
+        </div>
+
+        <p class="sr-only" role="status" aria-live="polite" id="demo-live"></p>
       </div>
     </div>
   </section>
