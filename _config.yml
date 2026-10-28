@@ -40,7 +40,11 @@ defaults:
   - scope:
       path: ""
     values:
-      image: /assets/og-image.png
+      image:
+        path: /assets/og-image.png
+        width: 1200
+        height: 630
+        alt: Lumen Glass — liquid glass shaders for Android and Jetpack Compose
 
 author: SubhankarCodeGeek
 
