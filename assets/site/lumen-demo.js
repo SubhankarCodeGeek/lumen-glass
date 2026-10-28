@@ -232,6 +232,16 @@
   /* Backdrop — our own stage, so it is already a texture                    */
   /* ---------------------------------------------------------------------- */
 
+  // One definition of the wordmark so the drawing code and the travel limits
+  // cannot drift apart: the glass has to be able to reach the outer letters.
+  var WORDMARK = 'LUMEN';
+  var SANS_STACK = 'Inter, -apple-system, "Segoe UI", Roboto, sans-serif';
+  var wordmarkTracking = function (size) { return size * 0.06; };
+
+  function wordmarkFontSize(boxW, boxH) {
+    return Math.min(boxW * 0.3, boxH * 0.62);
+  }
+
   function drawBackdrop(canvas) {
     var ctx = canvas.getContext('2d');
     if (!ctx) return false;
@@ -270,10 +280,10 @@
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    var size = Math.min(w * 0.3, h * 0.62);
-    ctx.font = '700 ' + size + 'px Inter, -apple-system, "Segoe UI", Roboto, sans-serif';
-    var text = 'LUMEN';
-    var tracking = size * 0.06;
+    var size = wordmarkFontSize(w, h);
+    ctx.font = '700 ' + size + 'px ' + SANS_STACK;
+    var text = WORDMARK;
+    var tracking = wordmarkTracking(size);
     var widths = [];
     var total = 0;
     var i;
@@ -429,11 +439,25 @@
       radius: 22, travelX: 0, travelY: 0
     };
 
-    // Time constants (ms). Position slightly slower than light so the surface
-    // reads as having mass while the highlight feels immediate.
+    // Times (ms) and mapping constants.
+    //
+    // TAU_POS is slightly slower than TAU_LIGHT so the surface reads as having
+    // mass while the highlight feels immediate.
     var TAU_POS = 105;
     var TAU_LIGHT = 85;
     var TAU_SHEEN = 140;
+
+    // Fraction of the stage width that drives the glass from centre to full
+    // travel. Half a stage would map 1:1 onto the pointer across the whole
+    // width, but the glass cannot reach that far without leaving the stage, so
+    // response is compressed into this band instead of being left to lag.
+    var POINTER_SPAN = 0.46;
+
+    // Hard ceiling on how fast the glass may travel (px/s). Exponential
+    // smoothing alone would let an instantaneous pointer jump move the glass a
+    // long way in a single frame; this keeps it visually stable no matter what
+    // the input does.
+    var MAX_SPEED = 2600;
 
     var gl = null;
     var program = null;
@@ -555,6 +579,27 @@
       return coarsePointer ? 1.75 : 2;
     }
 
+    // Half the rendered width of the wordmark, in stage pixels.
+    //
+    // The backdrop texture covers the whole stage at reduced resolution, so the
+    // stage size is what the font size is derived from — matching drawBackdrop.
+    var measureCtx = null;
+    function wordmarkHalfWidth() {
+      if (!measureCtx) {
+        measureCtx = document.createElement('canvas').getContext('2d');
+      }
+      if (!measureCtx) return 0;
+
+      var size = wordmarkFontSize(geom.stageW, geom.stageH);
+      measureCtx.font = '700 ' + size + 'px ' + SANS_STACK;
+      var tracking = wordmarkTracking(size);
+      var total = 0;
+      for (var i = 0; i < WORDMARK.length; i++) {
+        total += measureCtx.measureText(WORDMARK[i]).width + tracking;
+      }
+      return Math.max(0, (total - tracking) / 2);
+    }
+
     // Measures everything the render loop needs, once per resize.
     //
     // offsetWidth/offsetHeight are *layout* sizes: a transform does not change
@@ -574,8 +619,18 @@
 
       var slackX = Math.max(0, (geom.stageW - geom.halfW * 2) * 0.5);
       var slackY = Math.max(0, (geom.stageH - geom.halfH * 2) * 0.5);
-      geom.travelX = Math.min(slackX * 0.86, 190);
-      geom.travelY = Math.min(slackY * 0.8, 115);
+
+      // Use nearly all of the available slack, not a timid fraction of it. The
+      // earlier 190px cap meant the glass stopped well short of the outer letters
+      // of the wordmark, which read as "the glass is not following me" exactly
+      // where the composition is most interesting.
+      geom.travelX = Math.min(slackX * 0.95, 372);
+      geom.travelY = Math.min(slackY * 0.92, 132);
+
+      // How far the outer letters of the wordmark sit from centre, in stage px.
+      // Computed from the same font spec the backdrop uses, so a test can assert
+      // the glass is actually able to reach them.
+      geom.wordmarkHalf = wordmarkHalfWidth();
       geom.ready = true;
       return rect;
     }
@@ -740,6 +795,10 @@
       if (motion.ty < -geom.travelY) motion.ty = -geom.travelY;
     }
 
+    function clampUnit(v) {
+      return v > 1 ? 1 : v < -1 ? -1 : v;
+    }
+
     // The highlight and the light are derived from the pointer's position
     // *relative to the glass as it currently is*, so they keep tracking even
     // while the glass itself is still travelling toward the pointer.
@@ -747,10 +806,14 @@
       if (!geom.ready) return;
 
       if (pointer.inside && !coarsePointer) {
-        var nx = pointer.x * 2 - 1;
-        var ny = pointer.y * 2 - 1;
-        motion.tx = nx * geom.travelX;
-        motion.ty = ny * geom.travelY;
+        // The pointer spans the whole stage, but the glass can only travel within
+        // its slack. Mapping a slightly inset pointer range onto the full travel
+        // means the glass reaches the outer letters of the wordmark instead of
+        // lagging behind near the edges.
+        var nx = (pointer.x - 0.5) / POINTER_SPAN;
+        var ny = (pointer.y - 0.5) / POINTER_SPAN;
+        motion.tx = clampUnit(nx) * geom.travelX;
+        motion.ty = clampUnit(ny) * geom.travelY;
         clampToTravel();
       } else {
         // Touch has no hover, so the glass rests; only the light follows a tap.
@@ -824,6 +887,19 @@
       var prevY = motion.y;
       motion.x = approach(motion.x, motion.tx, TAU_POS, dt);
       motion.y = approach(motion.y, motion.ty, TAU_POS, dt);
+
+      // Clamp the distance covered in one frame. Without this, a pointer that
+      // teleports (entering the stage from far away, or a synthetic jump) makes
+      // the glass lurch; a real sweep is nowhere near this limit.
+      var stepX = motion.x - prevX;
+      var stepY = motion.y - prevY;
+      var stepLen = Math.sqrt(stepX * stepX + stepY * stepY);
+      var maxStep = (MAX_SPEED * dt) / 1000;
+      if (stepLen > maxStep && stepLen > 0) {
+        var scaleBack = maxStep / stepLen;
+        motion.x = prevX + stepX * scaleBack;
+        motion.y = prevY + stepY * scaleBack;
+      }
 
       var movedNow = Math.sqrt(
         (motion.x - prevX) * (motion.x - prevX) +
@@ -1175,9 +1251,10 @@
       setLightFromPoint: setLightFromPoint,
       snapshot: snapshot,
       // Exposed for the test suite: motion/geometry let it assert that the glass
-      // actually travels and settles rather than only that pixels changed.
+      // actually travels, reaches the wordmark, and settles.
       motion: motion,
       geometry: geom,
+      wordmarkHalf: function () { return geom.wordmarkHalf; },
       isSettled: function () {
         return (
           !rafId &&
