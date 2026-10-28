@@ -1,0 +1,44 @@
+<!--
+  Structured data for the library itself.
+
+  jekyll-seo-tag (used by the theme-rendered Markdown pages) emits a generic
+  WebSite node; for an SDK the useful entity is SoftwareSourceCode, which lets a
+  crawler associate the page with the repository, language and licence instead of
+  treating it as an anonymous web page.
+
+  Kept as static JSON — no Liquid — so the block validates as JSON and needs no
+  escaping. Only facts verifiable in this repository are asserted: no ratings,
+  download counts, prices or affiliations. If the Pages URL or baseurl changes,
+  update `url` and `image` below.
+-->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "Lumen Glass",
+  "alternateName": "LumenGlass",
+  "description": "Open-source liquid glass rendering library for Android and Jetpack Compose. Custom AGSL runtime shaders providing optical refraction, chromatic dispersion, configurable rim profiles and adaptive glass lighting.",
+  "url": "https://subhankarcodegeek.github.io/lumen-glass/",
+  "image": "https://subhankarcodegeek.github.io/lumen-glass/assets/og-image.png",
+  "codeRepository": "https://github.com/SubhankarCodeGeek/lumen-glass",
+  "programmingLanguage": "Kotlin",
+  "runtimePlatform": "Android",
+  "operatingSystem": "Android",
+  "applicationCategory": "DeveloperApplication",
+  "version": "0.1.1",
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Person",
+    "name": "Subhankar Bag",
+    "alternateName": "SubhankarCodeGeek",
+    "url": "https://github.com/SubhankarCodeGeek"
+  },
+  "maintainer": {
+    "@type": "Person",
+    "name": "Subhankar Bag",
+    "url": "https://github.com/SubhankarCodeGeek"
+  },
+  "keywords": "liquid glass, AGSL shader, RuntimeShader, Jetpack Compose, Android, glassmorphism, refraction, chromatic dispersion, Kotlin"
+}
+</script>

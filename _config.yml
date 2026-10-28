@@ -1,9 +1,14 @@
 # ---------------------------------------------------------------------------
 # GitHub Pages (Jekyll) configuration — https://subhankarcodegeek.github.io/lumen-glass/
 #
-# The published site is the documentation surface only: README.md renders as
-# index.html, docs/*.md render as docs/*.html, and assets/ holds the images the
-# README embeds.
+# The published site has two surfaces:
+#   * /            → index.html, rendered through _layouts/landing.html
+#   * /docs/*.html → docs/*.md, rendered through _layouts/docs.html
+# plus assets/, which holds the screenshots both of them use.
+#
+# index.html is a real file, so jekyll-readme-index no longer promotes README.md
+# to the site root: the README stays the repository's technical front door on
+# GitHub and this landing page owns the website.
 #
 # Everything Android/Gradle related is excluded so the Jekyll build stays fast
 # and deterministic. A stale or failed Pages build is the reason a
@@ -46,6 +51,20 @@ defaults:
         height: 630
         alt: Lumen Glass — liquid glass shaders for Android and Jetpack Compose
 
+  # Render the Markdown notes with the site's own layout instead of the theme's.
+  - scope:
+      path: "docs"
+    values:
+      layout: docs
+
+  # CLEANROOM.md lives at the repository root but is published as a documentation
+  # page (the footer and the landing page both link to it), so it gets the same
+  # layout.
+  - scope:
+      path: "CLEANROOM.md"
+    values:
+      layout: docs
+
 author: SubhankarCodeGeek
 
 # Pinned to the theme already in use, so the styling does not depend on the
@@ -86,6 +105,7 @@ exclude:
   - .idea
   - .github
   - .vscode
+  - scripts
 
   # --- Binaries / notes not referenced by the rendered site ---
   - assets/lumen_demo.mp4

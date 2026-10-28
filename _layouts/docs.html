@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{%- assign doc_name = page.name | remove: '.md' | remove: '.html' -%}
+{%- assign doc_title = doc_name | capitalize -%}
+<title>{{ doc_title }} | Lumen Glass documentation</title>
+<meta name="description" content="Lumen Glass documentation — {{ doc_title | downcase }} notes for the open-source liquid glass rendering library for Android and Jetpack Compose.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#04050a">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Subhankar Bag">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Lumen Glass">
+<meta property="og:title" content="{{ doc_title }} | Lumen Glass documentation">
+<meta property="og:description" content="Technical documentation for the Lumen Glass Android library.">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
+<meta property="og:image" content="{{ '/assets/og-image.png' | absolute_url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ '/assets/og-image.png' | absolute_url }}">
+
+<link rel="icon" href="{{ '/assets/site/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="stylesheet" href="{{ '/assets/site/styles.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/site/docs.css' | relative_url }}">
+<script>document.documentElement.classList.add('js')</script>
+<script src="{{ '/assets/site/script.js' | relative_url }}" defer></script>
+
+{% include project-jsonld.html %}
+</head>
+<body class="docs-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="aurora" aria-hidden="true">
+  <span class="aurora__blob aurora__blob--a"></span>
+  <span class="aurora__blob aurora__blob--b"></span>
+</div>
+
+<header class="site-header is-stuck">
+  <div class="container site-header__inner">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      <img class="brand__mark" src="{{ '/assets/site/favicon.svg' | relative_url }}" alt="" width="26" height="26">
+      Lumen Glass
+    </a>
+    <nav class="nav" aria-label="Documentation">
+      <a class="nav__link" href="{{ '/' | relative_url }}">Home</a>
+      <a class="nav__link" href="{{ '/' | relative_url }}#installation">Installation</a>
+      <a class="nav__link" href="{{ '/' | relative_url }}#features">Features</a>
+      <a class="nav__link" href="{{ '/' | relative_url }}#docs">All docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--sm" href="https://github.com/SubhankarCodeGeek/lumen-glass">GitHub</a>
+    </div>
+    <details class="nav-drawer" id="nav-drawer">
+      <summary>
+        <span class="sr-only">Menu</span>
+        <svg class="nav-drawer__icon nav-drawer__icon--menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/>
+        </svg>
+        <svg class="nav-drawer__icon nav-drawer__icon--close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/>
+        </svg>
+      </summary>
+      <div class="nav-drawer__panel">
+        <a class="nav__link" href="{{ '/' | relative_url }}">Home</a>
+        <a class="nav__link" href="{{ '/' | relative_url }}#installation">Installation</a>
+        <a class="nav__link" href="{{ '/' | relative_url }}#features">Features</a>
+        <a class="nav__link" href="{{ '/' | relative_url }}#docs">All docs</a>
+        <a class="nav__link" href="https://github.com/SubhankarCodeGeek/lumen-glass">GitHub repository</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="container">
+    <nav class="doc__crumbs" aria-label="Breadcrumb">
+      <a href="{{ '/' | relative_url }}">Lumen Glass</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ doc_title }}</span>
+    </nav>
+
+    <article class="prose">
+      {{ content }}
+    </article>
+
+    <p class="doc__source">
+      Source of this page:
+      <a href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/{{ page.path }}">
+        {{- page.path -}}
+      </a>
+    </p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__bottom" style="margin-top: 0; border-top: 0; padding-top: 0;">
+      <p>Copyright &copy; 2026 Subhankar Bag.</p>
+      <p class="footer__legal">
+        <a class="footer__link" href="https://github.com/SubhankarCodeGeek/lumen-glass">GitHub</a>
+        <a class="footer__link" href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass">JitPack</a>
+        <a class="footer__link" href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a>
+      </p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

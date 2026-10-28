@@ -1,0 +1,221 @@
+/* ==========================================================================
+   Lumen Glass — documentation prose
+   Loaded after styles.css on the rendered Markdown pages (docs/*.html).
+   Scoped to .prose so it cannot leak into the landing page.
+   ========================================================================== */
+
+.doc {
+  padding-block: clamp(2rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
+}
+
+.doc__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+}
+
+.doc__crumbs a {
+  color: var(--text-soft);
+  transition: color var(--dur) var(--ease);
+}
+
+.doc__crumbs a:hover {
+  color: var(--cyan);
+}
+
+.prose {
+  max-width: 46rem;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  margin-block: 2.4rem 0.9rem;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.prose h1 {
+  font-size: clamp(1.9rem, 3.8vw, 2.6rem);
+  letter-spacing: -0.03em;
+}
+
+.prose h2 {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+  font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+}
+
+.prose h3 {
+  font-size: 1.16rem;
+}
+
+.prose h4 {
+  font-size: 1rem;
+  color: var(--text-soft);
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote,
+.prose pre,
+.prose table {
+  margin-block: 1.1rem;
+}
+
+.prose p {
+  color: var(--text);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.35rem;
+}
+
+.prose li {
+  margin-block: 0.4rem;
+}
+
+.prose li::marker {
+  color: var(--text-dim);
+}
+
+.prose a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(111, 227, 255, 0.4);
+}
+
+.prose a:hover {
+  text-decoration-color: var(--cyan);
+}
+
+.prose strong {
+  color: var(--white);
+  font-weight: 600;
+}
+
+.prose code {
+  padding: 0.12em 0.36em;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2ebff;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  /* Long identifiers such as RenderEffect.createBlurEffect(...) must break
+     rather than push the page wider than the viewport. */
+  overflow-wrap: break-word;
+}
+
+/* Syntax-highlighter wrappers (Rouge, used by kramdown on GitHub Pages) put
+   another div around the <pre>. Let them scroll too if a snippet is wide. */
+.prose .highlight,
+.prose [class*="language-"] {
+  overflow-x: auto;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #05070d;
+  line-height: 1.6;
+}
+
+.prose pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.82rem;
+}
+
+.prose blockquote {
+  padding: 0.15rem 0 0.15rem 1.1rem;
+  border-left: 2px solid rgba(111, 227, 255, 0.45);
+  color: var(--text-soft);
+}
+
+.prose blockquote p {
+  color: inherit;
+}
+
+.prose hr {
+  height: 1px;
+  margin-block: 2.5rem;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+}
+
+/* Tables: keep them as real tables. Wrapping one in `display: block` to get a
+   scroll container leaves the row-group boxes outside the clipping box, so the
+   page itself still scrolls sideways on a phone. Instead let columns share the
+   available width and wrap their content when space is tight. */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.prose th,
+.prose td {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.prose th {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--white);
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .prose table {
+    table-layout: fixed;
+  }
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.doc__source {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.doc__source a {
+  color: var(--text-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.doc__source a:hover {
+  color: var(--cyan);
+}

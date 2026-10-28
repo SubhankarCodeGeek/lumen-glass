@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ page.title }}</title>
+<meta name="description" content="{{ page.description | strip_newlines | normalize_whitespace }}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#04050a">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Subhankar Bag">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+
+<!-- Open Graph / Twitter. og:image is the repository's 1200x630 card. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Lumen Glass">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Lumen Glass | Liquid Glass for Android &amp; Jetpack Compose">
+<meta property="og:description" content="{{ page.description | strip_newlines | normalize_whitespace }}">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
+<meta property="og:image" content="{{ '/assets/og-image.png' | absolute_url }}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lumen Glass — liquid glass rendering for Android and Jetpack Compose">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lumen Glass | Liquid Glass for Android &amp; Jetpack Compose">
+<meta name="twitter:description" content="{{ page.description | strip_newlines | normalize_whitespace }}">
+<meta name="twitter:image" content="{{ '/assets/og-image.png' | absolute_url }}">
+<meta name="twitter:image:alt" content="Lumen Glass — liquid glass rendering for Android and Jetpack Compose">
+
+<link rel="icon" href="{{ '/assets/site/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="preload" as="image" href="{{ '/assets/site/hero-poster.jpg' | relative_url }}" fetchpriority="high">
+<link rel="stylesheet" href="{{ '/assets/site/styles.css' | relative_url }}">
+
+<!-- Progressive enhancement flag: reveal animations and the hero loop only run
+     when scripting is available, so the page is fully readable without it. -->
+<script>document.documentElement.classList.add('js')</script>
+<script src="{{ '/assets/site/script.js' | relative_url }}" defer></script>
+
+{% include project-jsonld.html %}
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="aurora" aria-hidden="true">
+  <span class="aurora__blob aurora__blob--a"></span>
+  <span class="aurora__blob aurora__blob--b"></span>
+  <span class="aurora__blob aurora__blob--c"></span>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header" id="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      <img class="brand__mark" src="{{ '/assets/site/favicon.svg' | relative_url }}" alt="" width="26" height="26">
+      Lumen Glass
+    </a>
+
+    <nav class="nav" aria-label="Primary">
+      <a class="nav__link" href="#features">Features</a>
+      <a class="nav__link" href="#showcase">Showcase</a>
+      <a class="nav__link" href="#profiles">Profiles</a>
+      <a class="nav__link" href="#how-it-works">How it works</a>
+      <a class="nav__link" href="#installation">Installation</a>
+      <a class="nav__link" href="#docs">Docs</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a class="btn btn--sm" href="https://github.com/SubhankarCodeGeek/lumen-glass">
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+          <path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.55v-2.1c-3.2.7-3.88-1.4-3.88-1.4-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.51-1.46.11-3.05 0 0 .96-.3 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.18-1.49 3.14-1.18 3.14-1.18.63 1.59.24 2.76.12 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.26 5.69.41.36.78 1.05.78 2.12v3.14c0 .3.2.66.8.55A11.5 11.5 0 0 0 23.5 12A11.5 11.5 0 0 0 12 .5Z"/>
+        </svg>
+        GitHub
+      </a>
+      <a class="btn btn--sm btn--primary" href="#installation">Get started</a>
+    </div>
+
+    <details class="nav-drawer" id="nav-drawer">
+      <summary>
+        <span class="sr-only">Menu</span>
+        <svg class="nav-drawer__icon nav-drawer__icon--menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/>
+        </svg>
+        <svg class="nav-drawer__icon nav-drawer__icon--close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/>
+        </svg>
+      </summary>
+      <div class="nav-drawer__panel">
+        <a class="nav__link" href="#features">Features</a>
+        <a class="nav__link" href="#showcase">Showcase</a>
+        <a class="nav__link" href="#profiles">Profiles</a>
+        <a class="nav__link" href="#how-it-works">How it works</a>
+        <a class="nav__link" href="#installation">Installation</a>
+        <a class="nav__link" href="#docs">Docs</a>
+        <a class="nav__link" href="https://github.com/SubhankarCodeGeek/lumen-glass">GitHub repository</a>
+        <a class="btn btn--primary" href="#installation">Get started</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+{{ content }}
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="{{ '/' | relative_url }}">
+          <img class="brand__mark" src="{{ '/assets/site/favicon.svg' | relative_url }}" alt="" width="26" height="26">
+          Lumen Glass
+        </a>
+        <p>
+          An open-source liquid glass rendering library for Android and Jetpack Compose,
+          built on custom AGSL runtime shaders.
+        </p>
+      </div>
+
+      <nav class="footer__col" aria-label="Product">
+        <h2 class="footer__title">Product</h2>
+        <ul>
+          <li><a class="footer__link" href="#features">Features</a></li>
+          <li><a class="footer__link" href="#showcase">Showcase</a></li>
+          <li><a class="footer__link" href="#profiles">Rim profiles</a></li>
+          <li><a class="footer__link" href="#installation">Installation</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-label="Repository">
+        <h2 class="footer__title">Repository</h2>
+        <ul>
+          <li><a class="footer__link" href="https://github.com/SubhankarCodeGeek/lumen-glass">GitHub</a></li>
+          <li><a class="footer__link" href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass">JitPack</a></li>
+          <li><a class="footer__link" href="https://github.com/SubhankarCodeGeek/lumen-glass/issues">Issues</a></li>
+          <li><a class="footer__link" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/README.md">README</a></li>
+          <li><a class="footer__link" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/LICENSE">Apache-2.0 licence</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-label="Documentation">
+        <h2 class="footer__title">Documentation</h2>
+        <ul>
+          <li><a class="footer__link" href="{{ '/docs/ARCHITECTURE.html' | relative_url }}">Architecture</a></li>
+          <li><a class="footer__link" href="{{ '/docs/PERF.html' | relative_url }}">Performance</a></li>
+          <li><a class="footer__link" href="{{ '/docs/PARITY.html' | relative_url }}">Shader parity</a></li>
+          <li><a class="footer__link" href="{{ '/docs/PLAN.html' | relative_url }}">Roadmap</a></li>
+          <li><a class="footer__link" href="{{ '/CLEANROOM.html' | relative_url }}">Clean-room record</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="footer__bottom">
+      <p>Copyright &copy; 2026 Subhankar Bag.</p>
+      <p class="footer__legal">
+        <span>Licensed under Apache-2.0</span>
+        <span>Kotlin &middot; Jetpack Compose &middot; AGSL</span>
+      </p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,43 +1,13 @@
 <!--
   Injected into <head> by the jekyll-theme-primer layout.
+
+  Only theme-rendered Markdown pages use that layout now; the landing page and the
+  documentation pages each have their own layouts in _layouts/ and include the
+  same structured-data partial directly. Keeping the include here means the
+  project entity is described consistently wherever it appears, from a single
+  source.
 -->
-
-<!--
-  Rich-result metadata for the library itself.
-
-  jekyll-seo-tag emits a generic WebSite node; for an SDK the useful entity is
-  SoftwareSourceCode, which lets Google associate the page with the repository,
-  language and licence rather than treating it as an anonymous web page.
-  Emitted on every page: it describes the project, not the individual document.
-
-  Kept as static JSON (no Liquid) so the file validates as JSON and needs no
-  escaping. If the Pages URL or baseurl ever changes, update the two absolute
-  URLs below and the matching description in _config.yml.
--->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareSourceCode",
-  "name": "Lumen Glass",
-  "alternateName": "LumenGlass",
-  "description": "Open-source AGSL shader library for Android & Jetpack Compose. GPU-accelerated liquid glass with real refraction, chromatic dispersion and adaptive blur.",
-  "url": "https://subhankarcodegeek.github.io/lumen-glass/",
-  "image": "https://subhankarcodegeek.github.io/lumen-glass/assets/og-image.png",
-  "codeRepository": "https://github.com/SubhankarCodeGeek/lumen-glass",
-  "programmingLanguage": "Kotlin",
-  "runtimePlatform": "Android",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Android",
-  "license": "https://www.apache.org/licenses/LICENSE-2.0",
-  "isAccessibleForFree": true,
-  "author": {
-    "@type": "Person",
-    "name": "SubhankarCodeGeek",
-    "url": "https://github.com/SubhankarCodeGeek"
-  },
-  "keywords": "liquid glass, AGSL shader, Jetpack Compose, Android, glassmorphism, refraction, chromatic dispersion"
-}
-</script>
+{% include project-jsonld.html %}
 
 <!--
   Google Search Console — "HTML tag" verification (secondary method).

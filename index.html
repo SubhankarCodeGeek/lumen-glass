@@ -1,0 +1,841 @@
+---
+layout: landing
+title: Lumen Glass | Liquid Glass for Android &amp; Jetpack Compose
+description: >-
+  Open-source liquid glass rendering for Android and Jetpack Compose. Custom AGSL
+  runtime shaders bring optical refraction, chromatic dispersion, rim profiles and
+  refined glass lighting to your UI.
+permalink: /
+---
+<main id="main">
+  <!-- Hero ---------------------------------------------------------------- -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <p class="eyebrow">Open source &middot; Apache-2.0</p>
+        <h1 class="hero__title" id="hero-title">
+          Liquid Glass.
+          <span class="accent">Reimagined for Android.</span>
+        </h1>
+        <p class="hero__lead">
+          Bring light-bending surfaces, optical refraction, chromatic dispersion and
+          refined glass lighting to Jetpack Compose with an open-source rendering
+          library powered by custom AGSL shaders.
+        </p>
+
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="https://github.com/SubhankarCodeGeek/lumen-glass">
+            Explore on GitHub
+            <svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.55v-2.1c-3.2.7-3.88-1.4-3.88-1.4-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.51-1.46.11-3.05 0 0 .96-.3 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.18-1.49 3.14-1.18 3.14-1.18.63 1.59.24 2.76.12 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.26 5.69.41.36.78 1.05.78 2.12v3.14c0 .3.2.66.8.55A11.5 11.5 0 0 0 23.5 12A11.5 11.5 0 0 0 12 .5Z"/>
+            </svg>
+          </a>
+          <a class="btn" href="#installation">Get started</a>
+        </div>
+
+        <ul class="badges">
+          <li><span class="badge">Kotlin</span></li>
+          <li><span class="badge">Jetpack Compose</span></li>
+          <li><span class="badge">AGSL</span></li>
+          <li><span class="badge">Apache-2.0</span></li>
+          <li>
+            <a class="badge badge--link badge--version" href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass"
+               aria-label="Latest Lumen Glass release on JitPack">
+              <img src="https://jitpack.io/v/SubhankarCodeGeek/lumen-glass.svg"
+                   alt="Latest JitPack release" width="96" height="20" decoding="async" referrerpolicy="no-referrer">
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="hero__visual">
+        <div class="stage">
+          <span class="stage__glow" aria-hidden="true"></span>
+          <span class="stage__ring" aria-hidden="true"></span>
+
+          <div class="device stage__main">
+            <div class="device__screen">
+              <video id="hero-video"
+                     poster="{{ '/assets/site/hero-poster.jpg' | relative_url }}"
+                     width="600" height="1334"
+                     muted loop playsinline preload="none"
+                     aria-label="Screen recording of the Lumen Glass demo app: a glass card drifting over a colourful background.">
+                <source src="{{ '/assets/site/hero-demo.mp4' | relative_url }}" type="video/mp4">
+              </video>
+            </div>
+            <button class="media-toggle" type="button" id="media-toggle" hidden>Pause</button>
+          </div>
+
+          <p class="chip chip--a" aria-hidden="true">
+            <span class="chip__key">rimProfile</span>
+            <span class="chip__val">TORIC</span>
+          </p>
+          <p class="chip chip--b" aria-hidden="true">
+            <span class="chip__key">refraction</span>
+            <span class="chip__val">1.00</span>
+          </p>
+        </div>
+        <p class="stage__note">
+          Recorded in the demo app. The value chips are annotations, not app UI.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase ------------------------------------------------------------ -->
+  <section class="section section--edge" id="showcase" aria-labelledby="showcase-title">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Showcase</p>
+        <h2 class="section-head__title" id="showcase-title">Real output, not renders.</h2>
+        <p class="section-head__text">
+          Every frame below comes from the Lumen Glass demo app with the shader
+          pipeline running. Captions describe the configuration that produced them.
+        </p>
+      </header>
+
+      <div class="gallery">
+        <figure class="shot" data-reveal>
+          <div class="device">
+            <div class="device__screen">
+              <img src="{{ '/assets/site/toric.webp' | relative_url }}" width="610" height="1356"
+                   loading="lazy" decoding="async"
+                   alt="Phone capture of a rounded glass card with the toric meniscus profile: the grid behind it is magnified and bent along the card's edge.">
+            </div>
+          </div>
+          <figcaption>
+            <span class="shot__tag">RimProfile.TORIC</span>
+            <h3 class="shot__title">Toric meniscus</h3>
+            <p class="shot__text">
+              A circular arc cross-section magnifies the background along the rim while
+              the interior stays flat, so straight lines bow as they pass under the edge.
+            </p>
+          </figcaption>
+        </figure>
+
+        <figure class="shot" data-reveal>
+          <div class="device">
+            <div class="device__screen">
+              <img src="{{ '/assets/site/liquid-dock.webp' | relative_url }}" width="610" height="1356"
+                   loading="lazy" decoding="async"
+                   alt="Phone capture of a floating bottom navigation pill made of glass, refracting the app content behind it.">
+            </div>
+          </div>
+          <figcaption>
+            <span class="shot__tag">Bottom dock</span>
+            <h3 class="shot__title">Liquid glass dock</h3>
+            <p class="shot__text">
+              A navigation pill at a 36dp corner radius: continuous rim refraction, a
+              perimeter stroke and a tinted surface over live content.
+            </p>
+          </figcaption>
+        </figure>
+
+        <figure class="shot" data-reveal>
+          <div class="device">
+            <div class="device__screen">
+              <img src="{{ '/assets/site/droplet.webp' | relative_url }}" width="610" height="1356"
+                   loading="lazy" decoding="async"
+                   alt="Phone capture of a glass surface using the droplet profile, where content swells outward before tucking under the rim.">
+            </div>
+          </div>
+          <figcaption>
+            <span class="shot__tag">RimProfile.DROPLET</span>
+            <h3 class="shot__title">Liquid droplet</h3>
+            <p class="shot__text">
+              A bipolar meniscus that bulges outward before tucking under the rim, for a
+              fluid rather than machined read.
+            </p>
+          </figcaption>
+        </figure>
+
+        <figure class="shot" data-reveal>
+          <div class="device">
+            <div class="device__screen">
+              <img src="{{ '/assets/site/split-comparison.webp' | relative_url }}" width="610" height="1356"
+                   loading="lazy" decoding="async"
+                   alt="Split comparison capture: the original background beside the same content refracted through the glass surface.">
+            </div>
+          </div>
+          <figcaption>
+            <span class="shot__tag">Split comparison</span>
+            <h3 class="shot__title">Raw vs. refracted</h3>
+            <p class="shot__text">
+              The untouched background beside the same content seen through the lens.
+              The displacement is the shader sampling at a different coordinate — not a
+              CSS filter.
+            </p>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why ----------------------------------------------------------------- -->
+  <section class="section section--edge" id="why" aria-labelledby="why-title">
+    <div class="container">
+      <div class="why__grid">
+        <div data-reveal>
+          <p class="eyebrow">The material</p>
+          <h2 class="section-head__title" id="why-title">Beyond blur. Into optics.</h2>
+          <p class="section-head__text">
+            A blurred translucent panel averages the pixels behind it. Glass bends them.
+            Lumen Glass samples the backdrop at a displaced coordinate derived from a
+            signed distance field, then grades the result.
+          </p>
+
+          <ul class="optics">
+            <li class="optics__row">
+              <svg class="optics__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M3 12c3.5-6 14.5-6 18 0-3.5 6-14.5 6-18 0Z" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="2.6"/>
+              </svg>
+              <div>
+                <h3 class="optics__title">Refraction</h3>
+                <p class="optics__text">
+                  The sample point is displaced toward the surface centre along the
+                  boundary normal, scaled by the smaller half-extent — so a wide banner
+                  bends like a square card.
+                </p>
+              </div>
+            </li>
+            <li class="optics__row">
+              <svg class="optics__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M12 3v18M4.5 7.5c4 1.5 11 1.5 15 0M4.5 16.5c4-1.5 11-1.5 15 0"/>
+              </svg>
+              <div>
+                <h3 class="optics__title">Chromatic dispersion</h3>
+                <p class="optics__text">
+                  Red, green and blue are sampled at radial scales of
+                  <code>1 + d</code>, <code>1</code> and <code>1 - d</code>, so the colour
+                  fringe is zero at the optical centre and grows toward the rim.
+                </p>
+              </div>
+            </li>
+            <li class="optics__row">
+              <svg class="optics__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="14" rx="5"/>
+                <path d="M7.5 15.5c3-1 4-6 9-6" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <h3 class="optics__title">Rim profiles</h3>
+                <p class="optics__text">
+                  <code>TORIC</code>, <code>SMOOTH</code>, <code>DROPLET</code> and
+                  <code>LEGACY</code> change how the rim-weighted displacement ramps from
+                  the flat core to the perimeter.
+                </p>
+              </div>
+            </li>
+            <li class="optics__row">
+              <svg class="optics__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <circle cx="12" cy="12" r="8.5"/>
+                <path d="M12 3.5v17" opacity=".5"/>
+                <path d="M8 8.5 12 5l4 3.5" stroke-linejoin="round"/>
+              </svg>
+              <div>
+                <h3 class="optics__title">Lighting</h3>
+                <p class="optics__text">
+                  A hairline perimeter stroke plus a directional specular lobe, so the
+                  contour stays defined instead of going black on the side facing away
+                  from the light.
+                </p>
+              </div>
+            </li>
+            <li class="optics__row">
+              <svg class="optics__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M12 3.5a8.5 8.5 0 0 0 0 17Z" fill="currentColor" opacity=".28"/>
+                <circle cx="12" cy="12" r="8.5"/>
+              </svg>
+              <div>
+                <h3 class="optics__title">Frost and tint</h3>
+                <p class="optics__text">
+                  Platform blur, a saturation and contrast grade, and a material tint —
+                  the difference between water, smoked glass and frosted acrylic.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <figure class="why__figure" data-reveal>
+          <div class="device">
+            <div class="device__screen">
+              <img src="{{ '/assets/site/live-capture.webp' | relative_url }}" width="610" height="1356"
+                   loading="lazy" decoding="async"
+                   alt="Live device capture of a Lumen Glass surface over high-contrast app content, showing edge magnification and a bright perimeter highlight.">
+            </div>
+          </div>
+          <figcaption class="why__caption">
+            Live capture from the demo app: a glass surface over high-contrast content.
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- Interactive CSS approximation of the material ------------------- -->
+      <div class="console" data-reveal>
+        <div class="console__stage">
+          <span class="console__backdrop" aria-hidden="true"></span>
+          <div class="console__panel" id="console-panel">
+            <span class="console__label">Lumen</span>
+          </div>
+        </div>
+        <div class="console__controls">
+          <div class="control">
+            <div class="control__top">
+              <label class="control__name" for="knob-frost">frost</label>
+              <output class="control__value" for="knob-frost" id="out-frost">6 px</output>
+            </div>
+            <input type="range" id="knob-frost" min="0" max="18" step="1" value="6" data-knob="frost">
+          </div>
+          <div class="control">
+            <div class="control__top">
+              <label class="control__name" for="knob-tint">tint</label>
+              <output class="control__value" for="knob-tint" id="out-tint">0.10</output>
+            </div>
+            <input type="range" id="knob-tint" min="0" max="50" step="1" value="10" data-knob="tint">
+          </div>
+          <div class="control">
+            <div class="control__top">
+              <label class="control__name" for="knob-rim">rim light</label>
+              <output class="control__value" for="knob-rim" id="out-rim">0.28</output>
+            </div>
+            <input type="range" id="knob-rim" min="0" max="100" step="1" value="28" data-knob="rim">
+          </div>
+          <p class="console__note">
+            CSS approximation of the material, for illustration only. The real surface
+            is GPU-rendered by an AGSL shader and cannot be reproduced in a browser.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features ------------------------------------------------------------ -->
+  <section class="section section--edge" id="features" aria-labelledby="features-title">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Capabilities</p>
+        <h2 class="section-head__title" id="features-title">What the library actually does</h2>
+        <p class="section-head__text">
+          Every item below maps to code in the <code class="inline-code">library/</code>
+          module — a clean-room optical core, an Android rendering layer, and a Compose
+          surface on top.
+        </p>
+      </header>
+
+      <div class="features">
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="3" y="3.5" width="18" height="17" rx="4"/>
+              <path d="M7 9.5 10.5 12 7 14.5M12.5 15h4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Custom AGSL shaders</h3>
+          <p class="feature__text">
+            The advanced path is an AGSL <code>RuntimeShader</code> built once and applied
+            through <code>RenderEffect</code>, so the glass is evaluated on the GPU instead
+            of being approximated with stacked Android views.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5"/>
+              <path d="M12 3.5c3 4 3 13 0 17M3.5 12h17" opacity=".6"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Optical refraction</h3>
+          <p class="feature__text">
+            Background content is sampled at a coordinate displaced by a rounded-rect SDF
+            and its boundary normal, so the surface behaves like a lens rather than a
+            cut-out.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M4 17c0-6 3.6-10 8-10s8 4 8 10" stroke-linecap="round"/>
+              <path d="M4 17h16" opacity=".5"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Configurable rim profiles</h3>
+          <p class="feature__text">
+            Four geometric profiles — <code>TORIC</code> lens arc, <code>SMOOTH</code>
+            quadratic fillet, <code>DROPLET</code> bipolar meniscus and <code>LEGACY</code>
+            radial field — selected with one enum.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M12 3v18M5 6.5l14 11M19 6.5l-14 11" opacity=".85"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Chromatic dispersion</h3>
+          <p class="feature__text">
+            Per-channel radial scaling in the shader splits wavelengths toward the rim.
+            It is the most expensive effect, so it only runs on the <code>HIGH</code> tier
+            — one sample is used everywhere else.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1" stroke-linecap="round" opacity=".7"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Glass lighting</h3>
+          <p class="feature__text">
+            A 360&deg; hairline stroke, a top-left specular lobe, a Fresnel sheen inside
+            the edge, and an optional bezel inner shadow on the <code>HIGH</code> tier.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M9 7 4.5 12 9 17M15 7l4.5 5L15 17" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Jetpack Compose API</h3>
+          <p class="feature__text">
+            <code>LumenSource</code>, <code>Modifier.lumenGlass</code> and
+            <code>rememberLumenGlassState</code>, configured through a typed
+            <code>GlassSpecBuilder</code> DSL whose defaults are already sensible.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M4 16.5 9 11l3.5 3.5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15.5 7H20v4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Adaptive rendering</h3>
+          <p class="feature__text">
+            <code>QualityTier</code> resolves to explicit feature flags you can read back
+            through <code>resolvedFeatures</code>. Below API 33 the surface draws a
+            deliberate frosted panel rather than nothing.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rim profile explorer ------------------------------------------------- -->
+  <section class="section section--edge" id="profiles" aria-labelledby="profiles-title">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Rim profiles</p>
+        <h2 class="section-head__title" id="profiles-title">Four edge treatments, one API</h2>
+        <p class="section-head__text">
+          A profile changes only how the rim-weighted displacement ramps between the flat
+          interior and the perimeter. The lens weights, lighting and grading are shared.
+          Select one to compare:
+        </p>
+      </header>
+
+      <div class="rim" data-reveal>
+        <input class="rim__input" type="radio" name="rim-profile" id="rim-toric" checked>
+        <input class="rim__input" type="radio" name="rim-profile" id="rim-smooth">
+        <input class="rim__input" type="radio" name="rim-profile" id="rim-droplet">
+        <input class="rim__input" type="radio" name="rim-profile" id="rim-legacy">
+
+        <div class="rim__tabs">
+          <label class="rim__tab" for="rim-toric">TORIC</label>
+          <label class="rim__tab" for="rim-smooth">SMOOTH</label>
+          <label class="rim__tab" for="rim-droplet">DROPLET</label>
+          <label class="rim__tab" for="rim-legacy">LEGACY</label>
+        </div>
+
+        <div class="rim__panels">
+          <div class="rim__panel" id="panel-toric">
+            <figure class="rim__figure">
+              <div class="device">
+                <div class="device__screen">
+                  <img src="{{ '/assets/site/toric.webp' | relative_url }}" width="610" height="1356"
+                       loading="lazy" decoding="async"
+                       alt="Capture of the toric profile, with the background strongly magnified near the card edge.">
+                </div>
+              </div>
+              <svg class="curve" viewBox="0 0 260 120" role="img" aria-label="Toric profile: displacement rises steeply toward the rim.">
+                <defs>
+                  <linearGradient id="curve-grad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#6fe3ff"/><stop offset="1" stop-color="#b199ff"/>
+                  </linearGradient>
+                </defs>
+                <line class="curve__grid" x1="20" y1="60" x2="240" y2="60"/>
+                <line class="curve__grid" x1="20" y1="16" x2="20" y2="104"/>
+                <path class="curve__line" d="M20.0 60.0 L25.5 60.0 L31.0 59.9 L36.5 59.9 L42.0 59.8 L47.5 59.7 L53.0 59.5 L58.5 59.3 L64.0 59.1 L69.5 58.9 L75.0 58.6 L80.5 58.3 L86.0 58.0 L91.5 57.6 L97.0 57.2 L102.5 56.8 L108.0 56.3 L113.5 55.8 L119.0 55.3 L124.5 54.7 L130.0 54.1 L135.5 53.4 L141.0 52.7 L146.5 52.0 L152.0 51.2 L157.5 50.3 L163.0 49.4 L168.5 48.5 L174.0 47.4 L179.5 46.3 L185.0 45.1 L190.5 43.8 L196.0 42.4 L201.5 40.9 L207.0 39.2 L212.5 37.3 L218.0 35.2 L223.5 32.7 L229.0 29.7 L234.5 25.8 L240.0 16.0"/>
+                <text class="curve__axis" x="20" y="116">core</text>
+                <text class="curve__axis" x="214" y="116">rim</text>
+              </svg>
+            </figure>
+            <div class="rim__body">
+              <h3>Toric meniscus</h3>
+              <p class="rim__meta">
+                <span class="badge badge--version">RimProfile.TORIC</span>
+                <span class="badge">default</span>
+              </p>
+              <p>
+                A circular lens arc. The slope is zero at the interior boundary, so the
+                flat core joins seamlessly, and near-vertical at the perimeter, which
+                produces the strongest magnification of the four.
+              </p>
+              <code class="formula">curve(u) = 1 - sqrt(1 - u*u)
+offset   = -normal * (curve * maxDisp)</code>
+            </div>
+          </div>
+
+          <div class="rim__panel" id="panel-smooth">
+            <figure class="rim__figure">
+              <svg class="curve" viewBox="0 0 260 120" role="img" aria-label="Smooth profile: displacement rises in a gentle quadratic ramp toward the rim.">
+                <line class="curve__grid" x1="20" y1="60" x2="240" y2="60"/>
+                <line class="curve__grid" x1="20" y1="16" x2="20" y2="104"/>
+                <path class="curve__line" d="M20.0 60.0 L25.5 59.7 L31.0 59.3 L36.5 58.8 L42.0 58.4 L47.5 57.9 L53.0 57.3 L58.5 56.7 L64.0 56.1 L69.5 55.5 L75.0 54.8 L80.5 54.0 L86.0 53.3 L91.5 52.5 L97.0 51.6 L102.5 50.7 L108.0 49.8 L113.5 48.8 L119.0 47.8 L124.5 46.8 L130.0 45.7 L135.5 44.6 L141.0 43.4 L146.5 42.2 L152.0 41.0 L157.5 39.7 L163.0 38.4 L168.5 37.1 L174.0 35.7 L179.5 34.2 L185.0 32.8 L190.5 31.3 L196.0 29.7 L201.5 28.1 L207.0 26.5 L212.5 24.9 L218.0 23.2 L223.5 21.4 L229.0 19.7 L234.5 17.9 L240.0 16.0"/>
+                <text class="curve__axis" x="20" y="116">core</text>
+                <text class="curve__axis" x="214" y="116">rim</text>
+              </svg>
+              <figcaption class="rim__caption">
+                Curve plotted from the shader formula. No dedicated capture for this
+                profile exists in the repository yet.
+              </figcaption>
+            </figure>
+            <div class="rim__body">
+              <h3>Smooth bevel</h3>
+              <p class="rim__meta"><span class="badge badge--version">RimProfile.SMOOTH</span></p>
+              <p>
+                A progressive quadratic fillet. Magnification builds gradually and there
+                is no slope discontinuity at either end, which suits control sheets and
+                status overlays where a hard rim would read as an artefact.
+              </p>
+              <code class="formula">curve(u) = 0.30 * u + 0.70 * (u*u)
+offset   = -normal * (curve * maxDisp)</code>
+            </div>
+          </div>
+
+          <div class="rim__panel" id="panel-droplet">
+            <figure class="rim__figure">
+              <div class="device">
+                <div class="device__screen">
+                  <img src="{{ '/assets/site/droplet.webp' | relative_url }}" width="610" height="1356"
+                       loading="lazy" decoding="async"
+                       alt="Capture of the droplet profile, where the background bulges outward before being drawn under the rim.">
+                </div>
+              </div>
+              <svg class="curve" viewBox="0 0 260 120" role="img" aria-label="Droplet profile: displacement bulges outward, crosses zero mid-rim, then turns inward at the perimeter.">
+                <line class="curve__grid" x1="20" y1="60" x2="240" y2="60"/>
+                <line class="curve__grid" x1="20" y1="16" x2="20" y2="104"/>
+                <path class="curve__line" d="M20.0 60.0 L25.5 58.8 L31.0 57.6 L36.5 56.5 L42.0 55.5 L47.5 54.5 L53.0 53.5 L58.5 52.6 L64.0 51.8 L69.5 51.1 L75.0 50.5 L80.5 50.0 L86.0 49.6 L91.5 49.3 L97.0 49.1 L102.5 49.0 L108.0 49.0 L113.5 49.2 L119.0 49.5 L124.5 49.9 L130.0 50.5 L135.5 51.2 L141.0 52.0 L146.5 53.0 L152.0 54.2 L157.5 55.4 L163.0 56.8 L168.5 58.4 L174.0 60.1 L179.5 62.0 L185.0 64.0 L190.5 66.2 L196.0 68.5 L201.5 71.1 L207.0 73.8 L212.5 76.8 L218.0 80.1 L223.5 83.7 L229.0 87.9 L234.5 93.0 L240.0 104.0"/>
+                <text class="curve__axis" x="20" y="116">core</text>
+                <text class="curve__axis" x="214" y="116">rim</text>
+              </svg>
+            </figure>
+            <div class="rim__body">
+              <h3>Liquid droplet</h3>
+              <p class="rim__meta"><span class="badge badge--version">RimProfile.DROPLET</span></p>
+              <p>
+                An outward bulge subtracted from the inward zoom, so the displacement
+                changes sign partway across the rim: content swells before it is drawn
+                under the edge.
+              </p>
+              <code class="formula">bulge(u) = sin(pi * u) * 0.35
+zoom(u)  = 1 - sqrt(1 - u*u)
+offset   = normal * bulge*maxDisp - normal * zoom*maxDisp</code>
+            </div>
+          </div>
+
+          <div class="rim__panel" id="panel-legacy">
+            <figure class="rim__figure">
+              <div class="device">
+                <div class="device__screen">
+                  <img src="{{ '/assets/site/legacy.webp' | relative_url }}" width="610" height="1356"
+                       loading="lazy" decoding="async"
+                       alt="Capture of the legacy profile, where the background is displaced radially with no rim curvature.">
+                </div>
+              </div>
+              <svg class="curve" viewBox="0 0 260 120" role="img" aria-label="Legacy profile: displacement rises linearly with no rim curvature.">
+                <line class="curve__grid" x1="20" y1="60" x2="240" y2="60"/>
+                <line class="curve__grid" x1="20" y1="16" x2="20" y2="104"/>
+                <path class="curve__line" d="M20.0 60.0 L25.5 58.9 L31.0 57.8 L36.5 56.7 L42.0 55.6 L47.5 54.5 L53.0 53.4 L58.5 52.3 L64.0 51.2 L69.5 50.1 L75.0 49.0 L80.5 47.9 L86.0 46.8 L91.5 45.7 L97.0 44.6 L102.5 43.5 L108.0 42.4 L113.5 41.3 L119.0 40.2 L124.5 39.1 L130.0 38.0 L135.5 36.9 L141.0 35.8 L146.5 34.7 L152.0 33.6 L157.5 32.5 L163.0 31.4 L168.5 30.3 L174.0 29.2 L179.5 28.1 L185.0 27.0 L190.5 25.9 L196.0 24.8 L201.5 23.7 L207.0 22.6 L212.5 21.5 L218.0 20.4 L223.5 19.3 L229.0 18.2 L234.5 17.1 L240.0 16.0"/>
+                <text class="curve__axis" x="20" y="116">core</text>
+                <text class="curve__axis" x="214" y="116">rim</text>
+              </svg>
+            </figure>
+            <div class="rim__body">
+              <h3>Legacy field</h3>
+              <p class="rim__meta"><span class="badge badge--version">RimProfile.LEGACY</span></p>
+              <p>
+                The original displacement, kept for comparison. It blends a radial term
+                with the boundary normal using the superellipse field and adds no rim
+                curvature of its own — the shape of the distortion is the surface SDF.
+              </p>
+              <code class="formula">dir    = mix(-n, -normal, sq*sq)
+offset = dir * weight * scale</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -------------------------------------------------------- -->
+  <section class="section section--edge" id="how-it-works" aria-labelledby="how-title">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Integration</p>
+        <h2 class="section-head__title" id="how-title">Three steps to a glass surface</h2>
+        <p class="section-head__text">
+          One state object is shared by the background capture and the material. The
+          surface must overlap the captured region, or there is nothing to refract.
+        </p>
+      </header>
+
+      <ol class="steps">
+        <li class="step" data-reveal>
+          <h3 class="step__title">Create the glass state</h3>
+          <p class="step__text">
+            The tier is chosen from the device capability. Pass an explicit
+            <code class="inline-code">QualityTier</code> to override it — dispersion and
+            the bezel only run on <code class="inline-code">HIGH</code>.
+          </p>
+          <div class="code-block">
+            <div class="code-block__head">
+              <span class="code-block__file">GlassCard.kt</span>
+              <button class="copy" type="button" data-copy="snippet-state">Copy</button>
+            </div>
+            <pre><code id="snippet-state">val glass = rememberLumenGlassState()</code></pre>
+          </div>
+        </li>
+
+        <li class="step" data-reveal>
+          <h3 class="step__title">Wrap the background</h3>
+          <p class="step__text">
+            <code class="inline-code">LumenSource</code> records its content into a
+            graphics layer. Everything inside it becomes refractive material for every
+            glass surface sharing this state.
+          </p>
+          <div class="code-block">
+            <div class="code-block__head">
+              <span class="code-block__file">GlassCard.kt</span>
+              <button class="copy" type="button" data-copy="snippet-source">Copy</button>
+            </div>
+            <pre><code id="snippet-source">LumenSource(state = glass, modifier = Modifier.fillMaxSize()) {
+    FeedContent()
+}</code></pre>
+          </div>
+        </li>
+
+        <li class="step" data-reveal>
+          <h3 class="step__title">Apply the material</h3>
+          <p class="step__text">
+            <code class="inline-code">Modifier.lumenGlass</code> samples that layer through
+            the shader. Every property in the builder has a default, so this block is
+            optional.
+          </p>
+          <div class="code-block">
+            <div class="code-block__head">
+              <span class="code-block__file">GlassCard.kt</span>
+              <button class="copy" type="button" data-copy="snippet-modifier">Copy</button>
+            </div>
+            <pre><code id="snippet-modifier">Box(
+    Modifier
+        .size(width = 340.dp, height = 200.dp)
+        .lumenGlass(state = glass, cornerRadius = 28.dp) {
+            refraction = 1.0f
+            dispersion = 0.08f
+            frost = 6.dp
+            rimProfile = RimProfile.TORIC
+        }
+)</code></pre>
+          </div>
+        </li>
+      </ol>
+
+      <p class="section-head__text" data-reveal style="margin-top: 2.5rem">
+        Imports for the snippets above live in
+        <code class="inline-code">com.subhankar.lumenglass.compose</code> and
+        <code class="inline-code">com.subhankar.lumenglass.core</code>.
+        <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass#-quick-start">Read the full quick start</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Installation -------------------------------------------------------- -->
+  <section class="section section--edge" id="installation" aria-labelledby="install-title">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Installation</p>
+        <h2 class="section-head__title" id="install-title">Add it in two blocks</h2>
+        <p class="section-head__text">
+          Lumen Glass is published to JitPack straight from the GitHub repository. Current
+          release: <strong>0.1.1</strong>.
+        </p>
+      </header>
+
+      <div class="install__grid">
+        <div data-reveal>
+          <ul class="note-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 13 4.5 4.5L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Add the JitPack repository to <code class="inline-code">settings.gradle.kts</code>.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 13 4.5 4.5L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Declare the dependency in your app module's <code class="inline-code">build.gradle.kts</code>.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 13 4.5 4.5L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Sync Gradle, then wrap your background in <code class="inline-code">LumenSource</code>.</span>
+            </li>
+          </ul>
+
+          <div class="compat">
+            <p class="compat__title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.2v.1" stroke-linecap="round"/>
+              </svg>
+              Compatibility
+            </p>
+            <p>
+              Minimum SDK is <strong>21</strong>. The AGSL shader pipeline requires
+              <strong>API 33</strong> (Android 13) or later; below that the library draws a
+              frosted panel through the standard Android graphics APIs instead of failing.
+            </p>
+          </div>
+
+          <p class="section-head__text" style="margin-top: 1.5rem">
+            <a class="link" href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass">View the project on JitPack</a>
+            &middot;
+            <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass#-installation">Full installation notes</a>
+          </p>
+        </div>
+
+        <div data-reveal>
+          <div class="code-block">
+            <div class="code-block__head">
+              <span class="code-block__file">settings.gradle.kts</span>
+              <button class="copy" type="button" data-copy="snippet-repo">Copy</button>
+            </div>
+            <pre><code id="snippet-repo">dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://jitpack.io")
+        }
+    }
+}</code></pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block__head">
+              <span class="code-block__file">app/build.gradle.kts</span>
+              <button class="copy" type="button" data-copy="snippet-dep">Copy</button>
+            </div>
+            <pre><code id="snippet-dep">dependencies {
+    implementation("com.github.SubhankarCodeGeek:lumen-glass:0.1.1")
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer experience -------------------------------------------------- -->
+  <section class="section section--edge" id="docs" aria-labelledby="dx-title">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Developer experience</p>
+        <h2 class="section-head__title" id="dx-title">A library you can read</h2>
+        <p class="section-head__text">
+          The optical maths is a pure Kotlin module with JVM unit tests; the Android layer
+          handles capture and shaders; Compose sits on top. The repository stays the
+          authoritative reference — this page is the introduction.
+        </p>
+      </header>
+
+      <div class="dx-grid">
+        <a class="dx-card" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/docs/ARCHITECTURE.md" data-reveal>
+          <span class="dx-card__title">
+            Architecture
+            <svg class="dx-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="dx-card__text">
+            Module layout, the capture/render split, and where each effect is implemented.
+          </span>
+          <span class="dx-card__meta">docs/ARCHITECTURE.md</span>
+        </a>
+
+        <a class="dx-card" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/docs/PERF.md" data-reveal>
+          <span class="dx-card__title">
+            Performance
+            <svg class="dx-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="dx-card__text">
+            Tier behaviour, capture scaling, and the frame-timing approach behind the
+            benchmark module.
+          </span>
+          <span class="dx-card__meta">docs/PERF.md</span>
+        </a>
+
+        <a class="dx-card" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/CLEANROOM.md" data-reveal>
+          <span class="dx-card__title">
+            Clean-room record
+            <svg class="dx-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="dx-card__text">
+            The provenance of every formula and shader block, derived from public optics
+            and 2D distance functions.
+          </span>
+          <span class="dx-card__meta">CLEANROOM.md</span>
+        </a>
+
+        <a class="dx-card" href="https://github.com/SubhankarCodeGeek/lumen-glass/issues" data-reveal>
+          <span class="dx-card__title">
+            Issues &amp; contributions
+            <svg class="dx-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="dx-card__text">
+            Bug reports, feature requests and pull requests. Fork, branch, and open a PR
+            against <code class="inline-code">main</code>.
+          </span>
+          <span class="dx-card__meta">github.com/.../issues</span>
+        </a>
+      </div>
+
+      <p class="section-head__text" data-reveal style="margin-top: 2rem">
+        Also in the repository:
+        <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/README.md">README</a>,
+        <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/docs/PLAN.md">roadmap</a>,
+        <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/docs/PARITY.md">shader/maths parity notes</a>,
+        and the
+        <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/LICENSE">Apache-2.0 licence</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Final CTA ----------------------------------------------------------- -->
+  <section class="section section--tight" id="get-started" aria-labelledby="final-title">
+    <div class="container">
+      <div class="final" data-reveal>
+        <h2 id="final-title">Give your Android UI a new dimension.</h2>
+        <p>
+          Explore the source, integrate Lumen Glass into your Compose project, and
+          experiment with a different approach to glass rendering.
+        </p>
+        <div class="final__cta">
+          <a class="btn btn--primary" href="https://github.com/SubhankarCodeGeek/lumen-glass">Explore Lumen Glass</a>
+          <a class="btn" href="https://github.com/SubhankarCodeGeek/lumen-glass#-installation">Read the installation guide</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
