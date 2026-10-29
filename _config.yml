@@ -110,3 +110,16 @@ exclude:
   # --- Binaries / notes not referenced by the rendered site ---
   - assets/lumen_demo.mp4
   - assets/README.md
+
+  # Source media for tools/optimize-media.py. Kept in git so the responsive
+  # variants can be regenerated at a different CRF or quality, but never
+  # published: the page only references the -320/-480/-600/-610 outputs, so
+  # serving the originals would just be dead weight in the deploy artifact.
+  - assets/site/hero-demo.mp4
+  - assets/site/hero-poster.jpg
+  - assets/site/toric.webp
+  - assets/site/liquid-dock.webp
+  - assets/site/droplet.webp
+  - assets/site/split-comparison.webp
+  - assets/site/live-capture.webp
+  - assets/site/legacy.webp
