@@ -436,7 +436,11 @@
     // animation loop, so per-frame work cannot trigger a synchronous layout.
     var geom = {
       ready: false, stageW: 0, stageH: 0, halfW: 0, halfH: 0,
-      radius: 22, travelX: 0, travelY: 0
+      radius: 22, travelX: 0, travelY: 0,
+      // Viewport origin of the stage, cached by measure(). Pointer events map into
+      // stage space using these instead of calling getBoundingClientRect() per
+      // event, which forced a synchronous layout on every mouse move.
+      left: 0, top: 0
     };
 
     // Times (ms) and mapping constants.
@@ -612,6 +616,8 @@
 
       geom.stageW = rect.width;
       geom.stageH = rect.height;
+      geom.left = rect.left;
+      geom.top = rect.top;
       geom.halfW = panel.offsetWidth * 0.5 || 1;
       geom.halfH = panel.offsetHeight * 0.5 || 1;
       geom.radius =
@@ -966,12 +972,16 @@
     // Events only record where the pointer is. Everything visual is derived in
     // the animation loop, so a burst of pointermoves cannot cause a burst of
     // layout writes or shader recompiles.
+    //
+    // The stage rectangle comes from geom, which measure() fills on resize and on
+    // scroll. Reading getBoundingClientRect() here made every pointermove force a
+    // synchronous layout (the "forced reflow" diagnostic); the geometry is now
+    // read at most once per frame instead.
     function setLightFromPoint(clientX, clientY) {
-      var rect = stage.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
+      if (!geom.ready || !geom.stageW || !geom.stageH) return;
 
-      pointer.x = (clientX - rect.left) / rect.width;
-      pointer.y = (clientY - rect.top) / rect.height;
+      pointer.x = (clientX - geom.left) / geom.stageW;
+      pointer.y = (clientY - geom.top) / geom.stageH;
       pointer.inside = true;
 
       // Cheap CSS layer: the ambient glow and its position, no shader work.
@@ -1182,6 +1192,19 @@
       });
     }
 
+    // geom.left/top are viewport coordinates, so they go stale whenever the page
+    // scrolls. Re-measure at most once per frame rather than on every scroll
+    // event, and never inside the pointer handler.
+    var scrollMeasureQueued = false;
+    window.addEventListener('scroll', function () {
+      if (scrollMeasureQueued) return;
+      scrollMeasureQueued = true;
+      window.requestAnimationFrame(function () {
+        scrollMeasureQueued = false;
+        measure();
+      });
+    }, { passive: true });
+
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(
         function (entries) {
@@ -1274,9 +1297,22 @@
     };
   }
 
+  // init() compiles the AGSL-equivalent shader synchronously, which is the page's
+  // one long main-thread task. What the visitor sees first is the hero poster and
+  // the CSS panel, so the WebGL upgrade is deferred until the browser is idle.
+  // That keeps shader compilation out of the LCP window, and the existing
+  // fallback ladder already covers the gap if the upgrade never happens.
+  function scheduleInit() {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(init, { timeout: 2000 });
+    } else {
+      window.setTimeout(init, 200);
+    }
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', scheduleInit);
   } else {
-    init();
+    scheduleInit();
   }
 })();

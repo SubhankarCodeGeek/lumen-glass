@@ -30,7 +30,19 @@
 <meta name="twitter:image:alt" content="Lumen Glass — liquid glass rendering for Android and Jetpack Compose">
 
 <link rel="icon" href="{{ '/assets/site/favicon.svg' | relative_url }}" type="image/svg+xml">
-<link rel="preload" as="image" href="{{ '/assets/site/hero-poster.jpg' | relative_url }}" fetchpriority="high">
+
+<!-- The version badge is the only third-party origin the page renders; warming
+     the connection stops its DNS+TLS handshake from landing in the LCP window. -->
+<link rel="preconnect" href="https://jitpack.io" crossorigin>
+
+<!-- LCP candidate. Provided as WebP with both poster widths so the browser can
+     pick one without downloading the other, mirroring the <video> sources. -->
+<link rel="preload" as="image"
+      href="{{ '/assets/site/hero-poster-600.webp' | relative_url }}"
+      imagesrcset="{{ '/assets/site/hero-poster-480.webp' | relative_url }} 480w, {{ '/assets/site/hero-poster-600.webp' | relative_url }} 600w"
+      imagesizes="(max-width: 768px) 480px, 600px"
+      type="image/webp"
+      fetchpriority="high">
 <link rel="stylesheet" href="{{ '/assets/site/styles.css' | relative_url }}">
 
 <!-- Progressive enhancement flag: reveal animations and the hero loop only run
