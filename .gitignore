@@ -24,3 +24,7 @@ captures/
 
 # OS
 .DS_Store
+
+# Lighthouse CI — local run artifacts and generated reports
+.lighthouseci/
+lighthouse-report/

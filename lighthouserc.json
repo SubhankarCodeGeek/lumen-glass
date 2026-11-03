@@ -1,0 +1,29 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:8080/lumen-glass/"],
+      "numberOfRuns": 3,
+      "settings": {
+        "chromeFlags": "--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.85 }],
+        "categories:accessibility": ["error", { "minScore": 0.95 }],
+        "categories:seo": ["error", { "minScore": 0.95 }],
+
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "cumulative-layout-shift": ["warn", { "maxNumericValue": 0.1 }],
+        "largest-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
+        "errors-in-console": ["warn", { "maxLength": 0 }],
+        "uses-long-cache-ttl": "off"
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lighthouse-report"
+    }
+  }
+}

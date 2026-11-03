@@ -28,6 +28,7 @@ on:
       - "sitemap.xml"
       - "google09ae51d459da8d85.html"
       - "scripts/validate_site.py"
+      - "lighthouserc.json"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -103,6 +104,48 @@ jobs:
             --site ./_site \
             --baseurl /lumen-glass \
             --origin https://subhankarcodegeek.github.io
+
+      # Guards what validate_site.py cannot see: real rendering cost. Runs against
+      # the built output before it is published, so a regression fails the deploy
+      # instead of being discovered in PageSpeed weeks later.
+      #
+      # Thresholds in lighthouserc.json are deliberately looser than the measured
+      # values (mobile medians: performance 99, LCP 1.9s, CLS 0.000) because a
+      # shared CI runner is noisier than a developer machine, and the CLS figure
+      # is known to fluctuate.
+      - name: Serve the built site at its baseurl
+        run: |
+          set -euo pipefail
+          # The site is built with baseurl /lumen-glass and references assets by
+          # absolute path, so it must be served under that prefix. A symlink
+          # inside a parent directory achieves that without rewriting output.
+          mkdir -p preview
+          ln -s "$PWD/_site" preview/lumen-glass
+          python3 -m http.server 8080 --directory preview &
+
+          for _ in $(seq 1 30); do
+            if curl -sf -o /dev/null http://localhost:8080/lumen-glass/; then
+              echo "preview is serving /lumen-glass/"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "::error::the preview server never became ready"
+          exit 1
+
+      - name: Run Lighthouse CI
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: npx --yes @lhci/cli@0.14.x autorun
+
+      - name: Upload the Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lighthouse-report
+          path: lighthouse-report
+          retention-days: 14
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
