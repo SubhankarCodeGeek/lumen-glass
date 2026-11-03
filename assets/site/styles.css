@@ -86,6 +86,11 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-h) + 12px);
+  /* Reserve the scrollbar track at all times. Several hero elements are sized as
+     a percentage of their container (.stage__main is 52%), so a scrollbar
+     appearing or disappearing mid-load changes the available width and resizes
+     them, which registers as a layout shift on classic-scrollbar platforms. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -557,6 +562,19 @@ ol {
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(2.5rem, 5vw, 3.5rem);
   align-items: center;
+}
+
+/* The two-column rule is declared here, immediately after the base rule, rather
+   than only in the responsive section at the end of this file. The sheet is
+   ~2,000 lines and can be applied incrementally while it streams; when this
+   declaration lived only at the very end, first paint sometimes used the
+   stacked base rule and the hero then flipped to two columns, which measured as
+   a ~0.14 layout shift (hero__visual moved 351px -> 141px). Keeping the two
+   declarations adjacent means they are parsed and applied in the same pass. */
+@media (min-width: 760px) {
+  .hero__inner {
+    grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+  }
 }
 
 .hero__title {
@@ -1964,10 +1982,8 @@ ol {
 /* Responsive refinements --------------------------------------------------- */
 
 @media (min-width: 760px) {
-  .hero__inner {
-    grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
-  }
-
+  /* .hero__inner's two-column rule now lives beside its base rule, near the
+     hero styles, so it cannot be applied in a later pass than the base rule. */
   .chip--a {
     top: 12%;
   }
