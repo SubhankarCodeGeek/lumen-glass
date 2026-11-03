@@ -170,10 +170,17 @@
 
     // Reveal what is already on screen synchronously, so the first paint never
     // shows blank space while waiting for the first observer callback.
+    //
+    // All rects are read before any class is written. Interleaving the two made
+    // every iteration dirty the style and force a fresh synchronous layout (33
+    // targets), which showed up as a 263 ms long task and 558 ms of style/layout.
+    // Batching collapses that to a single layout pass.
     var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    var aboveFold = [];
     Array.prototype.forEach.call(targets, function (target) {
-      if (target.getBoundingClientRect().top < viewportHeight * 0.92) reveal(target);
+      if (target.getBoundingClientRect().top < viewportHeight * 0.92) aboveFold.push(target);
     });
+    aboveFold.forEach(reveal);
 
     var delivered = false;
     var observer = new IntersectionObserver(
@@ -245,24 +252,49 @@
     // Reduced motion: keep the poster and let the visitor opt in by pressing Play.
     if (reduceMotion.matches) return;
 
+    var onScreen = false;
+    var canPlay = false;
+
+    function maybePlay() {
+      if (!onScreen || !canPlay) return;
+      if (video.dataset.userPaused) return;
+      video.play().catch(function () {});
+    }
+
     // Only spend bandwidth and battery while the stage is actually on screen.
     if ('IntersectionObserver' in window) {
-      var observer = new IntersectionObserver(
+      new IntersectionObserver(
         function (entries) {
           entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              if (video.dataset.userPaused) return;
-              video.play().catch(function () {});
-            } else {
-              video.pause();
-            }
+            onScreen = entry.isIntersecting;
+            if (onScreen) maybePlay();
+            else video.pause();
           });
         },
         { threshold: 0.25 }
-      );
-      observer.observe(video);
+      ).observe(video);
     } else {
-      video.play().catch(function () {});
+      onScreen = true;
+    }
+
+    // Starting playback during page load puts a ~230 KB media fetch and a video
+    // decode pipeline in direct competition with the LCP image for bandwidth and
+    // main-thread time. The poster is already painted, so hold the first play
+    // until the load event and an idle slice: nothing looks empty in the gap.
+    function releasePlayback() {
+      canPlay = true;
+      maybePlay();
+    }
+
+    function whenIdle(fn) {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(fn, { timeout: 2000 });
+      else window.setTimeout(fn, 300);
+    }
+
+    if (document.readyState === 'complete') {
+      whenIdle(releasePlayback);
+    } else {
+      window.addEventListener('load', function () { whenIdle(releasePlayback); }, { once: true });
     }
   }
 
