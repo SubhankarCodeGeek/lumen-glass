@@ -18,8 +18,22 @@ Targets counted as "Lumen Glass": the GitHub repo, the GitHub Pages site
 | 2026-11-04 | liquid glass android | No | — | baseline | QmDeve/AndroidLiquidGlassView (#1), news on Android 17 / Pixel liquid glass |
 | 2026-11-04 | AGSL glass shader | No | — | baseline | abduzeedo "Crafting Glass", ProAndroidDev shaders post, developer.android.com AGSL |
 | 2026-11-04 | compose blur glass library | No | — | baseline | Kashif-E/KMPLiquidGlass, skydoves/Cloudy |
+| 2026-11-04 | android liquid glass | No | — | baseline | News on Android 17 / Pixel "liquid glass" rumours dominate; no libraries in results |
+| 2026-11-04 | jetpack compose liquid glass | No | — | baseline | klibs.io (ienground/AndroidLiquidGlass, FletchMcKee/liquid, NadeemIqbal/liquid-glass), kotlinlang Slack release threads, Kashif-E/KMPLiquidGlass |
+| 2026-11-04 | android liquid glass library | No | — | baseline | maxrave-dev/androidliquidglass, QmDeve/AndroidLiquidGlassView, Kyant0/AndroidLiquidGlass (klibs + docs) |
+| 2026-11-04 | android glassmorphism | No | — | baseline | GeeksforGeeks, Medium, androidengineers substack, droidcon "Blurring the Lines", neilyich/glassmorphism-compose |
+| 2026-11-04 | android backdrop blur | No | — | baseline | ezoushen/blur-cmp, AOSP window-blurs docs, ProAndroidDev dynamic blur, Dimezis/BlurView, Kyant backdrop docs |
+| 2026-11-04 | compose glass library | No | — | baseline | Kashif-E/KMPLiquidGlass, maxrave-dev/androidliquidglass, NadeemIqbal dev.to post |
+| 2026-11-04 | android glass effect | No | — | baseline | Expo glass-effect docs, KMPLiquidGlass, Wikipedia "Liquid Glass", QmDeve, dev.to AGSL React Native post |
+| 2026-11-04 | glass UI android | No | — | baseline | Google Glass / Android XR docs (intent mismatch: smart-glasses), One UI 9 news |
 
 Notes 2026-11-04: first logged run. The repo **is indexed** — an exact-match query
 (`"lumen-glass" SubhankarCodeGeek android compose`) returns it at #1 — but it does not surface
 for any target keyword yet. "Lumen" is a crowded brand term (Unreal Engine Lumen, CF.lumen,
 Lindner LUMEN), so generic keywords and backlinks matter more than the brand name.
+
+Notes 2026-11-04 (second run, 13:00 IST): added baselines for the 8 queries newly listed in the
+routine prompt. Same method (AI web-search tool, US results, not Google). Not found for any.
+Observations: klibs.io pages rank for most library-discovery queries, and kotlinlang Slack
+release threads are indexed; "glass UI android" is dominated by smart-glasses intent and is a
+poor target.
