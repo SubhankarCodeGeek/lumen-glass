@@ -106,6 +106,7 @@ exclude:
   - .github
   - .vscode
   - scripts
+  - seo
 
   # --- Binaries / notes not referenced by the rendered site ---
   - assets/lumen_demo.mp4

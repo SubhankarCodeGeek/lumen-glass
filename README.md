@@ -1,7 +1,14 @@
 <p align="center">
-  <h1 align="center">✨ Lumen Glass ✨</h1>
+  <h1 align="center">Lumen Glass — Liquid Glass &amp; Glassmorphism for Jetpack Compose (AGSL)</h1>
   <p align="center">
-    <strong>Physically Accurate, Clean-Room Liquid Glass for Android & Jetpack Compose</strong>
+    <strong>Open-source Android library for physically accurate liquid glass and frosted-glass blur effects in Jetpack Compose, built on AGSL runtime shaders.</strong>
+  </p>
+  <p align="center">
+    <a href="https://subhankarcodegeek.github.io/lumen-glass/"><strong>Website &amp; docs</strong></a> ·
+    <a href="#-installation">Install</a> ·
+    <a href="#-quick-start">Quick start</a> ·
+    <a href="#-faq">FAQ</a> ·
+    <a href="https://subhankarcodegeek.github.io/lumen-glass/docs/ARCHITECTURE.html">Architecture</a>
   </p>
   <p align="center">
     <a href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass"><img src="https://jitpack.io/v/SubhankarCodeGeek/lumen-glass.svg" alt="JitPack" /></a>
@@ -308,6 +315,25 @@ LumenGlass/
 ```
 
 > **Clean-Room Attestation:** Every mathematical equation, signed distance function, and AGSL shader block in this library was derived independently from analytical geometry, Snell's law of refraction, and Inigo Quilez's public 2D distance functions. No proprietary or unlicensed third-party shader code was used. See [`CLEANROOM.md`](CLEANROOM.md) for the mathematical provenance record.
+
+---
+
+## ❓ FAQ
+
+### How do I add a glass effect in Jetpack Compose?
+Add the JitPack dependency (see [Installation](#-installation)), wrap the content behind the glass in a `LumenSource`, and apply `Modifier.lumenGlass(...)` to the composable that should look like glass. The [Quick Start](#-quick-start) shows a complete floating glass card.
+
+### Is this glassmorphism or liquid glass?
+Both. Classic **glassmorphism** is a frosted, blurred, tinted panel; **liquid glass** adds real optical refraction, edge magnification and chromatic dispersion on top of the blur. Lumen Glass renders the full liquid glass look on API 33+ and degrades to a glassmorphism-style frosted panel on older devices.
+
+### Which Android versions are supported?
+The library runs on API 21+. The AGSL shader pipeline (refraction, dispersion, rim lighting) needs Android 13 / API 33+, where `RuntimeShader` is available; below that you get the graceful frosted-glass fallback instead of a crash.
+
+### How is it different from a plain Compose blur library?
+Blur-only libraries soften what is behind a surface. Lumen Glass also bends it: a custom AGSL glass shader models toric meniscus magnification, three rim profiles, dual-lobe specular highlights and wavelength-dependent dispersion, with adaptive quality tiers to hold 60 FPS. See the [comparison table](#head-to-head-comparison).
+
+### Can I use the AGSL glass shader without Compose?
+The optical model lives in a platform-agnostic `core` module and the Android substrate (`RuntimeShader`, `RenderEffect`, `RenderNode` capture) in `android`; the public, supported API today is the Jetpack Compose `Modifier.lumenGlass`. See [ARCHITECTURE](docs/ARCHITECTURE.md).
 
 ---
 
