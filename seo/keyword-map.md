@@ -24,5 +24,6 @@ Base: `https://subhankarcodegeek.github.io/lumen-glass/` (site) · `github.com/S
 | Library | android liquid glass library | Find a library | `/` + repo README | Partial | Competitors rank via klibs.io and GitHub |
 | Library | compose glass library | Find a library | repo README | Partial | |
 | Library | android glassmorphism library | Find a library | repo README | Partial | |
-| Install | lumen glass installation / jitpack | Install | future `/docs/getting-started/` (today: README#installation) | Partial | Install lives only in README and landing section |
+| Install | lumen glass installation / jitpack / getting started | Install | `/docs/getting-started/` | Targeted | Added 2026-11-05 (PR branch seo/getting-started-2026-11-05) |
+| How-to | how to add liquid glass in jetpack compose | How-to | `/docs/getting-started/` until the tutorial exists | Partial | Hand over to `/tutorials/glass-effect-jetpack-compose/` once written; then getting-started keeps install/setup intent only |
 | Branded | lumen glass / lumen glass github / lumen glass android | Navigational | `/` and repo | Targeted | Not yet surfacing — "Lumen" is crowded (Unreal Lumen, CF.lumen, Lindner) |

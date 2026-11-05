@@ -191,9 +191,9 @@ fun GlassCardExample() {
                     cornerRadius = 28.dp // Automatically matches rim width to corner radius
                 ) {
                     refraction = 1.0f
-                    dispersion = 0.08f
+                    dispersion = 0.08f // rendered on QualityTier.HIGH only
                     frost = 6.dp
-                    highlightStroke = 0.28f
+                    edgeLight = 0.10f
                     rimProfile = RimProfile.TORIC
                     tint = Color.White.copy(alpha = 0.12f)
                     lens = LensModel.Blend(centre = 0.2f, rim = 0.8f)
@@ -230,7 +230,7 @@ Box(
             refraction = 1.15f
             dispersion = 0.10f
             frost = 8.dp
-            highlightStroke = 0.32f
+            edgeLight = 0.14f
             rimProfile = RimProfile.TORIC
             tint = Color(0xFF1E222A).copy(alpha = 0.25f)
         }
@@ -255,7 +255,7 @@ Box(
             refraction = 0.85f
             dispersion = 0.04f
             frost = 10.dp
-            highlightStroke = 0.22f
+            edgeLight = 0.08f
             rimProfile = RimProfile.SMOOTH // Soft continuous Hermite curvature
             tint = Color.Black.copy(alpha = 0.35f)
         }
@@ -267,21 +267,26 @@ Box(
 
 ## 🎛️ Optical Knobs Reference
 
-All visual parameters in `GlassSpec` are typed, validated, and hot-reloadable:
+All visual parameters are set inside the `lumenGlass { … }` builder (`GlassSpecBuilder`). Defaults below are the library's actual defaults:
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `refraction` | `Float` | `1.0f` | Refractive bending strength ($0.0$ to $2.0$). |
-| `dispersion` | `Float` | `0.06f` | Chromatic dispersion aberration (RGB wavelength splitting). |
-| `frost` | `Dp` | `6.dp` | Hardware-accelerated separable Gaussian blur radius ($0$ to $24\text{dp}$). |
-| `highlightStroke` | `Float` | `0.28f` | Baseline luminance for the 360° perimeter highlight stroke. |
-| `edgeLight` | `Float` | `0.10f` | Directional specular sheen intensity on the top-left incident rim. |
+| `refraction` | `Float` | `1.0f` | Overall displacement strength. `0` = no bending (plain frost). |
+| `dispersion` | `Float` | `0f` | Chromatic dispersion (RGB wavelength splitting). Only rendered on the `HIGH` tier — see note below. |
+| `frost` | `Dp` | `6.dp` | Blur radius, applied with the platform's hardware blur. `0.dp` = no blur. |
+| `edgeLight` | `Float` | `0.1f` | Strength of the specular edge band. `0f` disables it. |
 | `rimProfile` | `RimProfile` | `TORIC` | Refraction geometry: `TORIC`, `SMOOTH`, `DROPLET`, or `LEGACY`. |
-| `lens` | `LensModel` | `Blend(0.4f, 0.6f)` | Lens distribution: `Centre(w)`, `Rim(w)`, or continuous `Blend(c, r)`. |
-| `tint` | `Color` | `Transparent` | Translucent glass surface tint. |
-| `saturation` | `Float` | `1.0f` | Rec. 709 luma-preserving saturation adjustment ($0.0$ to $2.0$). |
-| `contrast` | `Float` | `1.0f` | S-curve contrast grading ($0.5$ to $1.5$). |
-| `bezel` | `Bezel?` | `Bezel.soft(12.dp)` | Optional inner shadow boundary contour. |
+| `lens` | `LensModel` | `Blend(centre = 0.6f, rim = 0.4f)` | Lens distribution: `Centre(w)`, `Rim(w)`, or continuous `Blend(c, r)`. |
+| `tint` | `Color` | `Color.Unspecified` (no tint) | Surface tint; supply its own alpha, e.g. `Color.White.copy(alpha = 0.15f)`. |
+| `saturation` | `Float` | `1f` | Saturation multiplier. `1f` = unchanged. |
+| `contrast` | `Float` | `1f` | Contrast multiplier. `1f` = unchanged. |
+| `cornerRadius` | `Dp` | `0.dp` | Corner radius used by the shader's SDF (also settable as a `lumenGlass` parameter). |
+| `bezel` | `BezelBuilder?` | `null` (off) | Optional inner-shadow bezel: `bezel { radius = 12.dp; alpha = 0.12f }`. Rendered on the `HIGH` tier. |
+| `precisionMode` | `Boolean` | `true` | Dual-lobe hairline highlights and normal-aligned rim refraction; `false` = legacy diffuse mode. |
+
+> **Quality tier note:** `rememberLumenGlassState()` picks `BALANCED` on API 33+ and `FALLBACK` below it.
+> `BALANCED` skips dispersion and the bezel, so to see them request the top tier explicitly:
+> `rememberLumenGlassState(quality = QualityTier.HIGH)`. Read `state.resolvedFeatures` to check what the device actually got.
 
 ---
 
@@ -321,7 +326,7 @@ LumenGlass/
 ## ❓ FAQ
 
 ### How do I add a glass effect in Jetpack Compose?
-Add the JitPack dependency (see [Installation](#-installation)), wrap the content behind the glass in a `LumenSource`, and apply `Modifier.lumenGlass(...)` to the composable that should look like glass. The [Quick Start](#-quick-start) shows a complete floating glass card.
+Add the JitPack dependency (see [Installation](#-installation) or the [Getting started guide](https://subhankarcodegeek.github.io/lumen-glass/docs/getting-started/)), wrap the content behind the glass in a `LumenSource`, and apply `Modifier.lumenGlass(...)` to the composable that should look like glass. The [Quick Start](#-quick-start) shows a complete floating glass card.
 
 ### Is this glassmorphism or liquid glass?
 Both. Classic **glassmorphism** is a frosted, blurred, tinted panel; **liquid glass** adds real optical refraction, edge magnification and chromatic dispersion on top of the blur. Lumen Glass renders the full liquid glass look on API 33+ and degrades to a glassmorphism-style frosted panel on older devices.

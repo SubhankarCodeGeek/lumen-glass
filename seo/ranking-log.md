@@ -37,3 +37,16 @@ routine prompt. Same method (AI web-search tool, US results, not Google). Not fo
 Observations: klibs.io pages rank for most library-discovery queries, and kotlinlang Slack
 release threads are indexed; "glass UI android" is dominated by smart-glasses intent and is a
 poor target.
+
+| Date (IST) | Keyword | Found? | Position | Change | Ranking above / instead |
+|---|---|---|---|---|---|
+| 2026-11-05 | lumen glass github android | No | — | = (not found) | pub.dev lumen_kit, ecosyste.ms (openlumen, inkapplications/glass), Arm "Lumen HWRT on Android", CF.lumen |
+| 2026-11-05 | jetpack compose liquid glass library | No | — | = (not found) | QWEA0/Liquid-Glass-Android wiki, maxrave-dev/androidliquidglass, klibs.io ienground/AndroidLiquidGlass, kotlinlang Slack release threads, Mortd3kay/liquid-glass-android |
+| 2026-11-05 | android glassmorphism jetpack compose | No | — | = (not found) | **new:** saadkhalidkhan/compose-glasskit (Maven Central); klibs.io neilyich/glassmorphism-compose, ProAndroidDev/droidcon, substack, hashnode, Medium |
+
+Notes 2026-11-05: spot check only (3 queries; full 17-query sweep is weekly and last ran
+2026-11-04). Same method (AI web-search tool, US results, not Google). No movement — expected,
+since no new indexable content shipped between runs. New competitor on Maven Central:
+`io.github.saadkhalidkhan:compose-glasskit`. Pattern worth noting: klibs.io and Maven Central
+listings rank for library-discovery queries; Lumen Glass is JitPack-only and absent from both.
+Search Console data still not accessible to the routine.

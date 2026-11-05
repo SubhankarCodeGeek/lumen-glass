@@ -4,9 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {%- assign doc_name = page.name | remove: '.md' | remove: '.html' -%}
+{%- comment -%}
+  Pages may set `seo_title`, `crumb` and `description` in front matter for a unique,
+  keyword-relevant <title> and snippet. Without them the old filename-based
+  fallback applies, so the existing notes keep rendering unchanged.
+  (`seo_title`, not `title`: GitHub Pages' jekyll-titles-from-headings fills
+  `title` from each note's first heading, which would silently retitle them.)
+{%- endcomment -%}
 {%- assign doc_title = doc_name | capitalize -%}
+{%- if page.seo_title -%}{%- assign doc_title = page.seo_title -%}{%- endif -%}
+{%- assign doc_crumb = page.crumb | default: doc_title -%}
+{%- capture doc_desc_default -%}Lumen Glass documentation — {{ doc_title | downcase }} notes for the open-source liquid glass rendering library for Android and Jetpack Compose.{%- endcapture -%}
+{%- assign doc_desc = page.description | default: doc_desc_default -%}
 <title>{{ doc_title }} | Lumen Glass documentation</title>
-<meta name="description" content="Lumen Glass documentation — {{ doc_title | downcase }} notes for the open-source liquid glass rendering library for Android and Jetpack Compose.">
+<meta name="description" content="{{ doc_desc | escape }}">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#04050a">
 <meta name="color-scheme" content="dark">
@@ -16,7 +27,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Lumen Glass">
 <meta property="og:title" content="{{ doc_title }} | Lumen Glass documentation">
-<meta property="og:description" content="Technical documentation for the Lumen Glass Android library.">
+<meta property="og:description" content="{{ doc_desc | escape }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <meta property="og:image" content="{{ '/assets/og-image.png' | absolute_url }}">
 <meta name="twitter:card" content="summary_large_image">
@@ -46,7 +57,7 @@
     </a>
     <nav class="nav" aria-label="Documentation">
       <a class="nav__link" href="{{ '/' | relative_url }}">Home</a>
-      <a class="nav__link" href="{{ '/' | relative_url }}#installation">Installation</a>
+      <a class="nav__link" href="{{ '/docs/getting-started/' | relative_url }}">Getting started</a>
       <a class="nav__link" href="{{ '/' | relative_url }}#features">Features</a>
       <a class="nav__link" href="{{ '/' | relative_url }}#docs">All docs</a>
     </nav>
@@ -65,7 +76,7 @@
       </summary>
       <div class="nav-drawer__panel">
         <a class="nav__link" href="{{ '/' | relative_url }}">Home</a>
-        <a class="nav__link" href="{{ '/' | relative_url }}#installation">Installation</a>
+        <a class="nav__link" href="{{ '/docs/getting-started/' | relative_url }}">Getting started</a>
         <a class="nav__link" href="{{ '/' | relative_url }}#features">Features</a>
         <a class="nav__link" href="{{ '/' | relative_url }}#docs">All docs</a>
         <a class="nav__link" href="https://github.com/SubhankarCodeGeek/lumen-glass">GitHub repository</a>
@@ -79,7 +90,7 @@
     <nav class="doc__crumbs" aria-label="Breadcrumb">
       <a href="{{ '/' | relative_url }}">Lumen Glass</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">{{ doc_title }}</span>
+      <span aria-current="page">{{ doc_crumb }}</span>
     </nav>
 
     <article class="prose">
