@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "url": ["http://localhost:8080/lumen-glass/"],
-      "numberOfRuns": 3,
+      "numberOfRuns": 5,
       "settings": {
         "chromeFlags": "--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage"
       }
