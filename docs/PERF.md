@@ -1,7 +1,24 @@
+---
+seo_title: "Liquid Glass Performance on Android: Measured Frame Timing"
+crumb: Performance
+description: >-
+  Measured CPU frame time of Lumen Glass's AGSL liquid glass shader in Jetpack
+  Compose, per quality tier (Macrobenchmark FrameTimingMetric, P50 to P99).
+---
+
 # PERF — measured frame timing
 
 > **Purpose:** the evidence record for `PLAN.md` §6.1's performance exit criterion.
 > **Method:** Macrobenchmark `FrameTimingMetric` (`:benchmark` module), measured on device.
+
+**In short, for developers evaluating the library:** on the measured device the liquid glass
+shader costs about **2.4ms of CPU per frame at the median** (HIGH tier 5.03ms vs the no-shader
+fallback's 2.65ms), and every shader tier stays well inside a 16.6ms frame budget at the median.
+The tiers differ in their *tail* (P95/P99), not their typical frame, so `QualityTier.LOW` is the
+choice when occasional stalls matter more than dispersion and blur. These are one device's numbers,
+measured with the display capped at 45Hz (see the warning below), not a cross-device guarantee.
+How the tiers are picked and how to override them is covered in
+[Getting started → Quality tiers]({{ '/docs/getting-started/' | relative_url }}#5-quality-tiers-and-what-each-device-gets).
 
 ---
 

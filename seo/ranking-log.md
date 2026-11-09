@@ -50,3 +50,32 @@ since no new indexable content shipped between runs. New competitor on Maven Cen
 `io.github.saadkhalidkhan:compose-glasskit`. Pattern worth noting: klibs.io and Maven Central
 listings rank for library-discovery queries; Lumen Glass is JitPack-only and absent from both.
 Search Console data still not accessible to the routine.
+
+| Date (IST) | Keyword | Found? | Position | Change | Ranking above / instead |
+|---|---|---|---|---|---|
+| 2026-11-09 | lumen glass github | No | — | = (not found) | tallys/lumen, exorev07/Lumen, gitlab lumen-code, ecosyste.ms, Unreal "Lumen GI with glass" forum |
+| 2026-11-09 | lumen glass | No | — | = | Lindner LUMEN glass floor panels, Crate & Barrel, lighting products |
+| 2026-11-09 | lumen glass android | No | — | = | Arm "Lumen HWRT on Android", CF.lumen, Unreal Engine Lumen mobile docs |
+| 2026-11-09 | android liquid glass | No | — | = | Android 17 / Pixel "Liquid Glass" news only; no libraries |
+| 2026-11-09 | liquid glass android | No | — | = | QmDeve/AndroidLiquidGlassView (#1), 9to5google/MacRumors news, pub.dev packages, kotlinlang Slack |
+| 2026-11-09 | android glass effect | No | — | = | Expo glass-effect docs, klibs KMPLiquidGlass, Wikipedia, QmDeve, GfG |
+| 2026-11-09 | jetpack compose glass effect | No | — | = | androidengineers substack, dev.to, klibs ienground/AndroidLiquidGlass, ardakazanci, ProAndroidDev "Blurring the Lines" |
+| 2026-11-09 | jetpack compose liquid glass | No | — | = | klibs ienground/AndroidLiquidGlass, kotlinlang Slack threads, p.codekk.com, Maven Central nadeemiqbal/liquid-glass, klibs FletchMcKee/liquid |
+| 2026-11-09 | android liquid glass library | No | — | = | klibs Kashif-E/KMPLiquidGlass, QmDeve, p.codekk.com, klibs Kyant0/AndroidLiquidGlass, Maven Central com.qmdeve.liquidglass |
+| 2026-11-09 | compose glass library | No | — | = | Kashif-E/KMPLiquidGlass, NadeemIqbal dev.to, **new:** github.com/topics/liquid-glass, chrisbanes/haze docs |
+| 2026-11-09 | android glassmorphism | No | — | = | GfG, Medium, substack, klibs neilyich/glassmorphism-compose, droidcon, hashnode |
+| 2026-11-09 | AGSL glass shader | No | — | = | abduzeedo "Crafting Glass", ProAndroidDev shaders post, developer.android.com AGSL, GitHub topic "agsl" |
+| 2026-11-09 | android backdrop blur | No | — | = | klibs ezoushen/blur-cmp, AOSP window-blurs, ProAndroidDev dynamic blur, BlurView, Kyant backdrop docs |
+| 2026-11-09 | glass UI android | No | — | = | Google Glass / Android XR / Compose Glimmer (smart-glasses intent; low-value target) |
+
+Notes 2026-11-09: weekly full sweep (14 queries from the routine prompt). Same method (AI
+web-search tool, US results, not Google). Not found for any query; no movement. The exact-match
+check (`"lumen-glass" SubhankarCodeGeek`) did **not** return the repo this time (it was #1 on
+2026-11-04) — this tool's index varies run to run, so treat it as noise, not evidence of
+de-indexing; only Search Console URL Inspection can confirm. `/docs/getting-started/` is live
+with the expected title, description and canonical (fetched 2026-11-09).
+New patterns: (1) the GitHub topic page `github.com/topics/liquid-glass` and the `agsl` topic page
+now appear for library queries — repository topics are a direct discovery path; (2) aggregator
+mirrors (p.codekk.com, gittrend.io, relatedrepos.com) surface competitors from their GitHub
+activity; (3) Maven Central listings (qmdeve, nadeemiqbal) rank alongside klibs.io.
+Search Console data still not accessible to the routine.

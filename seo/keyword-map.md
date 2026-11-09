@@ -20,7 +20,7 @@ Base: `https://subhankarcodegeek.github.io/lumen-glass/` (site) · `github.com/S
 | Technical | android runtimeshader glass effect | Implement | same as AGSL glass shader | Partial | Merge with AGSL page |
 | Technical | android backdrop blur | Implement | future `/comparisons/liquid-glass-vs-blur/` | Gap | SERP = blur libs + AOSP docs; a comparison page fits better than claiming the term |
 | Technical | compose blur effect | Implement | same as above | Gap | |
-| Performance | android glass rendering performance | Evaluate | `/docs/PERF.html` | Partial | Real data exists; needs a dev-facing intro |
+| Performance | android glass rendering performance | Evaluate | `/docs/PERF.html` | Targeted | Dev-facing summary + title/description added 2026-11-09 (branch `seo/docs-metadata-2026-11-09`) |
 | Library | android liquid glass library | Find a library | `/` + repo README | Partial | Competitors rank via klibs.io and GitHub |
 | Library | compose glass library | Find a library | repo README | Partial | |
 | Library | android glassmorphism library | Find a library | repo README | Partial | |

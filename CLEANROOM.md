@@ -1,3 +1,11 @@
+---
+seo_title: "Clean-Room AGSL Glass Shader: Provenance Record"
+crumb: Shader provenance
+description: >-
+  How Lumen Glass's AGSL liquid glass shader was written from the maths (SDF,
+  gradient normal, edge falloff) without copying third-party shader code.
+---
+
 # CLEANROOM — shader provenance record
 
 > **Status:** 🟢 Complete (P1.4). Shader written and verified compiling/rendering on device (P1.7).

@@ -1,3 +1,11 @@
+---
+seo_title: "Architecture: AGSL Liquid Glass Library for Jetpack Compose"
+crumb: Architecture
+description: >-
+  How Lumen Glass is built: lens model, GlassSpec, quality tiers, layer capture,
+  the AGSL RuntimeShader and the Modifier.lumenGlass Compose API.
+---
+
 # Lumen Glass — Architecture
 
 > Target architecture for the **Lumen Glass** library — a standalone Android project living in a
