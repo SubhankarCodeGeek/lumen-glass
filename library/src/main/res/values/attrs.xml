@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Lumen Glass XML attributes for the View backend.
+
+      Every attribute maps to a field of GlassSpec (or to the quality/source selectors that are not
+      part of the spec). Nothing here is inert: if an attribute could not change what is rendered,
+      it is deliberately not declared. See docs/VIEW.md for the supported matrix and units.
+
+      Dimensions are px at inflation time and are divided by display density by
+      `LumenGlassAttrs`, so the stored spec stays in dp like every other GlassSpec in the library.
+    -->
+    <declare-styleable name="LumenGlassView">
+        <!-- Id of the LumenGlassSourceLayout this surface samples. -->
+        <attr name="lumenGlassSource" format="reference" />
+
+        <!-- false turns the surface into a plain, transparent FrameLayout. -->
+        <attr name="lumenGlassEnabled" format="boolean" />
+
+        <!-- Explicit quality tier; "auto" lets the capability probe choose. -->
+        <attr name="lumenGlassQuality">
+            <enum name="auto" value="0" />
+            <enum name="high" value="1" />
+            <enum name="balanced" value="2" />
+            <enum name="low" value="3" />
+            <enum name="fallback" value="4" />
+        </attr>
+
+        <!-- Lens model. Weights are per-variant; see the weight attributes below. -->
+        <attr name="lumenGlassLensModel">
+            <enum name="centre" value="0" />
+            <enum name="rim" value="1" />
+            <enum name="blend" value="2" />
+        </attr>
+
+        <!-- Centre-term weight, 0..1. Used by "centre" and "blend". -->
+        <attr name="lumenGlassCentreWeight" format="float" />
+
+        <!-- Rim-term weight, 0..1. Used by "rim" and "blend". -->
+        <attr name="lumenGlassRimWeight" format="float" />
+
+        <!-- Overall displacement strength. -->
+        <attr name="lumenGlassRefraction" format="float" />
+
+        <!-- Chromatic-aberration amount; the resolved tier may disable it. -->
+        <attr name="lumenGlassDispersion" format="float" />
+
+        <!-- Blur radius. -->
+        <attr name="lumenGlassFrost" format="dimension" />
+
+        <!-- Material tint; include the alpha channel (e.g. #33FFFFFF). -->
+        <attr name="lumenGlassTint" format="color" />
+
+        <!-- Colour saturation multiplier. -->
+        <attr name="lumenGlassSaturation" format="float" />
+
+        <!-- Colour contrast multiplier. -->
+        <attr name="lumenGlassContrast" format="float" />
+
+        <!-- Specular edge-band strength, 0..1. -->
+        <attr name="lumenGlassEdgeLight" format="float" />
+
+        <!-- Corner radius of the glass surface. -->
+        <attr name="lumenGlassCornerRadius" format="dimension" />
+
+        <!-- false runs legacy diffuse mode instead of the calibrated precision path. -->
+        <attr name="lumenGlassPrecisionMode" format="boolean" />
+
+        <!-- Geometric curvature profile for the rim bend. -->
+        <attr name="lumenGlassRimProfile">
+            <enum name="toric" value="0" />
+            <enum name="smooth" value="1" />
+            <enum name="droplet" value="2" />
+            <enum name="legacy" value="3" />
+        </attr>
+
+        <!-- Bezel inner-shadow radius. Setting either bezel attribute enables the bezel. -->
+        <attr name="lumenGlassBezelRadius" format="dimension" />
+
+        <!-- Bezel alpha, 0..1. -->
+        <attr name="lumenGlassBezelAlpha" format="float" />
+    </declare-styleable>
+</resources>

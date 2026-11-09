@@ -26,7 +26,7 @@ working glass card, and explains what happens on devices that cannot run the sha
 | `minSdk` | **21**. The library installs and renders on any API 21+ app. |
 | Full liquid glass (refraction, rim light, dispersion) | **Android 13 / API 33+** — the first release with AGSL `RuntimeShader`. |
 | Below API 33 | A deliberate **frosted panel** fallback is drawn instead. Nothing crashes and nothing silently disappears. |
-| UI toolkit | Jetpack Compose. `Modifier.lumenGlass` is the public, supported API. |
+| UI toolkit | Jetpack Compose (`Modifier.lumenGlass`) or Android Views/XML (`LumenGlassView`). See [Views]({{ '/docs/VIEW.html' | relative_url }}) for the XML API. |
 | Distribution | [JitPack](https://jitpack.io/#SubhankarCodeGeek/lumen-glass) |
 
 ## 1. Install from JitPack

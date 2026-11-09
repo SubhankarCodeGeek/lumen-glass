@@ -31,6 +31,7 @@ How the tiers are picked and how to override them is covered in
 | Compilation | `CompilationMode.Partial()` — `compilationMode: "verify"` in the result context |
 | Iterations | 5 per tier, `StartupMode.WARM` |
 | Screen | `TierComparisonActivity`, glass panes animating over high-contrast content |
+| Screen (View path) | `ViewGlassActivity`, two View surfaces over a scrolling source |
 | CPU | `cpuLocked: true` — clocks pinned by the benchmark, removing DVFS noise |
 | Command | `./gradlew :benchmark:connectedBenchmarkAndroidTest` |
 
@@ -62,6 +63,24 @@ How the tiers are picked and how to override them is covered in
 | HIGH | −7.54 | +1.20 | +8.54 | +42.01 |
 | BALANCED | −3.88 | +1.06 | +8.65 | +42.08 |
 
+### View path (View/XML surfaces)
+
+`ViewGlassFrameTimingBenchmark` drives `ViewGlassActivity` — the Phase 8 harness: one
+`LumenGlassSourceLayout` containing a 48-row `ScrollView`, sampled by two `LumenGlassView`
+surfaces (a `BALANCED` primary with 8dp frost plus a bezel, and a `HIGH` rim surface) while the
+source scrolls. 5 iterations, `StartupMode.WARM`, same device and build type as above.
+
+| Metric | P50 | P90 | P95 | P99 |
+|---|---|---|---|---|
+| `frameDurationCpuMs` | **3.9** | 5.3 | 6.3 | **9.6** |
+| `frameOverrunMs` | −9.9 | −8.8 | −7.5 | −1.5 |
+
+Read this as **“the View front end adds no separate cost model”**: it resolves the same
+`GlassRenderPlan` and runs the same shader, so the tier tables above remain the cost reference.
+The two scenarios are **not directly comparable** — different content, a different number of
+surfaces, and the Compose screen animates while this one scrolls — so the lower numbers here are
+not evidence that one backend is faster. The 45Hz governor caveat applies to this run too.
+
 ---
 
 ## What this says
@@ -78,7 +97,10 @@ How the tiers are picked and how to override them is covered in
    baseline. Anyone tuning this should look at the 95th/99th percentile, not the average.
 
 4. **LOW has the best tail (P99 13.4ms, no overrun until P95)**, which is the tier policy doing what
-   it claims: the reduced capture scale plus no blur removes the worst-case spikes.
+   it claims: the reduced capture scale plus no blur removes the worst-case spikes. Recording and
+   lens evaluation happen at buffer resolution and the presentation upscale is a GPU composite; the
+   per-stage saving has not been isolated by a benchmark, so this is measured at the whole-frame
+   level only.
 
 > [!WARNING]
 > **The device caps this app's UID to 45Hz, so these are not 60fps measurements.** Measured
@@ -145,6 +167,10 @@ How the tiers are picked and how to override them is covered in
 
 ```bash
 ANDROID_PREFS_ROOT= ./gradlew :benchmark:connectedBenchmarkAndroidTest
+
+# View/XML surfaces only (Phase 8):
+./gradlew :benchmark:connectedBenchmarkAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.subhankar.lumenglass.benchmark.ViewGlassFrameTimingBenchmark
 ```
 
 > [!NOTE]

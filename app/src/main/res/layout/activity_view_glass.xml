@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The View/XML harness.
+
+  Structural rules this layout demonstrates (docs/VIEW.md):
+
+  1. The source is a LumenGlassSourceLayout. Nothing else can be sampled.
+  2. The glass views are declared AFTER the source, so they sample the frame the source has just
+     recorded — no one-frame lag.
+  3. The source and the glasses are siblings. A glass may never sample an ancestor (it would
+     recurse through itself), and the binder rejects that with a debug-logged reason.
+
+  The rows are populated in ViewGlassActivity so the ScrollView has enough content to scroll.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/view_glass_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <com.subhankar.lumenglass.view.LumenGlassSourceLayout
+        android:id="@+id/view_glass_source"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:id="@+id/view_glass_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/view_glass_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+    </com.subhankar.lumenglass.view.LumenGlassSourceLayout>
+
+    <!-- Primary surface: full v1 attribute set. Its child proves children draw above the glass. -->
+    <com.subhankar.lumenglass.view.LumenGlassView
+        android:id="@+id/view_glass_centre"
+        android:layout_width="300dp"
+        android:layout_height="180dp"
+        android:layout_gravity="center"
+        app:lumenGlassBezelAlpha="0.12"
+        app:lumenGlassBezelRadius="10dp"
+        app:lumenGlassCentreWeight="0.6"
+        app:lumenGlassContrast="1.0"
+        app:lumenGlassCornerRadius="28dp"
+        app:lumenGlassEdgeLight="0.28"
+        app:lumenGlassFrost="8dp"
+        app:lumenGlassLensModel="blend"
+        app:lumenGlassPrecisionMode="true"
+        app:lumenGlassQuality="balanced"
+        app:lumenGlassRefraction="1.0"
+        app:lumenGlassRimProfile="toric"
+        app:lumenGlassRimWeight="0.4"
+        app:lumenGlassSaturation="1.1"
+        app:lumenGlassSource="@id/view_glass_source"
+        app:lumenGlassTint="#33FFFFFF">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:letterSpacing="0.12"
+            android:text="@string/view_glass_label"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </com.subhankar.lumenglass.view.LumenGlassView>
+
+    <!-- Second surface over the same source: different lens, tier and tint. -->
+    <com.subhankar.lumenglass.view.LumenGlassView
+        android:id="@+id/view_glass_corner"
+        android:layout_width="132dp"
+        android:layout_height="132dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        app:lumenGlassCornerRadius="66dp"
+        app:lumenGlassDispersion="0.06"
+        app:lumenGlassFrost="6dp"
+        app:lumenGlassLensModel="rim"
+        app:lumenGlassQuality="high"
+        app:lumenGlassRimWeight="0.55"
+        app:lumenGlassSource="@id/view_glass_source"
+        app:lumenGlassTint="#4D000000" />
+
+</FrameLayout>

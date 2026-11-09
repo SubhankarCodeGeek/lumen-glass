@@ -100,9 +100,86 @@ internal fun buildGlassRenderEffectOrNull(uniforms: GlassUniforms, frostRadiusPx
 internal const val CONTENT_SAMPLER_NAME: String = "content"
 
 /**
- * Applies the glass material to a [GlassCapture]'s node.
+ * The effect-space form of a surface-space [GlassUniforms] plus frost radius.
+ *
+ * This is a value, not an effect, so callers can **cache an effect and detect staleness** by
+ * comparing two [GlassEffectSpace] instances. The View backend needs that: it re-records the
+ * capture every frame but must not rebuild the `RenderEffect` (and recompile the shader) unless the
+ * geometry actually changed.
+ *
+ * @property uniforms the uniforms the effect must be built with — buffer-space on a reduced
+ *   capture, surface-space otherwise.
+ * @property frostRadiusPx the blur radius the effect must be built with, in the same space as
+ *   [uniforms].
+ */
+internal data class GlassEffectSpace(
+    val uniforms: GlassUniforms,
+    val frostRadiusPx: Float,
+)
+
+/**
+ * Converts **surface-space** uniforms to the space of the node the effect will be attached to.
+ *
+ * On the reduced-capture path the effect belongs on the buffer-resolution content node, so the two
+ * size-dependent values (`widthPx`/`heightPx`) become the buffer dimensions and the lengths
+ * (`cornerRadiusPx`/`bezelRadiusPx`/frost radius) are multiplied by the capture scale. At full
+ * scale the values pass through unchanged.
+ *
+ * Pure apart from reading the capture's current geometry: it attaches nothing and allocates no
+ * effect. Split out of [applyGlassEffect] so the View backend can use the same conversion policy
+ * for its cached effect instead of duplicating it.
+ *
+ * @param uniforms surface-space uniforms (callers never pre-scale them).
+ * @param frostRadiusPx surface-space blur radius.
+ */
+@RequiresApi(RENDER_NODE_MIN_API)
+internal fun GlassCapture.effectSpace(
+    uniforms: GlassUniforms,
+    frostRadiusPx: Float,
+): GlassEffectSpace {
+    if (effectNode() === node) return GlassEffectSpace(uniforms, frostRadiusPx)
+
+    val geometry = captureGeometry()
+    return GlassEffectSpace(
+        uniforms = uniforms.copy(
+            widthPx = geometry.bufferWidthPx.toFloat(),
+            heightPx = geometry.bufferHeightPx.toFloat(),
+            cornerRadiusPx = uniforms.cornerRadiusPx * geometry.scale,
+            bezelRadiusPx = uniforms.bezelRadiusPx * geometry.scale,
+        ),
+        frostRadiusPx = frostRadiusPx * geometry.scale,
+    )
+}
+
+/**
+ * Attaches [effect] to the node that actually holds the recorded content.
+ *
+ * On the reduced path that is the internal buffer-resolution node, so any effect left on the
+ * presentation node is cleared first: the material must be applied exactly once, on the node the
+ * lens samples. Passing `null` detaches any effect.
+ *
+ * No-op after release — a released capture is a caller bug, but this path is reached from a View
+ * `onDraw` and must not throw there (the View-owned capture re-creates itself after release, so a
+ * stale renderer reference is harmless).
+ */
+@RequiresApi(RENDER_EFFECT_MIN_API)
+internal fun GlassCapture.attachGlassEffect(effect: RenderEffect?) {
+    if (isReleased) return
+    val effectNode = effectNode()
+    if (effectNode !== node) node.setRenderEffect(null)
+    effectNode.setRenderEffect(effect)
+}
+
+/**
+ * Applies the glass material to a [GlassCapture]'s effect node.
  *
  * This is the normal P2 path: capture content, then render it through the lens.
+ *
+ * ## Surface-space uniforms
+ *
+ * [uniforms] and [frostRadiusPx] are always in **surface coordinates**, regardless of the capture
+ * scale. [effectSpace] converts them to the space of the node the effect is attached to, so the
+ * public draw contract stays unchanged: callers pass the same surface-space values at every scale.
  *
  * Returns `false` when AGSL is unavailable (API < 33), so the caller can take the FROST branch. A
  * boolean rather than an exception because "this device cannot run the shader" is an expected,
@@ -117,8 +194,10 @@ internal fun applyGlassEffect(
     frostRadiusPx: Float = 0f,
 ): Boolean {
     if (capture.isReleased) return false
-    val effect = buildGlassRenderEffectOrNull(uniforms, frostRadiusPx) ?: return false
-    capture.node.setRenderEffect(effect)
+
+    val space = capture.effectSpace(uniforms, frostRadiusPx)
+    val effect = buildGlassRenderEffectOrNull(space.uniforms, space.frostRadiusPx) ?: return false
+    capture.attachGlassEffect(effect)
     return true
 }
 

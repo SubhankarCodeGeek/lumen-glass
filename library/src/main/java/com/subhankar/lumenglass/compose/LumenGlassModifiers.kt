@@ -23,13 +23,12 @@ import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
-import com.subhankar.lumenglass.android.GlassUniforms
+import com.subhankar.lumenglass.android.FROST_PANEL_ARGB
 import com.subhankar.lumenglass.android.RENDER_EFFECT_MIN_API
-import com.subhankar.lumenglass.android.TIER_BALANCED
-import com.subhankar.lumenglass.android.TIER_HIGH
 import com.subhankar.lumenglass.android.buildGlassRenderEffectOrNull
 import com.subhankar.lumenglass.android.checkOverlap
 import com.subhankar.lumenglass.android.logOverlapVerdict
+import com.subhankar.lumenglass.android.resolveGlassRenderPlan
 import com.subhankar.lumenglass.android.toOverlapRect
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -189,21 +188,14 @@ internal class LumenGlassNode(
         // get near-black glass with no explanation.
         reportOverlap()
 
-        val uniforms = GlassUniforms.from(
+        val plan = resolveGlassRenderPlan(
             spec = spec,
             widthPx = size.width,
             heightPx = size.height,
-            cornerRadiusPx = spec.cornerRadiusDp * density,
-            dispersion = if (state.resolvedFeatures.useDispersion) spec.dispersion else 0f,
-            refraction = spec.refraction,
-            tier = if (state.resolvedFeatures.useDispersion) TIER_HIGH else TIER_BALANCED,
-            bezelRadiusPx = if (state.resolvedFeatures.useDispersion) (spec.bezel?.radiusDp ?: 0f) * density else 0f,
+            density = density,
+            features = state.resolvedFeatures,
         )
-
-        val effect = buildGlassRenderEffectOrNull(
-            uniforms = uniforms,
-            frostRadiusPx = if (state.resolvedFeatures.useBlur) spec.frostDp * density else 0f,
-        )
+        val effect = buildGlassRenderEffectOrNull(plan.uniforms, plan.frostRadiusPx)
         if (effect == null) {
             drawFrostPanel()
             drawContent()
@@ -248,17 +240,14 @@ internal class LumenGlassNode(
         )
     }
 
-    /** The documented degraded appearance when no shader can run. */
+    /**
+     * The documented degraded appearance when no shader can run.
+     *
+     * The colour is shared with the View backend ([FROST_PANEL_ARGB]) so switching APIs cannot
+     * change what the fallback looks like.
+     */
     private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawFrostPanel() {
-        drawRect(color = Color.White.copy(alpha = FROST_PANEL_ALPHA), size = size)
-    }
-
-    private companion object {
-        /**
-         * Deliberately visible but not opaque: the panel must read as *frosted glass* — you should
-         * be able to tell something is behind it. An opaque panel would look like a bug.
-         */
-        const val FROST_PANEL_ALPHA = 0.28f
+        drawRect(color = Color(FROST_PANEL_ARGB), size = size)
     }
 }
 

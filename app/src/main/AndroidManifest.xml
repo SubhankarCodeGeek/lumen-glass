@@ -46,6 +46,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Phase 8: the View/XML surface. One source, two glass surfaces, one scroller. -->
+        <activity
+            android:name=".ViewGlassActivity"
+            android:exported="true"
+            android:label="@string/harness_view">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- P3.5: tier comparison (HIGH/BALANCED/LOW/FALLBACK) + frame-timing HUD. -->
         <activity
             android:name=".TierComparisonActivity"

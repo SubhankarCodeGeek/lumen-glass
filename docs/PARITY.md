@@ -14,7 +14,7 @@
 Three things make a numeric comparison the wrong tool:
 
 1. **The baseline is not licence-clean.** The prototype
-   ([`CommunityRefraction.kt`](../../../360%20Community/designsystem/src/main/java/com/securnyx360/designsystem/theme/CommunityRefraction.kt))
+   (`360 Community/designsystem/src/main/java/com/securnyx360/designsystem/theme/CommunityRefraction.kt`)
    is a port of an unlicensed Shadertoy snippet and is marked *"internal R&D only — NOT
    publishable"* in its own header. Optimising for numerical closeness to it would be optimising for
    an artefact we are not allowed to ship.
@@ -71,7 +71,7 @@ squircle distance *after* the fact.
 
 Lumen Glass does not have the defect to patch: the superellipse field `|n.x|^e + |n.y|^e` over
 per-axis-normalised coordinates is aspect-independent **by construction**
-([`GlassMath.squircle`](../library/src/main/java/com/subhankar/lumenglass/core/GlassMath.kt)).
+([`GlassMath.squircle`](https://github.com/SubhankarCodeGeek/lumen-glass/blob/main/library/src/main/java/com/subhankar/lumenglass/core/GlassMath.kt)).
 
 **Verdict: Lumen Glass better.** Not a divergence in behaviour — the prototype's behaviour here is a
 bug.
@@ -169,5 +169,5 @@ to be the prototype doing expensive work the platform already does better.
 
 The prototype was read for **behaviour**, after our shader was already written, and specifically to
 confirm the aspect-ratio finding recorded in §4.1. **No shader text, constant or structure was
-copied** from it into Lumen Glass. See [`CLEANROOM.md`](../CLEANROOM.md) §"What was and was not
+copied** from it into Lumen Glass. See [`CLEANROOM.md`]({{ '/CLEANROOM.html' | relative_url }}) §"What was and was not
 consulted".

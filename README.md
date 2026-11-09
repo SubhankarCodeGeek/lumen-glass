@@ -211,6 +211,46 @@ fun GlassCardExample() {
 
 ---
 
+## 🧱 View & XML (no Compose)
+
+The same engine is available to the Android View system. Declare a source container, then a glass
+surface that samples it — no Compose dependency, no second material model:
+
+```xml
+<com.subhankar.lumenglass.view.LumenGlassSourceLayout
+    android:id="@+id/backdrop"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- Your scrolling content -->
+</com.subhankar.lumenglass.view.LumenGlassSourceLayout>
+
+<com.subhankar.lumenglass.view.LumenGlassView
+    android:layout_width="300dp"
+    android:layout_height="180dp"
+    android:layout_gravity="center"
+    app:lumenGlassSource="@id/backdrop"
+    app:lumenGlassCornerRadius="28dp"
+    app:lumenGlassFrost="8dp"
+    app:lumenGlassQuality="balanced" />
+```
+
+```kotlin
+val glass = findViewById<LumenGlassView>(R.id.glass)
+glass.setSource(source)
+glass.setGlassConfig {
+    lens = LensModel.Blend(centre = 0.6f, rim = 0.4f)
+    refraction = 1.0f
+    cornerRadiusDp = 24f
+}
+```
+
+Rules that matter: only a `LumenGlassSourceLayout` can be sampled, the glass must be declared
+**after** the source (otherwise it is one frame stale), and the surface needs API 33+ and hardware
+acceleration — below that it draws the shared FROST panel. See
+[`docs/VIEW.md`](docs/VIEW.md) for the full attribute matrix, unit rules and limitations.
+
+---
+
 ## 🛠️ Recipes
 
 <details>
@@ -314,7 +354,8 @@ LumenGlass/
 ├── library/
 │   ├── core/         # Pure platform-agnostic optical model (zero Android/androidx imports)
 │   ├── android/      # RuntimeShader, RenderEffect, RenderNode capture substrate
-│   └── compose/      # Public Jetpack Compose APIs (Modifier.lumenGlass, LumenSource)
+│   ├── compose/      # Public Jetpack Compose APIs (Modifier.lumenGlass, LumenSource)
+│   └── view/         # Public View/XML APIs (LumenGlassView, LumenGlassSourceLayout)
 ├── app/              # Interactive LumenGlass Studio testbed with real-time controls
 └── benchmark/        # Macrobenchmark frame-timing verification harness
 ```
@@ -338,7 +379,7 @@ The library runs on API 21+. The AGSL shader pipeline (refraction, dispersion, r
 Blur-only libraries soften what is behind a surface. Lumen Glass also bends it: a custom AGSL glass shader models toric meniscus magnification, three rim profiles, dual-lobe specular highlights and wavelength-dependent dispersion, with adaptive quality tiers to hold 60 FPS. See the [comparison table](#head-to-head-comparison).
 
 ### Can I use the AGSL glass shader without Compose?
-The optical model lives in a platform-agnostic `core` module and the Android substrate (`RuntimeShader`, `RenderEffect`, `RenderNode` capture) in `android`; the public, supported API today is the Jetpack Compose `Modifier.lumenGlass`. See [ARCHITECTURE](docs/ARCHITECTURE.md).
+Yes. The optical model lives in a platform-agnostic `core` module, the substrate (`RuntimeShader`, `RenderEffect`, `RenderNode` capture) in `android`, and there are two public front ends over it: Jetpack Compose (`Modifier.lumenGlass`) and the View/XML API (`LumenGlassSourceLayout` + `LumenGlassView`). Both resolve through the same `GlassSpec` and shader. See [VIEW.md](docs/VIEW.md) and [ARCHITECTURE](docs/ARCHITECTURE.md).
 
 ---
 

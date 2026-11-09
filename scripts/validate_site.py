@@ -62,6 +62,7 @@ REQUIRED = [
     "assets/site/live-capture-610.webp",
     "docs/ARCHITECTURE.html",
     "docs/PERF.html",
+    "docs/VIEW.html",
 ]
 
 BANNED = ("localhost", "127.0.0.1", "0.0.0.0", "file://", "/Users/", "example.com")

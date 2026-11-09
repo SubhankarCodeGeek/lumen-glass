@@ -11,8 +11,8 @@ description: >-
 > Target architecture for the **Lumen Glass** library — a standalone Android project living in a
 > **sibling folder** next to `360 Community` (`../LumenGlass/`). **Not** part of the 360 build.
 >
-> See [`PLAN.md`](PLAN.md) for the *why*, the licence constraint, and the roadmap.
-> See [`CLEANROOM.md`](CLEANROOM.md) before writing any shader code.
+> See [`PLAN.md`]({{ '/docs/PLAN.html' | relative_url }}) for the *why*, the licence constraint, and the roadmap.
+> See [`CLEANROOM.md`]({{ '/CLEANROOM.html' | relative_url }}) before writing any shader code.
 
 ---
 
@@ -41,6 +41,10 @@ description: >-
 ├── compose/                       # public Compose API — what consumers import
 │   ├── LumenGlass.kt              # Modifier.lumenGlass(...), Modifier.lumenSource(...)
 │   └── rememberLumenGlassState()
+│
+├── view/                          # public View/XML API
+│   ├── LumenGlassView.kt          # glass surface (FrameLayout)
+│   └── LumenGlassSourceLayout.kt  # the only accepted source
 │
 ├── sample/                        # demo app: sliders over high-contrast content
 └── README.md  ARCHITECTURE.md  CLEANROOM.md
@@ -142,8 +146,11 @@ requirement, not a footnote.)
 
 `PLAN.md` §5.2 has the full table. The architecture implications:
 
-- **`DownscaleCapture`** — capture renders at 0.25×–0.5× linear scale (glass is blurry anyway), then
-  the effect samples the small layer. ~4× fragment work saved. **Implemented (P3.5).**
+- **`DownscaleCapture`** — capture records at 0.25×–0.5× linear scale (glass is blurry anyway) into
+  a buffer-sized content node, which is then composited up into the full-region presentation node.
+  Recording and lens evaluation therefore happen at buffer resolution, and the presentation upscale
+  is a GPU composite; the resulting saving has **not been benchmarked** yet. **Implemented
+  (P3.5).**
 - **Platform blur, not ours** — `RenderEffect.createBlurEffect(radiusX, radiusY, …)` takes separate
   X and Y radii, so the framework's blur is *already* separable and hardware-accelerated. We use it
   rather than writing an 18-tap loop. **Corrected at P3.5** — see `PLAN.md` §5.2.
@@ -153,7 +160,7 @@ requirement, not a footnote.)
 
 ---
 
-## 6. Public API (`compose/`) — **implemented (P4)**
+## 6. Public APIs (`compose/`, `view/`) — **implemented**
 
 ```kotlin
 val glass = rememberLumenGlassState()          // creates/owns the capture
@@ -206,6 +213,40 @@ Box {
 - **Guarded** — a structural test asserts every bound uniform is declared (the `unknown identifier`
   crash class), and an on-device test compiles the shader for real.
 
+### The View backend (`view/`) — implemented (Phase 8)
+
+The View/XML front end **reuses the engine** rather than re-implementing it:
+
+```xml
+<com.subhankar.lumenglass.view.LumenGlassSourceLayout
+    android:id="@+id/backdrop"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+<com.subhankar.lumenglass.view.LumenGlassView
+    android:layout_width="280dp"
+    android:layout_height="160dp"
+    app:lumenGlassSource="@id/backdrop" />
+```
+
+- `LumenGlassSourceLayout` is the **only** accepted source. On a hardware draw it records
+  background → `onDraw` → non-glass direct children into one effect-free `RenderNode`, draws it,
+  then draws direct glass children and the foreground on the outer canvas. That mirrors
+  `View.draw()`'s order and avoids a `RenderNode` cycle for a glass inside its own source.
+- `LumenGlassView` is a `FrameLayout` that parses the `lumenGlass*` styleable into the same
+  `GlassSpec`, resolves the same render plan (`resolveGlassRenderPlan`) and applies the same shader
+  through `GlassCapture.effectSpace` / `attachGlassEffect`. The effect is cached on the
+  effect-space uniforms and rebuilt only when the material or geometry changes.
+- Binding is a typed, diagnosable decision (`SourceBinding.kt`): missing / self / ancestor / wrong
+  type are distinct rejection reasons, logged in debug. There is no arbitrary-view path.
+- Coordinates come from `getLocationInWindow` when both views are attached, and from summed
+  layout/scroll offsets in a shared root when they are not (tests and previews).
+- Invalidation is loop-free by construction: a surface may not sample an ancestor, so a source
+  notification can never dirty the source it samples.
+
+See [Views]({{ '/docs/VIEW.html' | relative_url }}) for the attribute matrix, units, migration and
+limitations.
+
 ---
 
 ## 7. Testing
@@ -217,6 +258,10 @@ Box {
 | `LensModelTest` | centre/rim/blend weight resolution (JVM) |
 | `CorePurityTest` | `core/` imports nothing `android*`/`androidx*` |
 | `LumenGlassShaderStructureTest` | every bound uniform is declared in the shader string |
+| `SourceBindingTest` | source-binding matrix: missing / self / ancestor / wrong type (JVM) |
+| `GlassAttrValuesTest` | XML values → `GlassSpec`, `null` preservation, clamping (JVM) |
+| `LumenGlassConfigBuilderTest` | builder defaults, bezel opt-in, clamping (JVM) |
+| `ViewGlassRenderTest` | GPU pixel readback: sampling offsets, multi-surface, FROST fallback, release, children-on-top, XML mapping (instrumented) |
 
 Device verification: the **sample app** (harness pattern) renders the shader over high-contrast
 content; frame timing measured for the §6.1 budget.
