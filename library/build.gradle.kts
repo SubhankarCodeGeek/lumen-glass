@@ -55,7 +55,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.subhankar.lumenglass"
             artifactId = "lumenglass"
-            version = "0.1.1"
+            version = "0.2.0"
 
             afterEvaluate {
                 from(components["release"])

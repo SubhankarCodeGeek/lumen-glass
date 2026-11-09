@@ -47,7 +47,7 @@ Then add the dependency to your app module's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.SubhankarCodeGeek:lumen-glass:0.1.1")
+    implementation("com.github.SubhankarCodeGeek:lumen-glass:0.2.0")
 }
 ```
 
