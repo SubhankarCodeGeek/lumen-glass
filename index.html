@@ -1,10 +1,10 @@
 ---
 layout: landing
-title: Lumen Glass | Liquid Glass for Android &amp; Jetpack Compose
+title: Lumen Glass | Liquid Glass for Jetpack Compose &amp; Android Views
 description: >-
-  Open-source liquid glass rendering for Android and Jetpack Compose. Custom AGSL
-  runtime shaders bring optical refraction, chromatic dispersion, rim profiles and
-  refined glass lighting to your UI.
+  Open-source liquid glass rendering for Jetpack Compose and Android Views. Custom
+  AGSL runtime shaders bring optical refraction, chromatic dispersion, rim profiles
+  and refined glass lighting to your UI.
 permalink: /
 ---
 {%- comment -%}
@@ -24,8 +24,8 @@ permalink: /
         </h1>
         <p class="hero__lead">
           Bring light-bending surfaces, optical refraction, chromatic dispersion and
-          refined glass lighting to Jetpack Compose with an open-source rendering
-          library powered by custom AGSL shaders.
+          refined glass lighting to Jetpack Compose and the Android View system with
+          an open-source rendering library powered by custom AGSL shaders.
         </p>
 
         <div class="hero__cta">
@@ -41,6 +41,7 @@ permalink: /
         <ul class="badges">
           <li><span class="badge">Kotlin</span></li>
           <li><span class="badge">Jetpack Compose</span></li>
+          <li><span class="badge">Views &amp; XML</span></li>
           <li><span class="badge">AGSL</span></li>
           <li><span class="badge">Apache-2.0</span></li>
           <li>
@@ -403,8 +404,8 @@ permalink: /
         <h2 class="section-head__title" id="features-title">What the library actually does</h2>
         <p class="section-head__text">
           Every item below maps to code in the <code class="inline-code">library/</code>
-          module — a clean-room optical core, an Android rendering layer, and a Compose
-          surface on top.
+          module — a clean-room optical core, an Android rendering layer, and two public
+          front ends on top: Compose and View/XML.
         </p>
       </header>
 
@@ -493,6 +494,21 @@ permalink: /
             <code>LumenSource</code>, <code>Modifier.lumenGlass</code> and
             <code>rememberLumenGlassState</code>, configured through a typed
             <code>GlassSpecBuilder</code> DSL whose defaults are already sensible.
+          </p>
+        </article>
+
+        <article class="feature" data-reveal>
+          <span class="feature__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2.5"/>
+              <path d="M3 9h18M8 4v5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <h3 class="feature__title">Views &amp; XML</h3>
+          <p class="feature__text">
+            <code>LumenGlassSourceLayout</code> and <code>LumenGlassView</code> bring the
+            same shader to classic layouts, configured with <code>app:lumenGlass*</code>
+            attributes or a typed builder — no Compose code required.
           </p>
         </article>
 
@@ -807,6 +823,13 @@ offset = dir * weight * scale</code>
           </div>
 
           <p class="section-head__text" style="margin-top: 1.5rem">
+            Using Android Views? The same artifact ships
+            <code class="inline-code">LumenGlassSourceLayout</code> and
+            <code class="inline-code">LumenGlassView</code>.
+            <a class="link" href="{{ '/docs/VIEW.html' | relative_url }}">Read the Views &amp; XML guide</a>.
+          </p>
+
+          <p class="section-head__text" style="margin-top: 0.75rem">
             <a class="link" href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass">View the project on JitPack</a>
             &middot;
             <a class="link" href="https://github.com/SubhankarCodeGeek/lumen-glass#-installation">Full installation notes</a>
@@ -852,8 +875,8 @@ offset = dir * weight * scale</code>
         <h2 class="section-head__title" id="dx-title">A library you can read</h2>
         <p class="section-head__text">
           The optical maths is a pure Kotlin module with JVM unit tests; the Android layer
-          handles capture and shaders; Compose sits on top. The repository stays the
-          authoritative reference — this page is the introduction.
+          handles capture and shaders; Compose and Views sit on top. The repository stays
+          the authoritative reference — this page is the introduction.
         </p>
       </header>
 
@@ -935,8 +958,8 @@ offset = dir * weight * scale</code>
       <div class="final" data-reveal>
         <h2 id="final-title">Give your Android UI a new dimension.</h2>
         <p>
-          Explore the source, integrate Lumen Glass into your Compose project, and
-          experiment with a different approach to glass rendering.
+          Explore the source, integrate Lumen Glass into your Compose or View project,
+          and experiment with a different approach to glass rendering.
         </p>
         <div class="final__cta">
           <a class="btn btn--primary" href="https://github.com/SubhankarCodeGeek/lumen-glass">Explore Lumen Glass</a>

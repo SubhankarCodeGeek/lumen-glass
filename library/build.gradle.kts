@@ -63,7 +63,7 @@ publishing {
 
             pom {
                 name.set("Lumen Glass")
-                description.set("A physically accurate, clean-room Liquid Glass rendering library for Android & Jetpack Compose.")
+                description.set("A physically accurate, clean-room Liquid Glass rendering library for Android, Jetpack Compose and Views.")
                 url.set("https://github.com/SubhankarCodeGeek/lumen-glass")
                 licenses {
                     license {

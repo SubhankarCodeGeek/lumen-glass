@@ -14,7 +14,7 @@
 {%- assign doc_title = doc_name | capitalize -%}
 {%- if page.seo_title -%}{%- assign doc_title = page.seo_title -%}{%- endif -%}
 {%- assign doc_crumb = page.crumb | default: doc_title -%}
-{%- capture doc_desc_default -%}Lumen Glass documentation — {{ doc_title | downcase }} notes for the open-source liquid glass rendering library for Android and Jetpack Compose.{%- endcapture -%}
+{%- capture doc_desc_default -%}Lumen Glass documentation — {{ doc_title | downcase }} notes for the open-source liquid glass rendering library for Android, Jetpack Compose and Views.{%- endcapture -%}
 {%- assign doc_desc = page.description | default: doc_desc_default -%}
 <title>{{ doc_title }} | Lumen Glass documentation</title>
 <meta name="description" content="{{ doc_desc | escape }}">

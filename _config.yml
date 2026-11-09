@@ -21,13 +21,13 @@ title: Lumen Glass
 
 # jekyll-seo-tag builds <title> as "title | tagline" — keep it keyword-led and
 # under ~60 characters so it is not truncated in search results.
-tagline: Liquid glass shaders for Android & Jetpack Compose
+tagline: Liquid glass shaders for Android, Jetpack Compose & Views
 
 # Used for <meta name="description"> and og:description. ~155 characters keeps
 # it intact in the SERP snippet, and it carries the terms people actually search
 # for: AGSL shader library, Android, Jetpack Compose, glassmorphism, refraction.
 description: >-
-  Open-source AGSL shader library for Android & Jetpack Compose.
+  Open-source AGSL shader library for Android, Jetpack Compose and Views.
   GPU-accelerated liquid glass with real refraction, chromatic dispersion
   and adaptive blur.
 
@@ -49,7 +49,7 @@ defaults:
         path: /assets/og-image.png
         width: 1200
         height: 630
-        alt: Lumen Glass — liquid glass shaders for Android and Jetpack Compose
+        alt: Lumen Glass — liquid glass shaders for Android, Jetpack Compose and Views
 
   # Render the Markdown notes with the site's own layout instead of the theme's.
   - scope:

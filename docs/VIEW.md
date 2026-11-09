@@ -40,6 +40,7 @@ resolves the same `GlassRenderPlan`, and runs the same AGSL shader through the s
 | **Hardware acceleration** | A software canvas cannot replay a `RenderNode`; the source falls back to an ordinary `FrameLayout` and the glass to FROST. |
 | **A `LumenGlassSourceLayout` source** | No other view type can be sampled — see [The source model](#the-source-model). |
 | **Same window** | A source in another window has no meaningful offset to the surface. |
+| **One artifact** | The AAR's POM lists Compose UI, foundation and material3 as `runtime` dependencies, so a View-only app still resolves them. No Compose code is needed or loaded, but the libraries are on the classpath. |
 
 The library itself supports API 21+. On API 29–32 the View hierarchy still works, but no glass is
 rendered: `LumenGlassSourceLayout` behaves as a normal `FrameLayout` and `LumenGlassView` draws the

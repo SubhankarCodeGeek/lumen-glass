@@ -1,19 +1,21 @@
 <p align="center">
-  <h1 align="center">Lumen Glass — Liquid Glass &amp; Glassmorphism for Jetpack Compose (AGSL)</h1>
+  <h1 align="center">Lumen Glass — Liquid Glass &amp; Glassmorphism for Jetpack Compose &amp; Android Views (AGSL)</h1>
   <p align="center">
-    <strong>Open-source Android library for physically accurate liquid glass and frosted-glass blur effects in Jetpack Compose, built on AGSL runtime shaders.</strong>
+    <strong>Open-source Android library for physically accurate liquid glass and frosted-glass blur effects in Jetpack Compose and the Android View system, built on AGSL runtime shaders.</strong>
   </p>
   <p align="center">
     <a href="https://subhankarcodegeek.github.io/lumen-glass/"><strong>Website &amp; docs</strong></a> ·
     <a href="#-installation">Install</a> ·
     <a href="#-quick-start">Quick start</a> ·
     <a href="#-faq">FAQ</a> ·
-    <a href="https://subhankarcodegeek.github.io/lumen-glass/docs/ARCHITECTURE.html">Architecture</a>
+    <a href="https://subhankarcodegeek.github.io/lumen-glass/docs/ARCHITECTURE.html">Architecture</a> ·
+    <a href="https://subhankarcodegeek.github.io/lumen-glass/docs/VIEW.html">Views &amp; XML</a>
   </p>
   <p align="center">
     <a href="https://jitpack.io/#SubhankarCodeGeek/lumen-glass"><img src="https://jitpack.io/v/SubhankarCodeGeek/lumen-glass.svg" alt="JitPack" /></a>
     <img src="https://img.shields.io/badge/API-21%2B%20(AGSL%2033%2B)-brightgreen.svg" alt="API" />
     <img src="https://img.shields.io/badge/Jetpack%20Compose-2026.06-4285F4.svg?logo=jetpackcompose" alt="Compose" />
+    <img src="https://img.shields.io/badge/Android%20Views-XML-3DDC84.svg?logo=android" alt="Views" />
     <img src="https://img.shields.io/badge/Kotlin-2.2-7F52FF.svg?logo=kotlin" alt="Kotlin" />
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License" /></a>
     <img src="https://img.shields.io/badge/Architecture-Clean--Room-success" alt="Clean-Room" />
@@ -147,6 +149,12 @@ dependencies {
 }
 ```
 
+### 3. Using Android Views (optional)
+
+The same artifact also ships the View/XML API — no extra dependency. Declare a
+`LumenGlassSourceLayout` and a `LumenGlassView` in your layout and set
+`app:lumenGlassSource`. See [Views & XML](docs/VIEW.md) for the attributes and source rules.
+
 ---
 
 ## 🚀 Quick Start
@@ -214,7 +222,7 @@ fun GlassCardExample() {
 ## 🧱 View & XML (no Compose)
 
 The same engine is available to the Android View system. Declare a source container, then a glass
-surface that samples it — no Compose dependency, no second material model:
+surface that samples it — no Compose code required, no second material model:
 
 ```xml
 <com.subhankar.lumenglass.view.LumenGlassSourceLayout
