@@ -1,6 +1,9 @@
 # Lumen Glass — an open-source Liquid Glass rendering library (aspiration & plan)
 
-> **Status:** 🟢 Decisions made (Q1–Q3, PQ1–PQ3, performance), P1 in flight.
+> **Status:** 🟢 P1–P5 shipped, **P6 (polish & docs) in progress**. P3.5's deliverables are in, but
+> its frame-rate exit criterion is measured-not-discharged (§6.1). The View/XML backend
+> (`LumenGlassView`, `LumenGlassSourceLayout`) was added after P5 and is documented in
+> [`VIEW.md`]({{ '/docs/VIEW.html' | relative_url }}).
 > This document captures the *why*, the *gap*, the *licence constraint*, the *decisions*, and the
 > *shape* of the work.
 > **Read §3 (licence constraint) before writing any shader code.**
@@ -233,10 +236,12 @@ Box {
 Each phase is independently valuable; P1–P3.5 justify the work **even if we never publish**.
 
 > [!IMPORTANT]
-> **P1's exit criteria are met**, including the signed attestation. P1–P3 are done; **P3.5 is the
-> next phase.** Note that `PARITY.md` §4.4 and §4.6 record two capabilities the prototype has and
-> Lumen Glass does not yet — in-shader blur and the bezel. They are scheduled for P3.5, not
-> oversights.
+> **P1's exit criteria are met**, including the signed attestation, and P1–P5 have shipped. P3.5's
+> deliverables are implemented — reduced-resolution capture, separable blur and adaptive tiers —
+> and the two capabilities `PARITY.md` §4.4/§4.6 recorded as missing (in-shader blur and the
+> bezel) now exist. What stays open from P3.5 is its **frame-rate exit criterion**: the benchmark
+> reports CPU frame cost, but not yet on a low-end reference device (§6.1). **P6 — polish & docs**
+> is the phase in flight.
 
 ### 6.1 Performance budget (acceptance)
 
