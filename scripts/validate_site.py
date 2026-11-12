@@ -297,8 +297,10 @@ def main() -> int:
 
     pages = [
         page
-        for page in sorted(site.glob("*.html")) + sorted((site / "docs").glob("*.html"))
-        if page.name not in SKIP_PAGES
+        # rglob, not two fixed globs: pretty permalinks such as /docs/getting-started/
+        # and /tutorials/<slug>/ build to <dir>/index.html, which a flat glob misses.
+        for page in sorted(site.rglob("*.html"))
+        if page.name not in SKIP_PAGES and "assets" not in page.relative_to(site).parts
     ]
     if not pages:
         errors.append("no HTML pages were produced")

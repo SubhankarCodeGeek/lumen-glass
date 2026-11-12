@@ -79,3 +79,23 @@ now appear for library queries — repository topics are a direct discovery path
 mirrors (p.codekk.com, gittrend.io, relatedrepos.com) surface competitors from their GitHub
 activity; (3) Maven Central listings (qmdeve, nadeemiqbal) rank alongside klibs.io.
 Search Console data still not accessible to the routine.
+
+| Date (IST) | Keyword | Found? | Position | Change | Ranking above / instead |
+|---|---|---|---|---|---|
+| 2026-11-12 | jetpack compose liquid glass library | No | — | = (not found) | klibs ienground/AndroidLiquidGlass, p.codekk.com, kotlinlang Slack release threads, klibs Kashif-E/KMPLiquidGlass, skydoves/Cloudy, Kyant0 docs (Algolia docsearch), Maven Central io.github.kyant0:backdrop |
+| 2026-11-12 | lumen glass github android compose | No | — | = | **new:** aldefy/Lumen (a Compose *coachmark* library on Maven Central, `io.github.aldefy:lumen`) plus its ecosyste.ms / relatedrepos mirrors; klibs NadeemIqbal/liquid-glass |
+| 2026-11-12 | jetpack compose glass effect bottom navigation bar | No | — | baseline | klibs FlowTab-CMP, ProAndroidDev "Blurring the Lines", androidengineers substack, dev.to quick glass effects, Medium "Liquid Glass Components in Compose Multiplatform" |
+| 2026-11-12 | android liquid glass library | No | — | = | klibs Kashif-E & ienground KMPLiquidGlass, QmDeve/AndroidLiquidGlassView, klibs Kyant0, p.codekk.com, Maven Central com.qmdeve.liquidglass |
+| 2026-11-12 | "Lumen Glass" liquid glass Android AGSL SubhankarCodeGeek (exact-match check) | No | — | = (also not found 2026-11-09) | abduzeedo "Crafting Glass", dev.to AGSL React Native post, Android 17 "liquid glass" news |
+
+Notes 2026-11-12: spot check (4 tracked/related queries + exact-match check). Same method (AI
+web-search tool, US results, not Google). No movement. The exact-match query has now missed the
+repo on two consecutive runs (it was #1 on 2026-11-04); still not proof of de-indexing — only
+Search Console URL Inspection can confirm. The live `/docs/getting-started/` page fetched fine
+(title, description and canonical as expected).
+New brand collision: **aldefy/Lumen**, a Jetpack Compose coachmark library published to Maven
+Central as `lumen`, now ranks for "lumen … github android compose". Bare "Lumen" is no longer
+usable as a brand handle in the Compose space: always say "Lumen Glass" (two words) in titles,
+descriptions, posts and the repo description.
+Added baseline for "jetpack compose glass effect bottom navigation bar" (the intent the new
+tutorial targets). Search Console data still not accessible to the routine.

@@ -8,6 +8,7 @@
     <a href="#-installation">Install</a> ·
     <a href="#-quick-start">Quick start</a> ·
     <a href="#-faq">FAQ</a> ·
+    <a href="https://subhankarcodegeek.github.io/lumen-glass/tutorials/glass-effect-jetpack-compose/">Tutorial</a> ·
     <a href="https://subhankarcodegeek.github.io/lumen-glass/docs/ARCHITECTURE.html">Architecture</a> ·
     <a href="https://subhankarcodegeek.github.io/lumen-glass/docs/VIEW.html">Views &amp; XML</a>
   </p>
@@ -375,7 +376,7 @@ LumenGlass/
 ## ❓ FAQ
 
 ### How do I add a glass effect in Jetpack Compose?
-Add the JitPack dependency (see [Installation](#-installation) or the [Getting started guide](https://subhankarcodegeek.github.io/lumen-glass/docs/getting-started/)), wrap the content behind the glass in a `LumenSource`, and apply `Modifier.lumenGlass(...)` to the composable that should look like glass. The [Quick Start](#-quick-start) shows a complete floating glass card.
+Add the JitPack dependency (see [Installation](#-installation) or the [Getting started guide](https://subhankarcodegeek.github.io/lumen-glass/docs/getting-started/)), wrap the content behind the glass in a `LumenSource`, and apply `Modifier.lumenGlass(...)` to the composable that should look like glass. The [Quick Start](#-quick-start) shows a complete floating glass card. For a full screen — a liquid glass bottom navigation bar over a scrolling list — follow the [Compose glass bottom bar tutorial](https://subhankarcodegeek.github.io/lumen-glass/tutorials/glass-effect-jetpack-compose/).
 
 ### Is this glassmorphism or liquid glass?
 Both. Classic **glassmorphism** is a frosted, blurred, tinted panel; **liquid glass** adds real optical refraction, edge magnification and chromatic dispersion on top of the blur. Lumen Glass renders the full liquid glass look on API 33+ and degrades to a glassmorphism-style frosted panel on older devices.

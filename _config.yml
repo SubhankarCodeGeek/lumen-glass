@@ -57,6 +57,12 @@ defaults:
     values:
       layout: docs
 
+  # Step-by-step tutorials use the same documentation layout.
+  - scope:
+      path: "tutorials"
+    values:
+      layout: docs
+
   # CLEANROOM.md lives at the repository root but is published as a documentation
   # page (the footer and the landing page both link to it), so it gets the same
   # layout.

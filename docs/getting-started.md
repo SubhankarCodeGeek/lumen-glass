@@ -177,6 +177,8 @@ skips dispersion. Use `rememberLumenGlassState(quality = QualityTier.HIGH)`.
 
 ## Next steps
 
+- [Tutorial: liquid glass bottom bar]({{ '/tutorials/glass-effect-jetpack-compose/' | relative_url }})
+  — a floating glass navigation bar over a scrolling list, step by step.
 - [Architecture]({{ '/docs/ARCHITECTURE.html' | relative_url }}) — how the capture
   substrate, AGSL shader and Compose API fit together.
 - [Performance]({{ '/docs/PERF.html' | relative_url }}) — measured frame timing.
